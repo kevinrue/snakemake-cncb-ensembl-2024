@@ -2,3 +2,17 @@
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
 # in particular regarding the standardized folder structure mentioned there. 
+
+container: "library://kevinrue/cncb/cncb-2:latest"
+
+configfile: "config/config.yaml"
+
+##### load rules #####
+
+include: "rules/downloads.smk"
+
+##### main rule #####
+rule all:
+    input:
+        "resources/genome/genome.gtf.gz",
+        "resources/genome/genome.fa.gz",
