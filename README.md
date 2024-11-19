@@ -16,12 +16,12 @@ If you use this workflow in a paper, don't forget to give credits to the authors
 Typical usage:
 
 ```
-nohup snakemake   --sdm apptainer --apptainer-args "--bind /var/scratch/$USER" &
+nohup snakemake   --sdm apptainer --apptainer-args "--bind /var/scratch" &
 ```
 
 Notes:
 
-- `--bind /var/scratch/$USER` binds the directory where Slurm jobs are given a private folder
+- `--bind /var/scratch` binds the directory where Slurm jobs are given a private folder
 
 # TODO
 
