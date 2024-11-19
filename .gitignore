@@ -1,5 +1,6 @@
 nohup.out
 sps-*
+af_home/**
 results/**
 resources/**
 logs/**
