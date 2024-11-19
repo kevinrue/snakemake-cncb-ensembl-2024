@@ -13,9 +13,15 @@ The usage of this workflow is described in the [Snakemake Workflow Catalog](http
 
 If you use this workflow in a paper, don't forget to give credits to the authors by citing the URL of this (original) <repo>sitory and its DOI (see above).
 
+Typical usage:
+
 ```
-nohup snakemake   --sdm apptainer &
+nohup snakemake   --sdm apptainer --apptainer-args "--bind /var/scratch/$USER" &
 ```
+
+Notes:
+
+- `--bind /var/scratch/$USER` binds the directory where Slurm jobs are given a private folder
 
 # TODO
 
