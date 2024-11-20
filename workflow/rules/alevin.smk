@@ -55,12 +55,17 @@ rule alevin_quant:
         mem="16G",
         runtime="4h",
     shell:
+        "jobdir=$(pwd) &&"
+        " cd $TMPDIR &&"
+        " export ALEVIN_FRY_HOME=af_home &&"
+        " simpleaf set-paths &&"
         " simpleaf quant"
         " --reads1 {params.reads1}"
         " --reads2 {params.reads2}"
-        " --index {input.index}/index"
+        " --index $jobdir/{input.index}/index"
         " --chemistry 10xv3 --resolution cr-like --expected-ori fw --unfiltered-pl" # from tutorial, to be confirmed
-        " --t2g-map {input.index}/index/t2g_3col.tsv"
+        " --t2g-map $jobdir/{input.index}/index/t2g_3col.tsv"
         " --threads {threads}"
         " --output alevin_quant_{wildcards.sample}"
-        " > {log.out} 2> {log.err}"
+        " > $jobdir/{log.out} 2> $jobdir/{log.err} &&"
+        " mv alevin_quant_{wildcards.sample} $jobdir/{output}"
