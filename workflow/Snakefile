@@ -9,10 +9,11 @@ configfile: "config/config.yaml"
 
 ##### load rules #####
 
+include: "rules/common.smk"
 include: "rules/downloads.smk"
 include: "rules/alevin.smk"
 
 ##### main rule #####
 rule all:
     input:
-        "resources/genome/index/alevin"
+        expand("results/alevin/{sample}", sample=SAMPLES['sample_name'].unique()),

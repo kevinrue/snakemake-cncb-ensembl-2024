@@ -16,7 +16,17 @@ If you use this workflow in a paper, don't forget to give credits to the authors
 Typical usage:
 
 ```
-nohup snakemake   --sdm apptainer --apptainer-args "--bind /var/scratch" &
+# Working directory
+cd $(realpath .) # containers prefer real paths
+
+# Host directories that need mounting to container
+TMP_APPTAINER_ARGS="--bind /var/scratch"
+TMP_APPTAINER_ARGS+=" --bind /ceph/project/cncb/shared/proj140/analyses/novogene_sequencing"
+
+# Execution
+nohup snakemake \
+  --sdm apptainer \
+  --apptainer-args "$TMP_APPTAINER_ARGS" &
 ```
 
 Notes:
