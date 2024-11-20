@@ -30,9 +30,7 @@ rule alevin_build_reference_index:
 
 # Function used by rule: alevin_quant
 def get_alevin_quant_input_fastqs(wildcards):
-    print(wildcards.sample)
     sample_fastqs_info=SAMPLES[SAMPLES['sample_name'] == wildcards.sample].filter(items=['directory', 'R1', 'R2'])
-    print(sample_fastqs_info)
     fq1=[os.path.join(os.path.realpath(sample_fastqs_info['directory'][i]), sample_fastqs_info['R1'][i]) for i in sample_fastqs_info.index]
     fq2=[os.path.join(os.path.realpath(sample_fastqs_info['directory'][i]), sample_fastqs_info['R2'][i]) for i in sample_fastqs_info.index]
     return {
