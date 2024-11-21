@@ -243,6 +243,7 @@ rm(tmp)
 ```{r}
 #| fig-width: 12
 #| fig-height: 8
+# grep("br", rowData(sce)[["gene_name"]], value = TRUE, ignore.case = TRUE) # use this for search
 example_genes <- c("Imp", "dati", "pdm3", "br")
 plotOneGene <- function(gene_name) {
   tmp <- data.frame(
@@ -261,27 +262,3 @@ plotOneGene <- function(gene_name) {
 gg_list <- lapply(example_genes, plotOneGene)
 plot_grid(plotlist = gg_list)
 ```
-
-```{r}
-#| fig-width: 12
-#| fig-height: 5
-grep("br", rowData(sce)[["gene_name"]], value = TRUE, ignore.case = TRUE)
-example_genes <- c()
-plotOneGene <- function(gene_name) {
-  tmp <- data.frame(
-    reducedDim(sce, "UMAP")
-  ) %>% 
-    mutate(
-      logcounts = assay(sce, "logcounts")[which(rowData(sce)[["gene_name"]] == gene_name), ]
-    ) %>% 
-    slice_sample(prop = 1)
-  ggplot(tmp, aes(UMAP1, UMAP2, colour = logcounts)) +
-    geom_point(size = 0.1) +
-    scale_colour_viridis_c() +
-    theme_light() +
-    labs(title = gene_name)
-}
-gg_list <- lapply(example_genes, plotOneGene)
-plot_grid(plotlist = gg_list)
-```
-
