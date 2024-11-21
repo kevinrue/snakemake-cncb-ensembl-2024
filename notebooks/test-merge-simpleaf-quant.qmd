@@ -82,7 +82,7 @@ tmp <- mutate(
   across(everything(), as.factor)
 )
 colData(sce) <- cbind(colData(sce), tmp)
-sce$sampleNoRep <- gsub("_rep[12]", "", sce$sample)
+sce$sampleNoRep <- factor(gsub("_rep[12]", "", sce$sample), levels = c("WPPm048hrs", "WPPm024hrs", "WPPp000hrs", "WPPp024hrs", "WPPp048hrs",  "WPPp072hrs", "WPPp096hrs", "WPPp120hrs"))
 colData(sce)
 rm(tmp)
 ```
