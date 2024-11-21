@@ -1,4 +1,5 @@
 nohup.out
+slurm-*.out
 sps-*
 af_home/**
 results/**
@@ -6,3 +7,5 @@ resources/**
 logs/**
 .snakemake
 .snakemake/**
+.Rproj.user
+snakemake-cncb-ensembl-2024.Rproj
