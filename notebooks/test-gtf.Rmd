@@ -1,0 +1,72 @@
+---
+title: "Inspect GTF file"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+```{r}
+library(rtracklayer)
+library(tidyverse)
+```
+
+## Import GTF
+
+```{r}
+gtf_data <- import("../resources/genome/genome.gtf.gz")
+colnames(mcols(gtf_data))
+```
+
+```{r}
+head(as.data.frame(gtf_data))
+```
+
+## Duplicate genes?
+
+```{r}
+all_coding_genes <- gtf_data %>% 
+  as.data.frame() %>% 
+  as_tibble() %>% 
+  filter(type == "gene" & gene_biotype == "protein_coding") %>% 
+  select(seqnames, start, end, strand, gene_id, gene_name, gene_biotype)
+all_coding_genes
+```
+
+As expected, the table above contains each gene_id only once.
+
+```{r}
+head(sort(table(all_coding_genes$gene_id), decreasing = TRUE))
+```
+
+However,
+
+```{r}
+all_coding_genes %>% 
+  select(seqnames, start, end, strand) %>% 
+  unique() %>% 
+  nrow() - nrow(all_coding_genes)
+```
+
+Who are they?
+
+```{r}
+dup2 <- all_coding_genes[all_coding_genes %>% 
+  select(seqnames, start, end, strand) %>% 
+  duplicated(), ]
+all_coding_genes %>% 
+  filter(
+    seqnames %in% dup2$seqnames & start %in% dup2$start & end %in% dup2$end & strand %in% dup2$strand
+  ) %>% 
+  arrange(seqnames, start, end, strand)
+```
+
+
+
+
+
