@@ -82,7 +82,9 @@ tmp <- mutate(
   across(everything(), as.factor)
 )
 colData(sce) <- cbind(colData(sce), tmp)
+sce$sampleNoRep <- gsub("_rep[12]", "", sce$sample)
 colData(sce)
+rm(tmp)
 ```
 
 ## Add gene annotations
@@ -128,6 +130,7 @@ ggplot(tmp, aes(rank, sum)) +
   labs(
     subtitle = sprintf("Max UMI & Number of cells >= %s UMI", umi_cutoff)
   )
+rm(tmp, tmp_top, tmp_umi_cutoff)
 ```
 
 ```{r}
@@ -155,13 +158,13 @@ gg4 <- ggplot(colData(sce), aes(x = sum)) +
   labs(title = "Total UMI (5,000 - max) & Bin count (0 - 100)") +
   theme_bw()
 plot_grid(gg1, gg2, gg3, gg4)
+rm(gg1, gg2, gg3, gg4)
 ```
 
 ```{r}
-sce <- sce[, sce$sum > 500]
+sce <- sce[, sce$sum >= umi_cutoff]
 sce
 ```
-
 
 ## Naive downstream analysis
 
@@ -196,35 +199,39 @@ reducedDimNames(sce)
 ```{r}
 set.seed(1100101001)
 sce <- runUMAP(sce, dimred="PCA")
-plotReducedDim(sce, dimred="UMAP")
 ```
 
 ```{r}
-colData(sce)[["NN.clusters"]] <- clusterCells(sce, use.dimred="PCA", BLUSPARAM=NNGraphParam(k=20, cluster.fun="louvain"))
-table(sce$NN.clusters)
+#| fig-width: 14
+#| fig-height: 3
+# "barcodes"   "sample"     "sum"        "mp"         "time"       "rep"        "sizeFactor"
+tmp <- data.frame(
+  reducedDim(sce, "UMAP")
+) %>% 
+  cbind(colData(sce))
+gg1 <- ggplot(tmp, aes(UMAP1, UMAP2)) +
+  geom_point(size = 0.1) +
+  theme_light()
+gg2 <- ggplot(tmp, aes(UMAP1, UMAP2, colour = mp)) +
+  geom_point(size = 0.1) +
+  theme_light()
+gg3 <- ggplot(tmp, aes(UMAP1, UMAP2, colour = time)) +
+  geom_point(size = 0.1) +
+  theme_light()
+plot_grid(gg1, gg2, gg3, nrow = 1)
+rm(tmp)
 ```
 
 ```{r}
-plotReducedDim(sce, "UMAP", colour_by="NN.clusters")
+#| fig-width: 14
+#| fig-height: 3
+tmp <- data.frame(
+  reducedDim(sce, "UMAP")
+) %>% 
+  cbind(colData(sce))
+ggplot(tmp, aes(UMAP1, UMAP2, colour = time)) +
+  geom_point(size = 0.1) +
+  facet_grid(rep ~ sampleNoRep) +
+  theme_light()
+rm(tmp)
 ```
-
-```{r}
-marker.info <- scoreMarkers(sce, sce$NN.clusters)
-marker.info
-```
-
-```{r}
-addGeneNameColumn <- function(x, sce) {
-  gene_ids <- rownames(x)
-  gene_names <- rowData(sce)[gene_ids, "gene_name"]
-  x <- cbind(gene_names, x)
-  rownames(x) <- gene_ids
-  x
-}
-```
-
-
-```{r}
-head(as.data.frame(addGeneNameColumn(marker.info[[3]], sce)[order(marker.info[[3]][["mean.logFC.cohen"]], decreasing=TRUE),]), 20)
-```
-
