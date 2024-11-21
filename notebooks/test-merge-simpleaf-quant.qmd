@@ -235,3 +235,29 @@ ggplot(tmp, aes(UMAP1, UMAP2, colour = time)) +
   theme_light()
 rm(tmp)
 ```
+
+> "Drosophila IMP (dIMP) is related to the vertebrate RNA-binding proteins IMP1-3, ZBP1, Vg1RBP and CRD-BP, which are involved in RNA regulatory processes such as translational repression, localization and stabilization. The proteins are expressed in many fetal tissues, including the developing nervous system, [...]" (https://pubmed.ncbi.nlm.nih.gov/19111951/)
+
+> "datilografo (dati) encodes a conserved zinc finger transcription factor required for the differentiation of neurons in the ventral nerve cord and the brain. In adult brains, the product of dati is required in cholinergic neurons to generate the decisions of accepting or rejecting male courtship." (https://flybase.org/reports/FBgn0262636.htm)
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+example_genes <- c("Imp", "dati")
+plotOneGene <- function(gene_name) {
+  tmp <- data.frame(
+    reducedDim(sce, "UMAP")
+  ) %>% 
+    mutate(
+      logcounts = assay(sce, "logcounts")[which(rowData(sce)[["gene_name"]] == gene_name), ]
+    ) %>% 
+    slice_sample(prop = 1)
+  ggplot(tmp, aes(UMAP1, UMAP2, colour = logcounts)) +
+    geom_point(size = 0.1) +
+    scale_colour_viridis_c() +
+    theme_light() +
+    labs(title = gene_name)
+}
+gg_list <- lapply(example_genes, plotOneGene)
+plot_grid(plotlist = gg_list)
+```
