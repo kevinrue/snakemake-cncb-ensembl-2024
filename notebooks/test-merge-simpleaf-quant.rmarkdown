@@ -3,9 +3,13 @@ title: "Load a single sample using fishpond"
 format: html
 ---
 
+
+
 Source: <https://combine-lab.github.io/alevin-fry-tutorials/2023/simpleaf-piscem/> (step 3)
 
 ## Libraries
+
+
 
 ```{r}
 #| message: false
@@ -22,14 +26,22 @@ library(scuttle)
 library(tidyverse)
 ```
 
+
+
 ## Load gene annotations
+
+
 
 ```{r}
 gtf_data <- import("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/resources/genome/genome.gtf.gz")
 colnames(mcols(gtf_data))
 ```
 
+
+
 ## Load data for all samples in a loop
+
+
 
 ```{r}
 alevin_quant_dir <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/alevin"
@@ -44,7 +56,6 @@ names(sce_list) <- sample_basedirs
 names(sce_list)
 ```
 
-
 ```{r}
 #| message: false
 feature_names <- rownames(sce_list[[1]])
@@ -55,7 +66,11 @@ for (sample_name in names(sce_list)) {
 }
 ```
 
+
+
 ## Merge all samples
+
+
 
 ```{r}
 for (sample_name in names(sce_list)) {
@@ -70,7 +85,11 @@ rm(sce_list)
 sce
 ```
 
+
+
 ## Separate sample metadata
+
+
 
 ```{r}
 tmp <- as.data.frame(do.call(
@@ -89,7 +108,11 @@ colData(sce)
 rm(tmp)
 ```
 
+
+
 ## Add gene annotations
+
+
 
 ```{r}
 tmp_annotations <- unique(mcols(gtf_data)[, c("gene_id", "gene_name")])
@@ -99,12 +122,15 @@ rm(tmp_annotations)
 sce
 ```
 
+
+
 ## Basic quality control
+
+
 
 ```{r}
 umi_cutoff <- 300
 ```
-
 
 ```{r}
 colData(sce)[["sum"]] <- colSums(assay(sce, "counts"))
@@ -169,7 +195,11 @@ sce <- sce[, sce$sum >= umi_cutoff]
 sce
 ```
 
+
+
 ## Naive downstream analysis
+
+
 
 ```{r}
 sce <- logNormCounts(sce)
@@ -243,6 +273,8 @@ ggplot(tmp, aes(UMAP1, UMAP2, colour = timepoint)) +
 rm(tmp)
 ```
 
+
+
 Early genes
 
 > "Drosophila IMP (dIMP) is related to the vertebrate RNA-binding proteins IMP1-3, ZBP1, Vg1RBP and CRD-BP, which are involved in RNA regulatory processes such as translational repression, localization and stabilization. The proteins are expressed in many fetal tissues, including the developing nervous system, [...]" (https://pubmed.ncbi.nlm.nih.gov/19111951/)
@@ -256,6 +288,8 @@ Late genes
 Other genes
 
 > pou domain motif 3 (pdm3) encodes a POU domain transcription factor that acts in odor receptor gene expression and axon targeting of olfactory neurons. [Date last reviewed: 2019-03-14] (FlyBase Gene Snapshot) (http://flybase.org/reports/FBgn0261588.htm)
+
+
 
 ```{r}
 #| fig-width: 12
@@ -279,3 +313,4 @@ plotOneGene <- function(gene_name) {
 gg_list <- lapply(example_genes, plotOneGene)
 plot_grid(plotlist = gg_list)
 ```
+

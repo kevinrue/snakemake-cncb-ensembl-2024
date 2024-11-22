@@ -1,0 +1,3 @@
+# This file is necessary next to the notebooks
+# so that quarto can be used to render them
+R_LIBS_USER=/ceph/project/cncb/albrecht/R-4.4.1
