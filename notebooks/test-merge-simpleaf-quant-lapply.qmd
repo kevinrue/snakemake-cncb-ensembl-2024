@@ -39,7 +39,7 @@ sample_basedirs
 
 ```{r}
 #| message: false
-sce_list <- lapply(X = file.path(alevin_quant_dir, sample_basedirs, "af_quant"), FUN = loadFry, outputFormat = "scRNA")
+sce_list <- lapply(X = file.path(alevin_quant_dir, sample_basedirs, "af_quant"), FUN = loadFry, outputFormat = "S+A", nonzero = TRUE)
 names(sce_list) <- sample_basedirs
 names(sce_list)
 ```
