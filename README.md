@@ -20,12 +20,13 @@ Typical usage:
 cd $(realpath .) # containers prefer real paths
 
 # Host directories that need mounting to container
-TMP_APPTAINER_ARGS="--bind /var/scratch"
-TMP_APPTAINER_ARGS+=" --bind /ceph/project/cncb/shared/proj140/analyses/novogene_sequencing"
+#TMP_APPTAINER_ARGS="--bind /var/scratch"
+TMP_APPTAINER_ARGS=" --bind /ceph/project/cncb/shared"
+TMP_APPTAINER_ARGS+=" --bind /ceph/project/cncb/albrecht"
 
 # Execution
 nohup snakemake \
-  --sdm apptainer \
+  --sdm conda apptainer \
   --apptainer-args "$TMP_APPTAINER_ARGS" &
 ```
 

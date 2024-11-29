@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconductor-fishpond
+  - bioconductor-rtracklayer
+  - bioconductor-summarizedexperiment
+  - r-cowplot
+  - r-ggplot2
+  - r-scales
+  - r-stringr
+  - r-tidyverse

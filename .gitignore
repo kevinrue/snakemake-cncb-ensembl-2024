@@ -1,3 +1,6 @@
+.condarc
+*.err
+*.out
 *.html
 *.rds
 nohup.out
@@ -7,6 +10,8 @@ af_home/**
 results/**
 resources/**
 logs/**
+.cache/
+.conda/
 .snakemake
 .snakemake/**
 .Rproj.user

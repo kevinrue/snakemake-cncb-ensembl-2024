@@ -9,11 +9,12 @@ configfile: "config/config.yaml"
 
 ##### load rules #####
 
+include: "rules/alevin.smk"
 include: "rules/common.smk"
 include: "rules/downloads.smk"
-include: "rules/alevin.smk"
+include: "rules/reports.smk"
 
 ##### main rule #####
 rule all:
     input:
-        expand("results/alevin/{sample}", sample=SAMPLES['sample_name'].unique()),
+        expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),

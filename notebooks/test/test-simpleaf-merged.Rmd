@@ -1,0 +1,105 @@
+---
+title: "Individual sample quality control"
+affiliation: "`r basename(snakemake@input)`"
+output: html_document
+date: "2024-11-29"
+---
+
+## TODO: containerise this
+
+```{r, message=FALSE}
+.libPaths("/ceph/project/cncb/albrecht/R-4.4.1")
+cat("Library path:\n")
+print(.libPaths("/ceph/project/cncb/albrecht/R-4.4.1"))
+```
+
+## Libraries
+
+```{r, message=FALSE}
+library(cowplot)
+library(ggrastr)
+library(ggrepel)
+library(fishpond)
+library(ggplot2)
+library(rtracklayer)
+library(scales)
+library(stringr)
+library(SummarizedExperiment)
+library(tidyverse)
+```
+
+## Parameters
+
+```{r}
+umi_cutoff <- 500
+```
+
+## Load alevin results
+
+```{r}
+#| message: false
+sce <- readRDS("../sce.rds")
+sce
+```
+
+## Basic quality control
+
+```{r}
+colData(sce)[["sum"]] <- colSums(assay(sce, "counts"))
+```
+
+```{r}
+range(colData(sce)[["sum"]])
+```
+
+```{r}
+tmp <- data.frame(
+  sum = sce$sum,
+  rank = rank(-sce$sum)
+) %>%
+  filter(sum > 0)
+tmp_top <- tmp %>%
+  slice_max(sum, n = 1)
+tmp_umi_cutoff <- data.frame(
+  sum = umi_cutoff,
+  rank = sum(tmp$sum >= umi_cutoff)
+)
+gg_barcode_rank_plot <- ggplot(tmp, aes(rank, sum)) +
+  geom_point_rast() +
+  geom_label(aes(label = sum), data = tmp_top, alpha = 0.5) +
+  geom_label(aes(label = rank), data = tmp_umi_cutoff, alpha = 0.5) +
+  scale_x_log10() +
+  scale_y_log10(limits = c(1, NA), labels = scales::comma) +
+  labs(
+    subtitle = sprintf("Max UMI & Number of cells >= %s UMI", umi_cutoff)
+  ) +
+  theme_bw()
+rm(tmp, tmp_top, tmp_umi_cutoff)
+gg_barcode_rank_plot
+```
+
+```{r, fig.width=12, fig.height=4}
+gg1 <- ggplot(colData(sce), aes(x = sum)) +
+  geom_histogram(binwidth = 100) +
+  labs(title = "Full view") +
+  theme_bw()
+gg2 <- ggplot(colData(sce), aes(x = sum)) +
+  geom_histogram(binwidth = 100) +
+  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  coord_cartesian(xlim = c(0, 5E3)) +
+  labs(title = "Total UMI (0 - 10,000)") +
+  theme_bw()
+gg3 <- ggplot(colData(sce), aes(x = sum)) +
+  geom_histogram(binwidth = 100) +
+  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  coord_cartesian(xlim = c(0, 5E3), ylim = c(0, 5E3)) +
+  labs(title = "Total UMI (0 - 5,000) & Bin count (0 - 5,000)") +
+  theme_bw()
+gg4 <- ggplot(colData(sce), aes(x = sum)) +
+  geom_histogram(binwidth = 100) +
+  coord_cartesian(xlim = c(5E3, NA), ylim = c(0, 100)) +
+  labs(title = "Total UMI (5,000 - max) & Bin count (0 - 100)") +
+  theme_bw()
+plot_grid(gg1, gg2, gg3, gg4)
+rm(gg1, gg2, gg3, gg4)
+```

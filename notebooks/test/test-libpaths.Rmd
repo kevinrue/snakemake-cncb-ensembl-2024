@@ -1,0 +1,21 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-11-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+.libPaths()
+```
+
+```{r}
+.libPaths("../../../R-4.4.1")
+```
+
+```{r}
+.libPaths()
+```
