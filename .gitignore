@@ -1,3 +1,4 @@
+*.html
 nohup.out
 slurm-*.out
 sps-*

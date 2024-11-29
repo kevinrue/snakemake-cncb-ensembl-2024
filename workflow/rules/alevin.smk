@@ -63,7 +63,7 @@ rule alevin_quant:
         " --reads1 {params.reads1}"
         " --reads2 {params.reads2}"
         " --index $jobdir/{input.index}/index"
-        " --chemistry 10xv3 --resolution cr-like --expected-ori fw --unfiltered-pl" # from tutorial, to be confirmed
+        " --chemistry 10xv4-3p --resolution cr-like --expected-ori fw --unfiltered-pl" # from tutorial, to be confirmed
         " --t2g-map $jobdir/{input.index}/index/t2g_3col.tsv"
         " --threads {threads}"
         " --output alevin_quant_{wildcards.sample}"
