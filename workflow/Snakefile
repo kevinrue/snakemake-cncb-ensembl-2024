@@ -9,8 +9,8 @@ configfile: "config/config.yaml"
 
 ##### load rules #####
 
-include: "rules/alevin.smk"
 include: "rules/common.smk"
+include: "rules/alevin.smk"
 include: "rules/downloads.smk"
 include: "rules/reports.smk"
 
@@ -18,3 +18,4 @@ include: "rules/reports.smk"
 rule all:
     input:
         expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "results/sce/all.rds",

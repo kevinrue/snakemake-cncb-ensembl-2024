@@ -69,3 +69,17 @@ rule alevin_quant:
         " --output alevin_quant_{wildcards.sample}"
         " > $jobdir/{log.out} 2> $jobdir/{log.err} &&"
         " mv alevin_quant_{wildcards.sample} $jobdir/{output}"
+
+rule alevin_all_rds:
+    input:
+        expand("results/alevin/{sample}", sample=SAMPLES['sample_name'].unique()),
+    output:
+        rds="results/sce/all.rds",
+    threads: 16
+    resources:
+        mem="128G",
+        runtime="1h",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/simpleaf_merge.R"
