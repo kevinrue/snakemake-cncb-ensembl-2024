@@ -7,19 +7,22 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+.libPaths("/ceph/project/cncb/albrecht/R-4.4.1/")
 ```
 
 ## Libraries
 
-```{r}
+```{r, message=FALSE}
+library(HDF5Array)
 library(rtracklayer)
+library(SingleCellExperiment)
 library(tidyverse)
 ```
 
 ## Import GTF
 
 ```{r}
-gtf_data <- import("../resources/genome/genome.gtf.gz")
+gtf_data <- import("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/resources/genome/genome.gtf.gz")
 colnames(mcols(gtf_data))
 ```
 
@@ -27,24 +30,23 @@ colnames(mcols(gtf_data))
 head(as.data.frame(gtf_data))
 ```
 
-## Duplicate genes?
+## How many duplicate genes?
 
 ```{r}
 all_coding_genes <- gtf_data %>% 
   as.data.frame() %>% 
   as_tibble() %>% 
-  filter(type == "gene" & gene_biotype == "protein_coding") %>% 
+  filter(type == "gene") %>% 
   select(seqnames, start, end, strand, gene_id, gene_name, gene_biotype)
 all_coding_genes
 ```
 
-As expected, the table above contains each gene_id only once.
+We lose the following number of genes when keeping only one instance of genes with the exact same:
 
-```{r}
-head(sort(table(all_coding_genes$gene_id), decreasing = TRUE))
-```
-
-However,
+- chromosome
+- start
+- end
+- strand
 
 ```{r}
 all_coding_genes %>% 
@@ -53,20 +55,88 @@ all_coding_genes %>%
   nrow() - nrow(all_coding_genes)
 ```
 
-Who are they?
+Extract the GTF information of all the duplicated genes.
 
 ```{r}
 dup2 <- all_coding_genes[all_coding_genes %>% 
   select(seqnames, start, end, strand) %>% 
   duplicated(), ]
-all_coding_genes %>% 
+dup_gene_info <- all_coding_genes %>% 
   filter(
     seqnames %in% dup2$seqnames & start %in% dup2$start & end %in% dup2$end & strand %in% dup2$strand
   ) %>% 
   arrange(seqnames, start, end, strand)
+rm(dup2)
+dup_gene_info
 ```
 
+```{r, eval=FALSE}
+sce <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/test/sce.rds")
+sce
+```
 
+```{r}
+count_assay_dup <- assay(sce, "counts")[dup_gene_info$gene_id, ]
+rm(sce)
+dim(count_assay_dup)
+```
 
+```{r, eval=FALSE}
+range(count_assay_dup)
+```
 
+Oh no!
+Some of those genes have non-zero expression, meaning that `simpleaf` managed to distinguish them!
+
+This means that I need to dig deeper into the gene models, and find out the genes where exons match perfectly.
+
+## Of those, how many duplicate gene models?
+
+For elach set of genes, compare their transcript modes to one another and identify the genes where all transcript models are identical to each other.
+For those, favour gene names that do not start match "^CG[[:digit:]]+$"
+
+```{r}
+dup_coordinates <- dup_gene_info %>%
+  group_by(seqnames, start, end, strand) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>% 
+  select(seqnames, start, end, strand)
+```
+
+```{r}
+keep_gene_ids <- character(0)
+# for (i in seq_len(nrow(dup_coordinates))) {
+for (i in 1) {
+  for_seqnames <- dup_coordinates %>% filter(row_number() == i) %>% pull(seqnames)
+  for_start <- dup_coordinates %>% filter(row_number() == i) %>% pull(start)
+  for_end <- dup_coordinates %>% filter(row_number() == i) %>% pull(end)
+  for_strand <- dup_coordinates %>% filter(row_number() == i) %>% pull(strand)
+  for_dup_gene_info <- dup_gene_info %>% filter(
+    seqnames == for_seqnames & start == for_start & end == for_end & strand == for_strand
+  ) %>% 
+    mutate(is_CG = grepl("^CG[[:digit:]]+$", gene_name)) %>% 
+    arrange(is_CG)
+  geneid1 <- for_dup_gene_info %>% filter(row_number() == 1) %>% pull(gene_id)
+  keep_gene_ids <- append(keep_gene_ids, geneid1)
+  transcripts1 <- gtf_data %>% 
+    as_tibble() %>% 
+    filter(gene_id == geneid1 & type == "transcript") %>% 
+    select(seqnames, start, end, strand)
+  exons1 <- gtf_data %>% 
+    as_tibble() %>% 
+    filter(gene_id == geneid1 & type == "exon") %>% 
+    select(seqnames, start, end, strand, transcript_id)
+  for (geneid2 in for_dup_gene_info %>% filter(row_number() != 1) %>% pull(gene_id)) {
+    transcripts2 <- gtf_data %>% 
+      as_tibble() %>% 
+      filter(gene_id == geneid2 & type == "transcript") %>% 
+      select(seqnames, start, end, strand)
+    exons2 <- gtf_data %>% 
+      as_tibble() %>% 
+      filter(gene_id == geneid2 & type == "exon") %>% 
+      select(seqnames, start, end, strand)
+    
+  }
+}
+```
 
