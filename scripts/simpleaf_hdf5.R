@@ -10,8 +10,8 @@ message("Done.")
 message("Writing to HDF5 file ...")
 sce <- saveHDF5SummarizedExperiment(
   x = sce,
-  dir = dirname(snakemake@output[[1]]),
-  prefix = "all-")
+  dir = snakemake@output[["hdf5"]]
+)
 message("Done.")
 
 message(Sys.time())

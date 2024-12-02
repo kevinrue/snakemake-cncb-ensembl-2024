@@ -30,9 +30,23 @@ for (sample_basedir in sample_basedirs) {
 }
 message("Done.")
 
-# Merge
-message("Merge all samples ...")
+message("Merging all samples ...")
 sce <- do.call("cbind", sce_list)
+message("Done.")
+
+message("Garbage collection ...")
+rm(sce_list)
+gc()
+message("Done.")
+
+message("Removing undetected genes ...")
+keep <- rowSums(assay(sce, "counts")) > 0
+sce <- sce[keep, ]
+message("Done.")
+
+message("Garbage collection ...")
+rm(keep)
+gc()
 message("Done.")
 
 message("Saving to RDS file ...")

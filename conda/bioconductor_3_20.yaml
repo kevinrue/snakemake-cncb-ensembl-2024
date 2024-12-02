@@ -2,9 +2,15 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - bioconductor-biocparallel
+  - bioconductor-biocsingular
+  - bioconductor-bluster
   - bioconductor-hdf5array
   - bioconductor-fishpond
   - bioconductor-rtracklayer
+  - bioconductor-scater
+  - bioconductor-scran
+  - bioconductor-scuttle
   - bioconductor-summarizedexperiment
   - bioconductor-singlecellexperiment
   - r-cowplot

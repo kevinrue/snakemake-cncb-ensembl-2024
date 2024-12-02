@@ -88,8 +88,7 @@ rule alevin_all_hdf5:
     input:
         rds="results/sce/all.rds",
     output:
-        "results/hdf5/all-assays.rds",
-        "results/hdf5/all-se.rds",
+        hdf5=directory("results/hdf5/all"),
     resources:
         mem="64G",
         runtime="6h",
