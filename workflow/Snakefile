@@ -19,3 +19,5 @@ rule all:
     input:
         expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/sce/all.rds",
+        "results/hdf5/all-assays.rds",
+        "results/hdf5/all-se.rds",

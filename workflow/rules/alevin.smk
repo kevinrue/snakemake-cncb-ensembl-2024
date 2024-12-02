@@ -83,3 +83,17 @@ rule alevin_all_rds:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/simpleaf_merge.R"
+
+rule alevin_all_hdf5:
+    input:
+        rds="results/sce/all.rds",
+    output:
+        "results/hdf5/all-assays.rds",
+        "results/hdf5/all-se.rds",
+    resources:
+        mem="64G",
+        runtime="6h",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/simpleaf_hdf5.R"
