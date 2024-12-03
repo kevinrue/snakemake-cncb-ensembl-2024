@@ -13,11 +13,4 @@ message("Importing from RDS file ...")
 TODO
 message("Done.")
 
-message("Writing to HDF5 file ...")
-sce <- saveHDF5SummarizedExperiment(
-  x = sce,
-  dir = dirname(snakemake@output[[1]]),
-  prefix = "all-")
-message("Done.")
-
 message(Sys.time())

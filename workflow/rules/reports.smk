@@ -3,7 +3,6 @@ rule simpleaf_sample_report:
         simpleaf="results/alevin/{sample}",
     output:
         "results/alevin-reports/{sample}.html",
-    # container: "docker://bioconductor/bioconductor_docker:RELEASE_3_20"
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -12,3 +11,17 @@ rule simpleaf_sample_report:
         runtime="30m",
     script:
         "../../notebooks/simpleaf_sample_report.Rmd"
+
+rule simpleaf_all_barcodes_report:
+    input:
+        rds="results/sce/all.rds",
+    output:
+        "results/alevin-reports/all.html",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../notebooks/simpleaf_barcodes_all_report.Rmd"

@@ -18,5 +18,5 @@ include: "rules/reports.smk"
 rule all:
     input:
         expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        "results/sce/all.rds",
+        "results/alevin-reports/all.html",
         "results/hdf5/all",

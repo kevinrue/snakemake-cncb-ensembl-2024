@@ -1,0 +1,49 @@
+---
+title: "Save sce as HDF5"
+affiliation: "`r basename(snakemake@input)`"
+output: html_document
+date: "2024-11-29"
+---
+
+## Library path
+
+```{r, message=FALSE}
+.libPaths("/ceph/project/cncb/albrecht/R-4.4.1")
+cat("Library path:\n")
+print(.libPaths())
+```
+
+## Libraries
+
+```{r, message=FALSE}
+library(SingleCellExperiment)
+```
+
+## Load sce
+
+```{r}
+sce <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/sce/all.rds")
+sce
+```
+
+```{r}
+format(object.size(sce), units = "GB")
+```
+
+```{r}
+counts_row_sum <- rowSums(assay(sce, "counts"))
+table(counts_row_sum > 0)
+```
+
+```{r}
+sce <- sce[counts_row_sum > 0, ]
+sce
+```
+
+```{r}
+format(object.size(sce), units = "GB")
+```
+
+```{r}
+saveRDS(sce, "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/sce/non_zero_genes.rds")
+```
