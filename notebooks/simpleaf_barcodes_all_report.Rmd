@@ -15,19 +15,18 @@ library(scales)
 library(SingleCellExperiment)
 library(stringr)
 library(tidyverse)
-print(.libPaths())
 ```
 
 ## Load sce
 
-```{r}
+```{r load_sce, echo=FALSE}
 sce <- readRDS(snakemake@input[["rds"]])
 sce
 ```
 
-## Decompose sample metadata
+## Barcode statistics
 
-```{r barcode_metadata}
+```{r barcode_metadata, include=FALSE}
 timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
 replicate_levels <- c("1", "2")
 barcode_stats <- tibble(
@@ -41,12 +40,18 @@ barcode_stats <- tibble(
     timepoint = factor(timepoint, timepoint_levels),
     replicate = factor(replicate, replicate_levels)
   )
-barcode_stats
 ```
 
-## Compute statistics
+- barcode: Barcode
+- sample: Sample name
+- timepoint: Developmental time point
+- replicate: Experimental replicate
+- umi_sum: Total UMIs detected
+- genes: Total genes detected
+- rank_umi: Ranking by decreasing UMI detected
+- rank_genes: Ranking by decreasing genes detected
 
-```{r compute_statistics}
+```{r compute_statistics, include=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
 barcode_stats$genes <- colSums(assay(sce, "counts") > 0)
 barcode_stats <- barcode_stats %>% 
@@ -73,7 +78,7 @@ genes_cutoff <- 500
 
 ### Total UMI
 
-```{r umi_rank_facet_sample, fig.width=7, fig.height=7}
+```{r umi_rank_facet_sample, fig.width=7, fig.height=7, echo=FALSE}
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
   geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
@@ -84,10 +89,9 @@ ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
     y = "Total UMI",
     x = "Rank"
   )
-gc(verbose = FALSE)
 ```
 
-```{r umi_rank_colour_sample, fig.width=12, fig.height=5}
+```{r umi_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
   geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
@@ -109,23 +113,23 @@ gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   )
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
-gc(verbose = FALSE)
 ```
 
-```{r umi_histogram_facet_sample, fig.width=7, fig.height=6}
+```{r umi_histogram_facet_sample, fig.width=7, fig.height=6, echo=FALSE}
 ggplot(barcode_stats %>% filter(umi_sum < 2E3), aes(x = umi_sum)) +
   facet_wrap(~sample) +
   geom_histogram(color = "black", fill = "white", binwidth = 50, position = "identity", alpha = 0.5, linewidth = 0.1) +
   geom_vline(xintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_comma()) +
   coord_cartesian(xlim = c(0, 2E3)) +
   theme_bw()
-gc(verbose = FALSE)
 ```
 
 
 ### Genes detected
 
-```{r genes_rank_colour_sample, fig.width=12, fig.height=5}
+```{r genes_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
   geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
@@ -149,49 +153,48 @@ gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   )
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
-gc(verbose = FALSE)
 ```
 
-```{r genes_histogram_colour_sample, fig.width=8, fig.height=6}
+```{r genes_histogram_colour_sample, fig.width=8, fig.height=6, echo=FALSE}
 ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
   facet_wrap(~sample) +
   geom_histogram(color = "black", fill = "white", binwidth = 25, position = "identity", alpha = 0.5, linewidth = 0.1) +
-  scale_y_log10() +
+  scale_y_log10(labels = label_comma()) +
+  scale_x_continuous(labels = label_comma()) +
   geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
   theme_bw() +
   labs(
     x = "Genes detected",
     y = "Barcodes"
   )
-gc(verbose = FALSE)
 ```
 
 ### Total UMI and genes detected
 
-```{r umi_genes_scatterplot_colour_sample, fig.width=8, fig.height=6}
+```{r umi_genes_scatterplot_colour_sample, fig.width=8, fig.height=6, echo=FALSE}
 ggplot(barcode_stats %>% filter(umi_sum < 10E3 & genes < 10E3), aes(x = genes, y = umi_sum)) +
   facet_wrap(~sample) +
   geom_point_rast(size = 0.1) +
   geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
   geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_comma()) +
   theme_bw()
-gc(verbose = FALSE)
 ```
-
 
 ## Apply filters
 
 ```{r filter_umi_sum}
-table(barcode_stats$umi_sum > umi_cutoff)
+table(barcode_stats$umi_sum >= umi_cutoff)
 ```
 
 ```{r filter_genes_detected}
-table(barcode_stats$genes > genes_cutoff)
+table(barcode_stats$genes >= genes_cutoff)
 ```
 
 ```{r filter_all}
 table(
-  barcode_stats$umi_sum > umi_cutoff &
-    barcode_stats$genes > genes_cutoff
+  barcode_stats$umi_sum >= umi_cutoff &
+    barcode_stats$genes >= genes_cutoff
 )
 ```
