@@ -96,3 +96,33 @@ rule alevin_all_hdf5:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/simpleaf_hdf5.R"
+
+rule scuttle_lognorm:
+    input:
+        rds="results/sce/all.rds",
+    output:
+        rds="results/sce/lognorm.rds",
+    resources:
+        mem="128G",
+        runtime="1h",
+    threads: 32
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scuttle_lognorm.R"
+
+rule scran_hvgs:
+    input:
+        rds="results/sce/lognorm.rds",
+    output:
+        tsv="results/model_gene_var/decomposed_variance.tsv",
+        fit="results/model_gene_var/fit.pdf",
+        hvgs="results/model_gene_var/variable_genes.txt",
+    resources:
+        mem="128G",
+        runtime="30m",
+    threads: 32
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scran_modelgenevar.R"

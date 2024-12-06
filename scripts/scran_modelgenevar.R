@@ -1,0 +1,46 @@
+message(Sys.time())
+
+suppressPackageStartupMessages({library(BiocParallel)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
+suppressPackageStartupMessages({library(scran)})
+suppressPackageStartupMessages({library(tidyverse)})
+
+message("Job configuration")
+message("- threads: ", snakemake@threads)
+
+message("Importing from RDS file ...")
+sce <- readRDS(snakemake@input[["rds"]])
+message("Done.")
+
+message("Model gene variance ...")
+dec <- modelGeneVar(sce, BPPARAM = MulticoreParam(workers = snakemake@threads))
+message("Done.")
+
+message("Saving gene statistics to TSV file ...")
+write_tsv(
+    bind_cols(tibble(gene_id = rownames(dec)), as_tibble(dec)),
+    snakemake@output[["tsv"]]
+)
+message("Done.")
+
+message("Computing and plotting fit to PDF file ...")
+fit <- metadata(dec)
+pdf(snakemake@output[["fit"]], width = 7, height = 5)
+plot(
+    fit$mean, fit$var,
+    xlab="Mean of log-expression",
+    ylab="Variance of log-expression"
+)
+curve(fit$trend(x), col="dodgerblue", add=TRUE, lwd=2)
+dev.off()
+message("Done.")
+
+message("Selecting highly variable genes ...")
+chosen <- getTopHVGs(dec, prop=0.1)
+message("Done.")
+
+message("Writing highly variable genes to TXT ...")
+write(chosen, snakemake@output[["hvgs"]])
+message("Done.")
+
+message(Sys.time())
