@@ -126,3 +126,20 @@ rule scran_hvgs:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/scran_modelgenevar.R"
+
+
+rule scran_fixed_pca:
+    input:
+        sce="results/sce/lognorm.rds",
+        hvgs="results/model_gene_var/variable_genes.txt",
+    output:
+        var_explained="results/fixed_pca/var_explained.pdf",
+        sce="results/sce/pca.rds",
+    resources:
+        mem="256G",
+        runtime="3h",
+    threads: 16
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scran_fixedpca.R"

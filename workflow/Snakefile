@@ -20,4 +20,4 @@ rule all:
         expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/alevin-reports/all.html",
         "results/hdf5/all",
-        "results/model_gene_var/variable_genes.txt",
+        "results/sce/pca.rds",
