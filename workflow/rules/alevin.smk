@@ -136,9 +136,9 @@ rule scran_fixed_pca:
         var_explained="results/fixed_pca/var_explained.pdf",
         sce="results/sce/pca.rds",
     resources:
-        mem="256G",
+        mem="512G",
         runtime="3h",
-    threads: 16
+    threads: 32
     conda:
         "../../conda/bioconductor_3_20.yaml"
     script:

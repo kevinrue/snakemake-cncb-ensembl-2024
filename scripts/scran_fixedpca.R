@@ -22,7 +22,7 @@ set.seed(1000)
 sce <- fixedPCA(
   sce,
   subset.row = hvgs,
-  rank = 200,
+  rank = 100,
   BSPARAM = RandomParam(),
   BPPARAM = MulticoreParam(workers = snakemake@threads)
 )
