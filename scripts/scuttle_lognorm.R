@@ -32,9 +32,13 @@ message("Log-normalise ...")
 sce <- logNormCounts(sce, BPPARAM = MulticoreParam(workers = snakemake@threads))
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Remove assay 'counts' ...")
 assay(sce, "counts") <- NULL
 message("Done.")
+
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
 message("Saving to RDS file ...")
 saveRDS(sce, snakemake@output[["rds"]])
