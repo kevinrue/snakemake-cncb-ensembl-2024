@@ -127,7 +127,6 @@ rule scran_hvgs:
     script:
         "../../scripts/scran_modelgenevar.R"
 
-
 rule scran_fixed_pca:
     input:
         sce="results/sce/lognorm.rds",
@@ -143,3 +142,17 @@ rule scran_fixed_pca:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/scran_fixedpca.R"
+
+rule scran_umap:
+    input:
+        sce="results/sce/pca.rds",
+    output:
+        sce="results/sce/umap.rds",
+    resources:
+        mem="512G",
+        runtime="3h",
+    threads: 32
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scater_umap.R"
