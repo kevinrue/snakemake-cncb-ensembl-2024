@@ -150,7 +150,7 @@ rule scran_umap:
         sce="results/sce/umap.rds",
     resources:
         mem="512G",
-        runtime="3h",
+        runtime="1h",
     threads: 32
     conda:
         "../../conda/bioconductor_3_20.yaml"
