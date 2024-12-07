@@ -8,6 +8,7 @@ suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
+message("- n_pcs: ", snakemake@params[["n_pcs"]])
 
 message("Importing SCE from RDS file ...")
 sce <- readRDS(snakemake@input[["sce"]])
@@ -20,7 +21,7 @@ set.seed(1000)
 sce <- runUMAP(
   sce,
   dimred = "PCA",
-  pca = 50,
+  pca = snakemake@params[["n_pcs"]],
   BNPARAM = KmknnParam(),
   BPPARAM = MulticoreParam(workers = snakemake@threads)
 )

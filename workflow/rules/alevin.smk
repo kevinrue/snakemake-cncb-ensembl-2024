@@ -155,6 +155,8 @@ rule scran_umap:
         sce="results/sce/pca.rds",
     output:
         sce="results/sce/umap.rds",
+    params:
+        pcs=config["umap"]["n_pcs"],
     resources:
         mem="20G",
         runtime="1h",

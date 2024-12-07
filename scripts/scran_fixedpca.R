@@ -8,6 +8,7 @@ suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
+message("- rank: ", snakemake@params[["rank"]])
 
 message("Importing SCE from RDS file ...")
 sce <- readRDS(snakemake@input[["sce"]])

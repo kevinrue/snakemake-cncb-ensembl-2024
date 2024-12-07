@@ -23,3 +23,6 @@ variable_genes:
 
 fixed_pca:
   rank: 100
+
+umap:
+  n_pcs: 50
