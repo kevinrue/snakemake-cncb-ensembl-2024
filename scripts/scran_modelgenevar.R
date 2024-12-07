@@ -12,6 +12,8 @@ message("Importing from RDS file ...")
 sce <- readRDS(snakemake@input[["rds"]])
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Model gene variance ...")
 dec <- modelGeneVar(sce, BPPARAM = MulticoreParam(workers = snakemake@threads))
 message("Done.")

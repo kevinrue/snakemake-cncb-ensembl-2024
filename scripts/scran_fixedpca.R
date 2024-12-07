@@ -13,6 +13,8 @@ message("Importing SCE from RDS file ...")
 sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Importing variable genes form TXT file ...")
 hvgs <- scan(snakemake@input[["hvgs"]], what = character())
 message("Done.")
@@ -28,6 +30,8 @@ sce <- fixedPCA(
 )
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Plotting variance explained ...")
 pdf(snakemake@output[["var_explained"]], width = 10, height = 5)
 percent.var <- attr(reducedDim(sce), "percentVar")
@@ -38,6 +42,8 @@ message("Done.")
 message("Removing assays ...")
 assays(sce) <- list()
 message("Done.")
+
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
 message("Saving SCE to RDS file ...")
 saveRDS(sce, snakemake@output[["sce"]])

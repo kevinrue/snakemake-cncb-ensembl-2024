@@ -135,7 +135,7 @@ rule scran_fixed_pca:
         var_explained="results/fixed_pca/var_explained.pdf",
         sce="results/sce/pca.rds",
     resources:
-        mem="512G",
+        mem="128G",
         runtime="3h",
     threads: 32
     conda:
@@ -149,7 +149,7 @@ rule scran_umap:
     output:
         sce="results/sce/umap.rds",
     resources:
-        mem="512G",
+        mem="20G",
         runtime="1h",
     threads: 32
     conda:

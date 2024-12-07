@@ -13,6 +13,8 @@ message("Importing SCE from RDS file ...")
 sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Running UMAP ...")
 set.seed(1000)
 sce <- runUMAP(
@@ -24,9 +26,13 @@ sce <- runUMAP(
 )
 message("Done.")
 
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
 message("Removing PCA ...")
 reducedDim(sce, "PCA") <- NULL
 message("Done.")
+
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
 message("Saving SCE to RDS file ...")
 saveRDS(sce, snakemake@output[["sce"]])
