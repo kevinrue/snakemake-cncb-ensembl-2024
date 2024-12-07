@@ -142,7 +142,7 @@ rule scran_fixed_pca:
     params:
         rank=config["fixed_pca"]["rank"],
     resources:
-        mem="512G",
+        mem="256G",
         runtime="3h",
     threads: 16
     conda:
