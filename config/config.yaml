@@ -13,3 +13,10 @@ genome:
 simpleaf:
   index:
     rlen: 150
+
+barcode_filters:
+  min_umis: 500
+  min_genes: 250
+
+variable_genes:
+  proportion: 0.1

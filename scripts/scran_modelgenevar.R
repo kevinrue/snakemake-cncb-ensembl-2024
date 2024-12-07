@@ -7,6 +7,7 @@ suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
+message("- HVGs proportion:", snakemake@params[["hvgs_prop"]])
 
 message("Importing from RDS file ...")
 sce <- readRDS(snakemake@input[["rds"]])
@@ -38,7 +39,7 @@ dev.off()
 message("Done.")
 
 message("Selecting highly variable genes ...")
-chosen <- getTopHVGs(dec, prop=0.1)
+chosen <- getTopHVGs(dec, prop = snakemake@params[["hvgs_prop"]])
 message("Done.")
 
 message("Writing highly variable genes to TXT ...")

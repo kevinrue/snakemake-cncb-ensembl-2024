@@ -102,6 +102,9 @@ rule scuttle_lognorm:
         rds="results/sce/all.rds",
     output:
         rds="results/sce/lognorm.rds",
+    params:
+        min_umis=config["barcode_filters"]["min_umis"],
+        min_genes=config["barcode_filters"]["min_genes"],        
     resources:
         mem="128G",
         runtime="1h",
@@ -118,6 +121,8 @@ rule scran_hvgs:
         tsv="results/model_gene_var/decomposed_variance.tsv",
         fit="results/model_gene_var/fit.pdf",
         hvgs="results/model_gene_var/variable_genes.txt",
+    params:
+        hvgs_prop=config["variable_genes"]["proportion"],
     resources:
         mem="128G",
         runtime="30m",
@@ -135,9 +140,9 @@ rule scran_fixed_pca:
         var_explained="results/fixed_pca/var_explained.pdf",
         sce="results/sce/pca.rds",
     resources:
-        mem="128G",
+        mem="512G",
         runtime="3h",
-    threads: 32
+    threads: 16
     conda:
         "../../conda/bioconductor_3_20.yaml"
     script:
