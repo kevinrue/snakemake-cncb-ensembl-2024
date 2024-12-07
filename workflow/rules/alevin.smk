@@ -139,6 +139,8 @@ rule scran_fixed_pca:
     output:
         var_explained="results/fixed_pca/var_explained.pdf",
         sce="results/sce/pca.rds",
+    params:
+        rank=config["fixed_pca"]["rank"],
     resources:
         mem="512G",
         runtime="3h",
