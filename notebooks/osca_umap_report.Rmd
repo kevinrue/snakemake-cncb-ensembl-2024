@@ -1,0 +1,65 @@
+---
+title: "UMAP overlayed with metadata"
+author: "Kevin Rue"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+NA
+```
+
+## Libraries
+
+```{r, message=FALSE}
+library(ggrastr)
+library(SingleCellExperiment)
+library(stringr)
+library(tidyverse)
+```
+
+## Load sce
+
+```{r load_sce, echo=FALSE}
+sce <- readRDS(snakemake@input[["rds"]])
+# sce <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/sce/umap.rds.backup")
+sce
+```
+
+## Barcode metadata
+
+```{r barcode_metadata, echo=FALSE}
+timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
+replicate_levels <- c("1", "2")
+colData(sce) <- str_match(string = colData(sce)[["sample"]], pattern = "WPP(?<timepoint>[mp][[:digit:]]{3}hrs)_rep(?<replicate>[[:digit:]]{1})")[, -1] %>%
+  as_tibble() %>%
+  mutate(
+    timepoint = factor(timepoint, timepoint_levels),
+    replicate = factor(replicate, replicate_levels)
+  ) %>%
+  as("DataFrame")
+colData(sce)
+```
+
+## Plots
+
+```{r umap-coloured, echo=FALSE, fig.width=7, fig.height=5}
+for (coldata in colnames(colData(sce))) {
+  gg <- reducedDim(sce, "UMAP") %>%
+    as_tibble() %>%
+    mutate(
+      COLOUR = colData(sce)[[coldata]]
+    ) %>%
+    slice_sample(prop = 1) %>%
+    ggplot(aes(UMAP1, UMAP2, colour  = COLOUR)) +
+    geom_point_rast(size = 0.05) +
+    theme_bw() +
+    labs(
+      colour = coldata
+    ) +
+    guides(
+      color = guide_legend(override.aes = list(size = 5))
+    )
+  print(gg)
+}
+```
