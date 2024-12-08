@@ -26,7 +26,7 @@ rule simpleaf_all_barcodes_report:
     script:
         "../../notebooks/simpleaf_barcodes_all_report.Rmd"
 
-rule simpleaf_all_barcodes_report:
+rule scran_umap_report:
     input:
         rds="results/sce/umap.rds",
     output:

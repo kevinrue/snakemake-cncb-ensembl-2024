@@ -10,7 +10,7 @@ library(tidyverse)
 
 ```{r}
 # UMAP: R used up to 15G
-slurm_file <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/sps-2453722_-2/sps-2453722_-2-mem.tsv"
+slurm_file <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/sps-2453910_-2/sps-2453910_-2-mem.tsv"
 # PCA
 #slurm_file <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/sps-2453688/sps-2453688-mem.tsv"
 ```
