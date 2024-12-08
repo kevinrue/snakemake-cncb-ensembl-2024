@@ -143,8 +143,8 @@ rule scran_fixed_pca:
         rank=config["fixed_pca"]["rank"],
     resources:
         mem="256G",
-        runtime="3h",
-    threads: 16
+        runtime="6h",
+    threads: 24
     conda:
         "../../conda/bioconductor_3_20.yaml"
     script:
