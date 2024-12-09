@@ -5,17 +5,15 @@ output: html_document
 date: "`r Sys.Date()`"
 ---
 
-## Library path
-
-```{r library_path, message=FALSE}
-.libPaths("/ceph/project/cncb/albrecht/R-4.4.1")
-cat("Library path:\n")
-print(.libPaths())
+```{r setup, include=FALSE}
+breaks <- 10^(-10:10)
+minor_breaks <- rep(1:9, 21)*(10^rep(-10:10, each=9))
+# dir.create("results/alevin-reports/data/", showWarnings = FALSE)
 ```
 
 ## Libraries
 
-```{r libraries, message=FALSE}
+```{r, message=FALSE}
 library(cowplot)
 library(ggplot2)
 library(ggrastr)
@@ -31,8 +29,6 @@ library(tidyverse)
 sce <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/sce/all.rds")
 sce
 ```
-
-## Main content
 
 ## Barcode statistics
 
@@ -61,7 +57,7 @@ barcode_stats <- tibble(
 - rank_umi: Ranking by decreasing UMI detected
 - rank_genes: Ranking by decreasing genes detected
 
-```{r compute_statistics, echo=FALSE}
+```{r compute_statistics, include=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
 barcode_stats$genes <- colSums(assay(sce, "counts") > 0)
 barcode_stats <- barcode_stats %>% 
@@ -77,11 +73,17 @@ barcode_stats <- barcode_stats %>%
 barcode_stats
 ```
 
+```{r write_barcode_stats, include=FALSE}
+# write_tsv(barcode_stats, "results/alevin-reports/data/barcode_stats.tsv.gz")
+```
+
 ## Proposed QC cutoffs
 
 ```{r set_cutoffs}
-umi_cutoff <- 1E3
-genes_cutoff <- 500
+umi_cutoff_low <- 500
+genes_cutoff_low <- 250
+umi_cutoff_final <- 3000
+genes_cutoff_final <- 1000
 ```
 
 ## Plots
@@ -91,9 +93,11 @@ genes_cutoff <- 500
 ```{r umi_rank_facet_sample, fig.width=7, fig.height=7, echo=FALSE}
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   facet_wrap(~sample) +
-  scale_x_log10(labels = label_comma()) + scale_y_log10(labels = label_comma()) +
+  scale_x_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   theme_bw() +
   labs(
     y = "Total UMI",
@@ -104,8 +108,10 @@ ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
 ```{r umi_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
-  scale_x_log10(labels = label_comma()) + scale_y_log10(labels = label_comma()) +
+  geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  scale_x_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
+   scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   theme_bw() +
   labs(
     y = "Total UMI",
@@ -113,8 +119,10 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
-  scale_x_log10(labels = label_comma()) + scale_y_log10(labels = label_comma()) +
+  geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  scale_x_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   coord_cartesian(ylim = c(1, 10E3), xlim = c(10E3, NA)) +
   theme_bw() +
   labs(
@@ -126,13 +134,13 @@ rm(gg1, gg2)
 ```
 
 ```{r umi_histogram_facet_sample, fig.width=7, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 2E3), aes(x = umi_sum)) +
+ggplot(barcode_stats %>% filter(umi_sum < 20E3), aes(x = umi_sum)) +
   facet_wrap(~sample) +
-  geom_histogram(color = "black", fill = "white", binwidth = 50, position = "identity", alpha = 0.5, linewidth = 0.1) +
-  geom_vline(xintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  geom_histogram(color = "black", fill = "white", binwidth = 100, position = "identity", alpha = 0.5, linewidth = 0.1) +
+  geom_vline(xintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_vline(xintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_continuous(labels = label_comma()) +
-  scale_y_continuous(labels = label_comma()) +
-  coord_cartesian(xlim = c(0, 2E3)) +
+  scale_y_log10(labels = label_comma()) +
   theme_bw()
 ```
 
@@ -142,8 +150,9 @@ ggplot(barcode_stats %>% filter(umi_sum < 2E3), aes(x = umi_sum)) +
 ```{r genes_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
-  scale_x_log10(labels = label_comma()) +
+  geom_hline(yintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  scale_x_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw() +
   labs(
@@ -152,8 +161,9 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
-  scale_x_log10(labels = label_comma()) +
+  geom_hline(yintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  scale_x_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   scale_y_continuous(labels = label_comma()) +
   coord_cartesian(ylim = c(0, 2E3), xlim = c(10E3, NA)) +
   theme_bw() +
@@ -169,9 +179,10 @@ rm(gg1, gg2)
 ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
   facet_wrap(~sample) +
   geom_histogram(color = "black", fill = "white", binwidth = 25, position = "identity", alpha = 0.5, linewidth = 0.1) +
-  scale_y_log10(labels = label_comma()) +
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = label_comma()) +
   scale_x_continuous(labels = label_comma()) +
-  geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  geom_vline(xintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_vline(xintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   theme_bw() +
   labs(
     x = "Genes detected",
@@ -185,8 +196,10 @@ ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
 ggplot(barcode_stats %>% filter(umi_sum < 10E3 & genes < 10E3), aes(x = genes, y = umi_sum)) +
   facet_wrap(~sample) +
   geom_point_rast(size = 0.1) +
-  geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.1, colour = "red") +
+  geom_vline(xintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_vline(xintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_continuous(labels = label_comma()) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
@@ -194,18 +207,36 @@ ggplot(barcode_stats %>% filter(umi_sum < 10E3 & genes < 10E3), aes(x = genes, y
 
 ## Apply filters
 
+### Permissive filters
+
 ```{r filter_umi_sum}
-table(barcode_stats$umi_sum >= umi_cutoff)
+table(barcode_stats$umi_sum >= umi_cutoff_low)
 ```
 
 ```{r filter_genes_detected}
-table(barcode_stats$genes >= genes_cutoff)
+table(barcode_stats$genes >= genes_cutoff_low)
 ```
 
 ```{r filter_all}
 table(
-  barcode_stats$umi_sum >= umi_cutoff &
-    barcode_stats$genes >= genes_cutoff
+  barcode_stats$umi_sum >= umi_cutoff_low &
+    barcode_stats$genes >= genes_cutoff_low
 )
 ```
 
+### Final filters
+
+```{r filter_umi_sum_final}
+table(barcode_stats$umi_sum >= umi_cutoff_final)
+```
+
+```{r filter_genes_detected_final}
+table(barcode_stats$genes >= genes_cutoff_final)
+```
+
+```{r filter_all_final}
+table(
+  barcode_stats$umi_sum >= umi_cutoff_final &
+    barcode_stats$genes >= genes_cutoff_final
+)
+```

@@ -134,14 +134,13 @@ rm(gg1, gg2)
 ```
 
 ```{r umi_histogram_facet_sample, fig.width=7, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 10E3), aes(x = umi_sum)) +
+ggplot(barcode_stats %>% filter(umi_sum < 20E3), aes(x = umi_sum)) +
   facet_wrap(~sample) +
-  geom_histogram(color = "black", fill = "white", binwidth = 50, position = "identity", alpha = 0.5, linewidth = 0.1) +
+  geom_histogram(color = "black", fill = "white", binwidth = 100, position = "identity", alpha = 0.5, linewidth = 0.1) +
   geom_vline(xintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
   geom_vline(xintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_continuous(labels = label_comma()) +
-  scale_y_continuous(labels = label_comma()) +
-  coord_cartesian(xlim = c(0, 2E3)) +
+  scale_y_log10(labels = label_comma()) +
   theme_bw()
 ```
 
