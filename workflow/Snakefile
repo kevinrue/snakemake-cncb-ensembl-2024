@@ -14,7 +14,6 @@ include: "rules/alevin.smk"
 include: "rules/downloads.smk"
 include: "rules/r.smk"
 include: "rules/reports.smk"
-include: "rules/sce.smk"
 
 ##### main rule #####
 rule all:
@@ -23,6 +22,8 @@ rule all:
         "results/alevin-reports/all.html",
         "results/umap-reports/without-integration.html",
         "results/umap-reports/without-integration-final.html",
+        "results/enrichgo-reports/hvgs.html",
+        "results/enrichgo-reports/hvgs-final.html",
         "results/hdf5/all",
         "results/enrichgo/hvgs.rds",
         "results/sce/lognorm-final.rds",

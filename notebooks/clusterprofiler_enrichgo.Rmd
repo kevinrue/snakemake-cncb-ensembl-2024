@@ -20,7 +20,7 @@ ego <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/
 ```
 
 ```{r, echo=FALSE}
-head(ego, n = 20) %>% 
+head(ego, n = 50) %>% 
   select(-geneID) %>%
   knitr::kable("pipe")
 ```

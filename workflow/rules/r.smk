@@ -11,6 +11,34 @@ rule alevin_all_rds:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/simpleaf_merge.R"
+        
+rule background_gene_ids:
+    input:
+        rds="results/sce/lognorm.rds",
+    output:
+        txt="results/sce/lognorm_rownames.txt"
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/sce_rownames.R"
+        
+rule background_gene_ids_final:
+    input:
+        rds="results/sce/lognorm-final.rds",
+    output:
+        txt="results/sce/lognorm_rownames-final.txt"
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/sce_rownames.R"
 
 rule alevin_all_hdf5:
     input:
@@ -162,3 +190,33 @@ rule scran_umap_final:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/scater_umap.R"
+
+rule enrichgo_hvgs:
+    input:
+        hvgs="results/model_gene_var/variable_genes.txt",
+        bg="results/sce/lognorm_rownames.txt"
+    output:
+        rds="results/enrichgo/hvgs.rds",
+    conda:
+        "../../conda/bioconductor_3_20-v2.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/enrichgo_genes.R"
+
+rule enrichgo_hvgs_final:
+    input:
+        hvgs="results/model_gene_var/variable_genes-final.txt",
+        bg="results/sce/lognorm_rownames-final.txt"
+    output:
+        rds="results/enrichgo/hvgs-final.rds",
+    conda:
+        "../../conda/bioconductor_3_20-v2.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/enrichgo_genes.R"

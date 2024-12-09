@@ -65,13 +65,13 @@ rule enrichgo_hvgs_report:
     output:
         "results/enrichgo-reports/hvgs.html",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2
     resources:
         mem="8G",
         runtime="10m",
     script:
-        "../../scripts/clusterprofiler_enrichgo.Rmd"
+        "../../notebooks/clusterprofiler_enrichgo.Rmd"
 
 rule enrichgo_hvgs_report_final:
     input:
@@ -79,10 +79,10 @@ rule enrichgo_hvgs_report_final:
     output:
         "results/enrichgo-reports/hvgs-final.html",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2
     resources:
         mem="8G",
         runtime="10m",
     script:
-        "../../scripts/clusterprofiler_enrichgo.Rmd"
+        "../../notebooks/clusterprofiler_enrichgo.Rmd"
