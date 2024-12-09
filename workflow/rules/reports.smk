@@ -17,6 +17,11 @@ rule simpleaf_all_barcodes_report:
         rds="results/sce/all.rds",
     output:
         "results/alevin-reports/all.html",
+    params:
+        umi_cutoff_low=config["barcode_filters"]["min_umis"],
+        genes_cutoff_low=config["barcode_filters"]["min_genes"],
+        umi_cutoff_final=config["barcode_filters"]["final"]["min_umis"],
+        genes_cutoff_final=config["barcode_filters"]["final"]["min_genes"],
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
