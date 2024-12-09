@@ -17,6 +17,9 @@ simpleaf:
 barcode_filters:
   min_umis: 500
   min_genes: 250
+  final:
+    min_umis: 3000
+    min_genes: 1000
 
 variable_genes:
   proportion: 0.1

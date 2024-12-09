@@ -12,6 +12,7 @@ configfile: "config/config.yaml"
 include: "rules/common.smk"
 include: "rules/alevin.smk"
 include: "rules/downloads.smk"
+include: "rules/r.smk"
 include: "rules/reports.smk"
 include: "rules/sce.smk"
 
@@ -23,3 +24,4 @@ rule all:
         "results/umap-reports/without-integration.html",
         "results/hdf5/all",
         "results/enrichgo/hvgs.rds",
+        "results/sce/lognorm-final.rds",
