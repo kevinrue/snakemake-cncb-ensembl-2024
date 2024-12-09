@@ -22,6 +22,7 @@ rule all:
         expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/alevin-reports/all.html",
         "results/umap-reports/without-integration.html",
+        "results/umap-reports/without-integration-final.html",
         "results/hdf5/all",
         "results/enrichgo/hvgs.rds",
         "results/sce/lognorm-final.rds",

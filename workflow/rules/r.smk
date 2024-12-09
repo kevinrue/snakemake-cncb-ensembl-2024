@@ -77,6 +77,24 @@ rule scran_hvgs:
     script:
         "../../scripts/scran_modelgenevar.R"
 
+rule scran_hvgs_final:
+    input:
+        rds="results/sce/lognorm-final.rds",
+    output:
+        tsv="results/model_gene_var/decomposed_variance-final.tsv",
+        fit="results/model_gene_var/fit-final.pdf",
+        hvgs="results/model_gene_var/variable_genes-final.txt",
+    params:
+        hvgs_prop=config["variable_genes"]["proportion"],
+    resources:
+        mem="128G",
+        runtime="30m",
+    threads: 32
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scran_modelgenevar.R"
+
 rule scran_fixed_pca:
     input:
         sce="results/sce/lognorm.rds",
@@ -95,11 +113,45 @@ rule scran_fixed_pca:
     script:
         "../../scripts/scran_fixedpca.R"
 
+rule scran_fixed_pca_final:
+    input:
+        sce="results/sce/lognorm-final.rds",
+        hvgs="results/model_gene_var/variable_genes-final.txt",
+    output:
+        var_explained="results/fixed_pca/var_explained-final.pdf",
+        sce="results/sce/pca-final.rds",
+    params:
+        rank=config["fixed_pca"]["rank"],
+    resources:
+        mem="256G",
+        runtime="6h",
+    threads: 24
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scran_fixedpca.R"
+
 rule scran_umap:
     input:
         sce="results/sce/pca.rds",
     output:
         sce="results/sce/umap.rds",
+    params:
+        pcs=config["umap"]["n_pcs"],
+    resources:
+        mem="20G",
+        runtime="1h",
+    threads: 32
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/scater_umap.R"
+
+rule scran_umap_final:
+    input:
+        sce="results/sce/pca-final.rds",
+    output:
+        sce="results/sce/umap-final.rds",
     params:
         pcs=config["umap"]["n_pcs"],
     resources:

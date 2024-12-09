@@ -45,11 +45,39 @@ rule scran_umap_report:
     script:
         "../../notebooks/osca_umap_report.Rmd"
 
+rule scran_umap_report_final:
+    input:
+        rds="results/sce/umap-final.rds",
+    output:
+        "results/umap-reports/without-integration-final.html",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../notebooks/osca_umap_report.Rmd"
+
 rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
     output:
         "results/enrichgo-reports/hvgs.html",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/clusterprofiler_enrichgo.Rmd"
+
+rule enrichgo_hvgs_report_final:
+    input:
+        rds="results/enrichgo/hvgs-final.rds",
+    output:
+        "results/enrichgo-reports/hvgs-final.html",
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
