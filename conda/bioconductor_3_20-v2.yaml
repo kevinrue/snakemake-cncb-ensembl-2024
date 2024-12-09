@@ -5,6 +5,7 @@ dependencies:
   - bioconductor-biocparallel
   - bioconductor-biocsingular
   - bioconductor-bluster
+  - bioconductor-clusterprofiler
   - bioconductor-hdf5array
   - bioconductor-fishpond
   - bioconductor-org.dm.eg.db

@@ -39,3 +39,17 @@ rule scran_umap_report:
         runtime="30m",
     script:
         "../../notebooks/osca_umap_report.Rmd"
+
+rule enrichgo_hvgs_report:
+    input:
+        rds="results/enrichgo/hvgs.rds",
+    output:
+        "results/enrichgo-reports/hvgs.html",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/clusterprofiler_enrichgo.Rmd"

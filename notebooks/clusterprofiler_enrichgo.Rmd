@@ -1,0 +1,26 @@
+---
+title: "GO enrichment of variable genes"
+author: "Kevin Rue"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(clusterProfiler)
+library(tidyverse)
+```
+
+## Top 50 GO terms
+
+Includes all ontologies: `BP`, `MF`, `CC`.
+
+```{r readrds, include=FALSE}
+ego <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/enrichgo/hvgs.rds")
+```
+
+```{r, echo=FALSE}
+head(ego, n = 20) %>% 
+  select(-geneID) %>%
+  knitr::kable("pipe")
+```

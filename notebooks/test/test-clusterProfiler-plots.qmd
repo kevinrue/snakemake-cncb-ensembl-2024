@@ -1,0 +1,19 @@
+---
+title: "Untitled"
+format: html
+---
+
+```{r}
+#| message: false
+library(clusterProfiler)
+```
+
+```{r}
+ego <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/enrichgo/hvgs.rds")
+ego
+```
+
+```{r}
+head(ego, n = 20)
+```
+
