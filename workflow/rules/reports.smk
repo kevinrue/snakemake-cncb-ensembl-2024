@@ -3,6 +3,8 @@ rule simpleaf_sample_report:
         simpleaf="results/alevin/{sample}",
     output:
         "results/alevin-reports/{sample}.html",
+    params:
+        umi_cutoff=config["barcode_filters"]["final"]["min_umis"],
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2

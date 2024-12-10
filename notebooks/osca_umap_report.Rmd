@@ -22,7 +22,6 @@ library(tidyverse)
 
 ```{r load_sce, echo=FALSE}
 sce <- readRDS(snakemake@input[["rds"]])
-# sce <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/sce/umap.rds.backup")
 sce
 ```
 
