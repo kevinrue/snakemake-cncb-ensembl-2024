@@ -92,7 +92,7 @@ genes_cutoff_final <- snakemake@params[["genes_cutoff_final"]]
 
 ### Total UMI
 
-```{r umi_rank_facet_sample, fig.width=7, fig.height=7, echo=FALSE}
+```{r umi_rank_facet_sample, fig.width=9, fig.height=7, echo=FALSE}
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
   geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
@@ -102,8 +102,8 @@ ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
-    y = "Total UMI",
-    x = "Rank"
+    y = "UMI Counts",
+    x = "Barcodes"
   )
 ```
 
@@ -116,8 +116,8 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
-    y = "Total UMI",
-    x = "Rank"
+    y = "UMI Counts",
+    x = "Barcodes"
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
@@ -128,8 +128,8 @@ gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   coord_cartesian(ylim = c(1, 10E3), xlim = c(10E3, NA)) +
   theme_bw() +
   labs(
-    y = "Total UMI",
-    x = "Rank"
+    y = "UMI Counts",
+    x = "Barcodes"
   )
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
@@ -143,7 +143,11 @@ ggplot(barcode_stats %>% filter(umi_sum < 20E3), aes(x = umi_sum)) +
   geom_vline(xintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(labels = label_number(scale_cut = cut_short_scale())) +
-  theme_bw()
+  theme_bw() +
+  labs(
+    x = "Barcodes",
+    y = "UMI counts"
+  )
 ```
 
 ### Genes detected
@@ -157,8 +161,8 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw() +
   labs(
-    y = "Genes detected",
-    x = "Rank"
+    y = "Genes",
+    x = "Barcodes"
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
@@ -169,8 +173,8 @@ gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   coord_cartesian(ylim = c(0, 2E3), xlim = c(10E3, NA)) +
   theme_bw() +
   labs(
-    y = "Genes detected",
-    x = "Rank"
+    y = "Genes",
+    x = "Barcodes"
   )
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
@@ -186,7 +190,7 @@ ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
   geom_vline(xintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   theme_bw() +
   labs(
-    x = "Genes detected",
+    x = "Genes",
     y = "Barcodes"
   )
 ```
@@ -194,16 +198,20 @@ ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
 ### Total UMI and genes detected
 
 ```{r umi_genes_scatterplot_colour_sample, fig.width=9, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 10E3 & genes < 10E3), aes(x = genes, y = umi_sum)) +
+ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = genes, y = umi_sum)) +
   facet_wrap(~sample) +
   geom_point_rast(size = 0.1) +
   geom_vline(xintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
   geom_vline(xintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
   geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
   geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  scale_x_continuous(labels = label_comma()) +
-  scale_y_continuous(labels = label_comma()) +
-  theme_bw()
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    x = "UMI counts",
+    y = "Barcodes"
+  )
 ```
 
 ## Apply filters
