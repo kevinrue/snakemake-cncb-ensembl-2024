@@ -18,6 +18,10 @@ library(scales)
 library(stringr)
 library(SummarizedExperiment)
 library(tidyverse)
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r snakemake, include=FALSE}
@@ -70,14 +74,18 @@ tmp_umi_cutoff <- data.frame(
 )
 gg_barcode_rank_plot <- ggplot(tmp, aes(rank, sum)) +
   geom_point() +
-  geom_label(aes(label = sum), data = tmp_top, alpha = 0.5) +
-  geom_label(aes(label = rank), data = tmp_umi_cutoff, alpha = 0.5) +
-  scale_x_log10() +
-  scale_y_log10(limits = c(1, NA), labels = scales::comma) +
+  geom_label(aes(label = format(sum, big.mark = ",")), data = tmp_top, alpha = 0.5, hjust = 0) +
+  geom_label(aes(label = format(rank, big.mark = ",")), data = tmp_umi_cutoff, alpha = 0.5) +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_log10(limits = c(1, NA), breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   labs(
-    subtitle = sprintf("Max UMI & Number of cells >= %s UMI", umi_cutoff)
+    subtitle = sprintf("Maximum UMI & Number of cells >= %s UMI", format(umi_cutoff, big.mark = ","))
   ) +
-  theme_bw()
+  theme_bw() +
+  labs(
+    y = "UMI Counts",
+    x = "Barcodes"
+  )
 rm(tmp, tmp_top, tmp_umi_cutoff)
 gg_barcode_rank_plot
 ```
@@ -87,25 +95,48 @@ gg_barcode_rank_plot
 ```{r umi_sum_histogram, echo=FALSE, fig.width=12, fig.height=4}
 gg1 <- ggplot(colData(sce), aes(x = sum)) +
   geom_histogram(binwidth = 100) +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   labs(title = "Full view") +
-  theme_bw()
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
 gg2 <- ggplot(colData(sce), aes(x = sum)) +
   geom_histogram(binwidth = 100) +
   geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3)) +
-  labs(title = "Total UMI (0 - 10,000)") +
-  theme_bw()
+  labs(title = "Total UMI (0 - 5,000)") +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
 gg3 <- ggplot(colData(sce), aes(x = sum)) +
   geom_histogram(binwidth = 100) +
   geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3), ylim = c(0, 5E3)) +
   labs(title = "Total UMI (0 - 5,000) & Bin count (0 - 5,000)") +
-  theme_bw()
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
 gg4 <- ggplot(colData(sce), aes(x = sum)) +
   geom_histogram(binwidth = 100) +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(5E3, NA), ylim = c(0, 100)) +
   labs(title = "Total UMI (5,000 - max) & Bin count (0 - 100)") +
-  theme_bw()
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
 plot_grid(gg1, gg2, gg3, gg4)
 rm(gg1, gg2, gg3, gg4)
 ```
