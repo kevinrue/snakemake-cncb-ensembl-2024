@@ -62,14 +62,13 @@ Extract the GTF information of all the duplicated genes.
 ```{r}
 dup2 <- all_coding_genes[all_coding_genes %>% 
   select(seqnames, start, end, strand) %>% 
-  duplicated(), ]
-dup_gene_info <- all_coding_genes %>% 
-  filter(
-    seqnames %in% dup2$seqnames & start %in% dup2$start & end %in% dup2$end & strand %in% dup2$strand
-  ) %>% 
-  arrange(seqnames, start, end, strand)
-rm(dup2)
-dup_gene_info
+  duplicated(), ] %>% 
+  select(seqnames, start, end, strand) %>% 
+  unique()
+duplicated_gene_ids <- dup2 %>%
+  left_join(all_coding_genes, by = join_by(seqnames, start, end, strand)) %>% 
+  pull(gene_id)
+length(duplicated_gene_ids)
 ```
 
 ```{r, eval=FALSE}
@@ -78,7 +77,7 @@ sce
 ```
 
 ```{r, eval=FALSE}
-count_assay_dup <- assay(sce, "counts")[dup_gene_info$gene_id, ]
+count_assay_dup <- assay(sce, "counts")[duplicated_gene_ids, ]
 rm(sce)
 dim(count_assay_dup)
 ```
@@ -98,19 +97,15 @@ For each set of genes, compare their transcript modes to one another and identif
 For those, favour gene names that do not start match "^CG[[:digit:]]+$"
 
 ```{r}
-dup_coordinates <- dup_gene_info %>%
-  group_by(seqnames, start, end, strand) %>% 
-  slice_head(n = 1) %>% 
-  ungroup() %>% 
-  select(seqnames, start, end, strand)
+# dup_coordinates <- dup_gene_info %>%
+#   group_by(seqnames, start, end, strand) %>% 
+#   slice_head(n = 1) %>% 
+#   ungroup() %>% 
+#   select(seqnames, start, end, strand)
 ```
 
 ```{r}
-# keep_gene_ids <- character(0)
-# duplicates_gene_models <- tibble(
-#   representative = character(0),
-#   duplicate = character(0)
-# )
+keep_gene_ids <- character(0)
 genes_compared <- tibble(
   primary_id = character(0),
   primary_name = character(0),
@@ -118,13 +113,13 @@ genes_compared <- tibble(
   secondary_name = character(0),
   status = factor(character(0), c("duplicate", "different"))
 )
-for (i in seq_len(nrow(dup_coordinates))) {
+for (i in seq_len(nrow(dup2))) {
 # for (i in 1) {
-  for_seqnames <- dup_coordinates %>% filter(row_number() == i) %>% pull(seqnames)
-  for_start <- dup_coordinates %>% filter(row_number() == i) %>% pull(start)
-  for_end <- dup_coordinates %>% filter(row_number() == i) %>% pull(end)
-  for_strand <- dup_coordinates %>% filter(row_number() == i) %>% pull(strand)
-  for_dup_gene_info <- dup_gene_info %>% filter(
+  for_seqnames <- dup2 %>% filter(row_number() == i) %>% pull(seqnames)
+  for_start <- dup2 %>% filter(row_number() == i) %>% pull(start)
+  for_end <- dup2 %>% filter(row_number() == i) %>% pull(end)
+  for_strand <- dup2 %>% filter(row_number() == i) %>% pull(strand)
+  for_dup_gene_info <- all_coding_genes %>% filter(
     seqnames == for_seqnames & start == for_start & end == for_end & strand == for_strand
   ) %>% 
     mutate(is_CG = grepl("^CG[[:digit:]]+$", gene_name)) %>% 
@@ -162,6 +157,7 @@ for (i in seq_len(nrow(dup_coordinates))) {
           status = "different"
         )
       )
+      keep_gene_ids <- append(keep_gene_ids, geneid2)
     }
   }
 }
@@ -172,7 +168,12 @@ genes_compared
 ```
 
 ```{r}
-write_tsv(genes_compared, "genes_compared.tsv")
-write_csv(genes_compared, "genes_compared.csv")
+table(genes_compared$status)
 ```
 
+
+```{r}
+write_tsv(genes_compared, "genes_compared.tsv")
+write_csv(genes_compared, "genes_compared.csv")
+write(keep_gene_ids, "genes_representative.txt")
+```

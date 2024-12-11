@@ -1,0 +1,34 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - alevin-fry
+  - bwa
+  - conda
+  - fastqc
+  - gatk4
+  - kb-python
+  - mamba
+  - multiqc
+  - picard
+  - piscem
+  - samtools
+  - simpleaf
+  - r-cowplot
+  - r-ggplot2
+  - r-scales
+  - r-stringr
+  - r-tidyverse
+  - bioconductor-biocparallel
+  - bioconductor-biocsingular
+  - bioconductor-bluster
+  - bioconductor-clusterprofiler
+  - bioconductor-hdf5array
+  - bioconductor-fishpond
+  - bioconductor-org.dm.eg.db
+  - bioconductor-rtracklayer
+  - bioconductor-scater
+  - bioconductor-scran
+  - bioconductor-scuttle
+  - bioconductor-summarizedexperiment
+  - bioconductor-singlecellexperiment
