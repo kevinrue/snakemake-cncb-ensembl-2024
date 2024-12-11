@@ -157,6 +157,25 @@ ggplot(barcode_stats %>% filter(umi_sum < 20E3), aes(x = umi_sum)) +
 
 ### Genes detected
 
+```{r genes_rank_facet_sample, fig.width=9, fig.height=7, echo=FALSE}
+filtered_stats_final <- barcode_stats %>% 
+  group_by(sample) %>% 
+  summarise(barcodes = sum(genes >= genes_cutoff_final))
+ggplot(barcode_stats, aes(x = rank_genes, y = genes)) +
+  geom_line() +
+  geom_hline(yintercept = genes_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
+  geom_hline(yintercept = genes_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 10, y = genes_cutoff_final, label = format(barcodes, big.mark = ",")), filtered_stats_final, colour = "red") +
+  facet_wrap(~sample) +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw() +
+  labs(
+    y = "Genes",
+    x = "Barcodes"
+  )
+```
+
 ```{r genes_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
@@ -223,34 +242,26 @@ ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = genes, y 
 
 ### Permissive filters
 
-```{r filter_umi_sum}
-table(barcode_stats$umi_sum >= umi_cutoff_low)
-```
-
-```{r filter_genes_detected}
-table(barcode_stats$genes >= genes_cutoff_low)
-```
-
-```{r filter_all}
-table(
-  barcode_stats$umi_sum >= umi_cutoff_low &
-    barcode_stats$genes >= genes_cutoff_low
-)
+```{r filters_permissive}
+barcode_stats %>% 
+  group_by(sample) %>% 
+  summarise(
+    umi_filter = sum(umi_sum >= umi_cutoff_low),
+    genes_filter = sum(genes >= genes_cutoff_low),
+    all_filters = sum(umi_sum >= umi_cutoff_low & genes >= genes_cutoff_low)
+  ) %>%
+  knitr::kable()
 ```
 
 ### Final filters
 
-```{r filter_umi_sum_final}
-table(barcode_stats$umi_sum >= umi_cutoff_final)
-```
-
-```{r filter_genes_detected_final}
-table(barcode_stats$genes >= genes_cutoff_final)
-```
-
-```{r filter_all_final}
-table(
-  barcode_stats$umi_sum >= umi_cutoff_final &
-    barcode_stats$genes >= genes_cutoff_final
-)
+```{r filters_final}
+barcode_stats %>% 
+  group_by(sample) %>% 
+  summarise(
+    umi_filter = sum(umi_sum >= umi_cutoff_final),
+    genes_filter = sum(genes >= genes_cutoff_final),
+    all_filters = sum(umi_sum >= umi_cutoff_final & genes >= genes_cutoff_final)
+  ) %>%
+  knitr::kable()
 ```
