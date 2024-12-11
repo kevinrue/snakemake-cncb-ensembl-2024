@@ -73,6 +73,7 @@ barcode_stats <- barcode_stats %>%
   mutate(rank_genes = row_number()) %>% 
   ungroup()
 barcode_stats
+rm(sce)
 ```
 
 ```{r write_barcode_stats, include=FALSE}
@@ -93,10 +94,14 @@ genes_cutoff_final <- snakemake@params[["genes_cutoff_final"]]
 ### Total UMI
 
 ```{r umi_rank_facet_sample, fig.width=9, fig.height=7, echo=FALSE}
+filtered_stats_final <- barcode_stats %>% 
+  group_by(sample) %>% 
+  summarise(barcodes = sum(umi_sum >= umi_cutoff_final))
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
   geom_hline(yintercept = umi_cutoff_low, linetype = "dashed", linewidth = 0.5, colour = "orange") +
   geom_hline(yintercept = umi_cutoff_final, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 10, y = umi_cutoff_final, label = format(barcodes, big.mark = ",")), filtered_stats_final, colour = "red") +
   facet_wrap(~sample) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
