@@ -250,8 +250,10 @@ barcode_stats %>%
     genes_filter = sum(genes >= genes_cutoff_low),
     all_filters = sum(umi_sum >= umi_cutoff_low & genes >= genes_cutoff_low)
   ) %>%
-  knitr::kable()
+  knitr::kable(format.args = list(big.mark = ","))
 ```
+
+Total: `r format(with(barcode_stats, sum(umi_sum >= umi_cutoff_low & genes >= genes_cutoff_low)), big.mark = ",")`
 
 ### Final filters
 
@@ -263,5 +265,7 @@ barcode_stats %>%
     genes_filter = sum(genes >= genes_cutoff_final),
     all_filters = sum(umi_sum >= umi_cutoff_final & genes >= genes_cutoff_final)
   ) %>%
-  knitr::kable()
+  knitr::kable(format.args = list(big.mark = ","))
 ```
+
+Total: `r format(with(barcode_stats, sum(umi_sum >= umi_cutoff_final & genes >= genes_cutoff_final)), big.mark = ",")`
