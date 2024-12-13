@@ -24,38 +24,10 @@ rule dropletutils_emptydrops:
         "../../conda/bioc_dropletutils.yaml"
     threads: 32
     resources:
-        mem="8G",
-        runtime="10m",
+        mem="128G",
+        runtime="6h",
     script:
         "../../scripts/dropletutils_emptydrops.R"
-
-rule background_gene_ids:
-    input:
-        rds="results/sce/lognorm.rds",
-    output:
-        txt="results/sce/lognorm_rownames.txt"
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    threads: 2
-    resources:
-        mem="64G",
-        runtime="30m",
-    script:
-        "../../scripts/sce_rownames.R"
-        
-rule background_gene_ids_final:
-    input:
-        rds="results/sce/lognorm-final.rds",
-    output:
-        txt="results/sce/lognorm_rownames-final.txt"
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    threads: 2
-    resources:
-        mem="64G",
-        runtime="30m",
-    script:
-        "../../scripts/sce_rownames.R"
 
 rule alevin_all_hdf5:
     input:
@@ -103,6 +75,34 @@ rule scuttle_lognorm_final:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/scuttle_lognorm.R"
+
+rule background_gene_ids:
+    input:
+        rds="results/sce/lognorm.rds",
+    output:
+        txt="results/sce/lognorm_rownames.txt"
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/sce_rownames.R"
+        
+rule background_gene_ids_final:
+    input:
+        rds="results/sce/lognorm-final.rds",
+    output:
+        txt="results/sce/lognorm_rownames-final.txt"
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/sce_rownames.R"
 
 rule scran_hvgs:
     input:
