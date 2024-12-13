@@ -28,3 +28,4 @@ rule all:
         "results/enrichgo-reports/hvgs-final.html",
         "results/hdf5/all",
         "resources/gtf/duplicated_gene_models.tsv",
+        "results/emptydrops/results.tsv",

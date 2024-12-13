@@ -62,3 +62,11 @@ for (coldata in colnames(colData(sce))) {
   print(gg)
 }
 ```
+
+## Session info
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

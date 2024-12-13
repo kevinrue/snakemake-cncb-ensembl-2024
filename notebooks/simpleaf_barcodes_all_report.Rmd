@@ -269,3 +269,11 @@ barcode_stats %>%
 ```
 
 Total: `r format(with(barcode_stats, sum(umi_sum >= umi_cutoff_final & genes >= genes_cutoff_final)), big.mark = ",")`
+
+## Session info
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

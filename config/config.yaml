@@ -14,6 +14,10 @@ simpleaf:
   index:
     rlen: 150
 
+emptydrops:
+  lower: 100
+  niters: 10000
+
 barcode_filters:
   min_umis: 500
   min_genes: 250

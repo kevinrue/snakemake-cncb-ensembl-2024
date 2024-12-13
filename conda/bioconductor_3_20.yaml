@@ -14,6 +14,7 @@ dependencies:
   - bioconductor-scuttle
   - bioconductor-summarizedexperiment
   - bioconductor-singlecellexperiment
+  - r-biocmanager
   - r-cowplot
   - r-ggplot2
   - r-scales

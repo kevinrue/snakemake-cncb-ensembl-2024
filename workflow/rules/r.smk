@@ -11,7 +11,24 @@ rule alevin_all_rds:
         "../../conda/bioconductor_3_20.yaml"
     script:
         "../../scripts/simpleaf_merge.R"
-        
+
+rule dropletutils_emptydrops:
+    input:
+        rds="results/sce/all.rds",
+    output:
+        tsv="results/emptydrops/results.tsv",
+    params:
+        lower=config["emptydrops"]["lower"],
+        niters=config["emptydrops"]["niters"],
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 32
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/dropletutils_emptydrops.R"
+
 rule background_gene_ids:
     input:
         rds="results/sce/lognorm.rds",

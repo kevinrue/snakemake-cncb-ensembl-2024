@@ -140,3 +140,11 @@ gg4 <- ggplot(colData(sce), aes(x = sum)) +
 plot_grid(gg1, gg2, gg3, gg4)
 rm(gg1, gg2, gg3, gg4)
 ```
+
+## Session info
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
