@@ -22,7 +22,7 @@ rule dropletutils_emptydrops:
         niters=config["emptydrops"]["niters"],
     conda:
         "../../conda/bioc_dropletutils.yaml"
-    threads: 32
+    threads: 16
     resources:
         mem="128G",
         runtime="6h",
