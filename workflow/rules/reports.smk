@@ -33,6 +33,20 @@ rule simpleaf_all_barcodes_report:
     script:
         "../../notebooks/simpleaf_barcodes_all_report.Rmd"
 
+rule emptydrop_report:
+    input:
+        tsv="results/emptydrops/results.tsv",
+    output:
+        "results/reports/emptydrops.html",
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 2
+    resources:
+        mem="32G",
+        runtime="30m",
+    script:
+        "../../notebooks/emptydrops_report.Rmd"
+
 rule scran_umap_report:
     input:
         rds="results/sce/umap.rds",

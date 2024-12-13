@@ -15,8 +15,8 @@ simpleaf:
     rlen: 150
 
 emptydrops:
-  lower: 100
-  niters: 100000
+  lower: 1000
+  niters: 1000000
 
 barcode_filters:
   min_umis: 500

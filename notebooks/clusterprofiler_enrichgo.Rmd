@@ -1,7 +1,7 @@
 ---
 title: "GO enrichment of variable genes"
-author: "Kevin Rue"
 output: html_document
+author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 

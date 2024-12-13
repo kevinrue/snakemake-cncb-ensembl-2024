@@ -1,7 +1,7 @@
 ---
 title: "UMAP overlayed with metadata"
-author: "Kevin Rue"
 output: html_document
+author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 

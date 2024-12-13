@@ -1,7 +1,8 @@
 ---
 title: "Individual sample quality control"
 output: html_document
-date: "2024-11-29"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
 ---
 
 ## Sample information

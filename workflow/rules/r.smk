@@ -25,7 +25,7 @@ rule dropletutils_emptydrops:
     threads: 24
     resources:
         mem="256G",
-        runtime="30m",
+        runtime="1h",
     script:
         "../../scripts/dropletutils_emptydrops.R"
 

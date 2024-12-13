@@ -1,0 +1,40 @@
+---
+title: "emptyDrops"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(tidyverse)
+```
+
+```{r snakemake, include=FALSE}
+tsv_file <- snakemake@input[["tsv"]]
+```
+
+## EmptyDrops results
+
+```{r read_tsv, echo=FALSE}
+#| message: false
+emptydrops_results <- read_tsv(tsv_file)
+emptydrops_results
+```
+
+## Overall statistics
+
+```{r filter_stats, echo=FALSE}
+#| message: false
+thresholds <- c(0.01, 0.001, 0.0001, 0.00001)
+filter_stats <- tibble(
+    threshold = thresholds,
+    barcodes = vapply(thresholds, function(x) sum(emptydrops_results$FDR < x, na.rm = TRUE), integer(1))
+)
+filter_stats
+```
+
+## Session info
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
