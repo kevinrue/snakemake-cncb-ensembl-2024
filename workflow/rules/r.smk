@@ -12,7 +12,24 @@ rule alevin_all_rds:
     script:
         "../../scripts/simpleaf_merge.R"
 
-rule dropletutils_emptydrops:
+rule dropletutils_emptydrops_per_sample:
+    input:
+        alevin="results/alevin/{sample}",
+    output:
+        tsv="results/emptydrops/{sample}.tsv",
+    params:
+        lower=config["emptydrops"]["lower"],
+        niters=config["emptydrops"]["niters"],
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 12
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/dropletutils_emptydrops_sample.R"
+
+rule dropletutils_emptydrops_all:
     input:
         rds="results/sce/all.rds",
     output:

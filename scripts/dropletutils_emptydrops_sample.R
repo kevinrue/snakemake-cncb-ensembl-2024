@@ -1,9 +1,9 @@
 message(Sys.time())
 
 suppressPackageStartupMessages({library(BiocParallel)})
-suppressPackageStartupMessages({library(SingleCellExperiment)})
 suppressPackageStartupMessages({library(DropletUtils)})
-suppressPackageStartupMessages({library(tidyverse)})
+suppressPackageStartupMessages({library(fishpond)})
+suppressPackageStartupMessages({library(SummarizedExperiment)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
@@ -13,11 +13,13 @@ stopifnot(is.numeric(snakemake@threads))
 stopifnot(is.numeric(snakemake@params[["lower"]]))
 stopifnot(is.numeric(snakemake@params[["niters"]]))
 
-message("Importing from RDS file ...")
-sce <- readRDS(snakemake@input[["rds"]])
-message("Done.")
+sample_fry_dir <- file.path(snakemake@input[["alevin"]], "af_quant")
+message("Input directory: ", sample_fry_dir)
+stopifnot(dir.exists(sample_fry_dir))
 
-message("SCE object size: ", format(object.size(sce), unit = "GB"))
+message("Loading sample ... ")
+sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
+message("Done.")
 
 message("Running emptyDrops ...")
 set.seed(100)
@@ -28,8 +30,6 @@ emptydrops_out <- emptyDrops(
     BPPARAM = MulticoreParam(workers = as.integer(snakemake@threads))
 )
 message("Done.")
-
-message("Table object size: ", format(object.size(emptydrops_out), unit = "GB"))
 
 message("Saving to TSV file ...")
 write_tsv(

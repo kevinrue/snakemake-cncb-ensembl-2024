@@ -29,3 +29,4 @@ rule all:
         "results/hdf5/all",
         "resources/gtf/duplicated_gene_models.tsv",
         "results/reports/emptydrops.html",
+        expand("results/reports/emptydrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
