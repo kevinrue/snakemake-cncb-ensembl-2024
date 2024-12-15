@@ -32,3 +32,4 @@ rule all:
         "results/hdf5/all",
         "resources/gtf/duplicated_gene_models.tsv",
         expand("results/barcodeRanks/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+        expand("results/simpleaf/lower/{sample}.txt", sample=SAMPLES['sample_name'].unique()),

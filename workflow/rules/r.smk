@@ -1,3 +1,19 @@
+rule simpleaf_lower_umi_per_sample:
+    input:
+        alevin="results/alevin/{sample}",
+    output:
+        txt="results/simpleaf/lower/{sample}.txt",
+    params:
+        expected_cells=config["expected_cells"],
+    threads: 2
+    resources:
+        mem="32G",
+        runtime="10m",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/simpleaf_find_lower.R"
+
 rule alevin_all_rds:
     input:
         expand("results/alevin/{sample}", sample=SAMPLES['sample_name'].unique()),
