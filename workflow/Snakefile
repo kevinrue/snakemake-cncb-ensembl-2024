@@ -20,8 +20,8 @@ include: "rules/reports.smk"
 ##### main rule #####
 rule all:
     input:
-        "results/reports/alevin.html",
-        expand("results/reports/alevin/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "results/reports/simpleaf.html",
+        expand("results/reports/simpleaf/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/reports/emptydrops.html",
         expand("results/reports/emptydrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/umap-reports/without-integration.html",

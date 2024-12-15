@@ -1,8 +1,8 @@
-rule simpleaf_all_barcodes_report:
+rule simpleaf_all_report:
     input:
         rds="results/sce/all.rds",
     output:
-        "results/reports/alevin.html",
+        "results/reports/simpleaf.html",
     params:
         umi_cutoff_low=config["barcode_filters"]["min_umis"],
         genes_cutoff_low=config["barcode_filters"]["min_genes"],
@@ -15,13 +15,13 @@ rule simpleaf_all_barcodes_report:
         mem="64G",
         runtime="30m",
     script:
-        "../../notebooks/simpleaf_barcodes_all_report.Rmd"
+        "../../notebooks/simpleaf_all_report.Rmd"
 
 rule simpleaf_sample_report:
     input:
         simpleaf="results/alevin/{sample}",
     output:
-        "results/reports/alevin/{sample}.html",
+        "results/reports/simpleaf/{sample}.html",
     params:
         umi_cutoff=config["barcode_filters"]["final"]["min_umis"],
     conda:

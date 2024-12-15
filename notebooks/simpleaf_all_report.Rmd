@@ -10,7 +10,7 @@ umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
-out_data_dir <- file.path(dirname(snakemake@output[[1]]), "data")
+out_data_dir <- file.path(dirname(snakemake@output[[1]]), "simpleaf_data")
 dir.create(out_data_dir, showWarnings = FALSE)
 ```
 
