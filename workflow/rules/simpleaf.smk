@@ -38,18 +38,18 @@ def get_alevin_quant_input_fastqs(wildcards):
         'fq2': fq2,
     }
 
-rule alevin_quant:
+rule simpleaf_quant:
     input:
         unpack(get_alevin_quant_input_fastqs),
         index="resources/genome/index/alevin",
     output:
-        directory("results/alevin/{sample}"),
+        directory("results/simpleaf/quant/{sample}"),
     params:
         reads1=lambda wildcards, input: ','.join(input.fq1),
         reads2=lambda wildcards, input: ','.join(input.fq2),
     log:
-        out="logs/alevin/quant/{sample}.out",
-        err="logs/alevin/quant/{sample}.err",
+        out="logs/simpleaf/quant/{sample}.out",
+        err="logs/simpleaf/quant/{sample}.err",
     threads: 16
     resources:
         mem="16G",

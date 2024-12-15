@@ -14,9 +14,6 @@ simpleaf:
   index:
     rlen: 150
 
-# TODO: move this to sample.tsv and rename sample.tsv to scrnaseq.tsv
-expected_cells: 30000
-
 emptydrops:
   lower: 1000
   niters: 1000000

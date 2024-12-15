@@ -1,10 +1,10 @@
 rule simpleaf_lower_umi_per_sample:
     input:
-        alevin="results/alevin/{sample}",
+        alevin="results/simpleaf/quant/{sample}",
     output:
         txt="results/simpleaf/lower/{sample}.txt",
     params:
-        expected_cells=config["expected_cells"],
+        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     threads: 2
     resources:
         mem="32G",
@@ -16,7 +16,7 @@ rule simpleaf_lower_umi_per_sample:
 
 rule alevin_all_rds:
     input:
-        expand("results/alevin/{sample}", sample=SAMPLES['sample_name'].unique()),
+        expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
     output:
         rds="results/sce/all.rds",
     threads: 16
@@ -30,9 +30,8 @@ rule alevin_all_rds:
 
 rule dropletutils_emptydrops_per_sample:
     input:
-        alevin="results/alevin/{sample}",
+        alevin="results/simpleaf/quant/{sample}",
     output:
-        # tsv="results/emptydrops/{sample}.tsv",
         rds="results/emptydrops/{sample}.rds",
     params:
         lower=config["emptydrops"]["lower"],
@@ -50,7 +49,7 @@ rule dropletutils_emptydrops_all:
     input:
         rds="results/sce/all.rds",
     output:
-        rds="results/emptydrops/results.rds",
+        rds="results/emptyDrops/results.rds",
     params:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
@@ -65,7 +64,7 @@ rule dropletutils_emptydrops_all:
 
 rule dropletutils_barcode_ranks:
     input:
-        alevin="results/alevin/{sample}",
+        alevin="results/simpleaf/quant/{sample}",
     output:
         rds="results/barcodeRanks/{sample}.rds",
     params:

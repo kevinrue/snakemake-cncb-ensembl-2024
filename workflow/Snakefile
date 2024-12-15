@@ -11,11 +11,11 @@ configfile: "config/config.yaml"
 ##### load rules #####
 
 include: "rules/common.smk"
-include: "rules/alevin.smk"
 include: "rules/gtf.smk"
 include: "rules/downloads.smk"
 include: "rules/r.smk"
 include: "rules/reports.smk"
+include: "rules/simpleaf.smk"
 
 ##### main rule #####
 rule all:
