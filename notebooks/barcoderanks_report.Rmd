@@ -1,0 +1,57 @@
+---
+title: "barcodeRanks"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(S4Vectors)
+library(scales)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+stopifnot(file.exists(rds_file))
+```
+
+## Load barcodeRanks results
+
+```{r read_rds, echo=FALSE}
+#| message: false
+emptydrops_results <- readRDS(rds_file)
+emptydrops_results
+```
+
+## Plot
+
+```{r filter_stats, echo=FALSE}
+emptydrops_results %>%
+  as.data.frame() %>%
+  as_tibble() %>%
+  ggplot(aes(rank, total)) +
+  geom_line() +
+  geom_hline(yintercept = metadata(emptydrops_results)$knee, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = metadata(emptydrops_results)$inflection, linetype = "dashed", color = "orange") +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    y = "UMI Counts",
+    x = "Barcodes"
+  )
+```
+
+## Session info
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

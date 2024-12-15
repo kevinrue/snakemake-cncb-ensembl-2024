@@ -33,6 +33,20 @@ rule simpleaf_sample_report:
     script:
         "../../notebooks/simpleaf_sample_report.Rmd"
 
+rule barcoderanks_report:
+    input:
+        rds="results/barcodeRanks/{sample}.rds",
+    output:
+        "results/reports/barcodeRanks/{sample}.html",
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/barcoderanks_report.Rmd"
+
 rule emptydrop_report_all:
     input:
         rds="results/emptydrops/results.rds",
