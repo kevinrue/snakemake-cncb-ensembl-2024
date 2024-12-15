@@ -16,7 +16,8 @@ rule dropletutils_emptydrops_per_sample:
     input:
         alevin="results/alevin/{sample}",
     output:
-        tsv="results/emptydrops/{sample}.tsv",
+        # tsv="results/emptydrops/{sample}.tsv",
+        rds="results/emptydrops/{sample}.rds",
     params:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
@@ -33,7 +34,7 @@ rule dropletutils_emptydrops_all:
     input:
         rds="results/sce/all.rds",
     output:
-        tsv="results/emptydrops/results.tsv",
+        rds="results/emptydrops/results.rds",
     params:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
@@ -45,6 +46,22 @@ rule dropletutils_emptydrops_all:
         runtime="1h",
     script:
         "../../scripts/dropletutils_emptydrops.R"
+
+rule dropletutils_barcode_ranks:
+    input:
+        alevin="results/alevin/{sample}",
+    output:
+        rds="results/barcodeRanks/{sample}.rds",
+    params:
+        lower=config["emptydrops"]["lower"],
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 12
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/dropletutils_barcoderanks.R"
 
 rule alevin_all_hdf5:
     input:

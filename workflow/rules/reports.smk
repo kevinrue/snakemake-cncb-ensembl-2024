@@ -1,24 +1,8 @@
-rule simpleaf_sample_report:
-    input:
-        simpleaf="results/alevin/{sample}",
-    output:
-        "results/alevin-reports/{sample}.html",
-    params:
-        umi_cutoff=config["barcode_filters"]["final"]["min_umis"],
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    threads: 2
-    resources:
-        mem="16G",
-        runtime="30m",
-    script:
-        "../../notebooks/simpleaf_sample_report.Rmd"
-
 rule simpleaf_all_barcodes_report:
     input:
         rds="results/sce/all.rds",
     output:
-        "results/alevin-reports/all.html",
+        "results/reports/alevin.html",
     params:
         umi_cutoff_low=config["barcode_filters"]["min_umis"],
         genes_cutoff_low=config["barcode_filters"]["min_genes"],
@@ -33,9 +17,25 @@ rule simpleaf_all_barcodes_report:
     script:
         "../../notebooks/simpleaf_barcodes_all_report.Rmd"
 
+rule simpleaf_sample_report:
+    input:
+        simpleaf="results/alevin/{sample}",
+    output:
+        "results/reports/alevin/{sample}.html",
+    params:
+        umi_cutoff=config["barcode_filters"]["final"]["min_umis"],
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="30m",
+    script:
+        "../../notebooks/simpleaf_sample_report.Rmd"
+
 rule emptydrop_report_all:
     input:
-        tsv="results/emptydrops/results.tsv",
+        rds="results/emptydrops/results.rds",
     output:
         "results/reports/emptydrops.html",
     conda:
@@ -49,7 +49,7 @@ rule emptydrop_report_all:
 
 rule emptydrop_report_sample:
     input:
-        tsv="results/emptydrops/{sample}.tsv",
+        rds="results/emptydrops/{sample}.rds",
     output:
         "results/reports/emptydrops/{sample}.html",
     conda:

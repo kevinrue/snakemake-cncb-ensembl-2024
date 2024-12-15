@@ -20,13 +20,14 @@ include: "rules/reports.smk"
 ##### main rule #####
 rule all:
     input:
-        expand("results/alevin-reports/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        "results/alevin-reports/all.html",
+        "results/reports/alevin.html",
+        expand("results/reports/alevin/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "results/reports/emptydrops.html",
+        expand("results/reports/emptydrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/umap-reports/without-integration.html",
         "results/umap-reports/without-integration-final.html",
         "results/enrichgo-reports/hvgs.html",
         "results/enrichgo-reports/hvgs-final.html",
         "results/hdf5/all",
         "resources/gtf/duplicated_gene_models.tsv",
-        "results/reports/emptydrops.html",
-        expand("results/reports/emptydrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("results/barcodeRanks/{sample}.rds", sample=SAMPLES['sample_name'].unique()),

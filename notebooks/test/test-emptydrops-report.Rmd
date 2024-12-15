@@ -1,0 +1,79 @@
+---
+title: "Test emptydrops report"
+output: html_document
+date: "2024-12-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(scales)
+library(SummarizedExperiment)
+library(tidyverse)
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+## Load emptydrops results
+
+```{r}
+emptydrops_out <- read_tsv("../../results/emptydrops/results.tsv")
+```
+
+## Load cell names
+
+```{r}
+sce <- readRDS("../../results/sce/all.rds")
+barcodes <- colnames(sce)
+rm(sce)
+```
+
+## Split cell metadata
+
+
+```{r barcode_metadata, include=FALSE}
+timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
+replicate_levels <- c("1", "2")
+barcode_stats <- tibble(
+  barcode = barcodes,
+  sample = gsub("[ATCG]+-", "", barcodes)
+) %>% 
+  bind_cols(
+    str_match(string = barcodes, pattern = "WPP(?<timepoint>[mp][[:digit:]]{3}hrs)_rep(?<replicate>[[:digit:]]{1})")[, -1]
+  ) %>% 
+  mutate(
+    timepoint = factor(timepoint, timepoint_levels),
+    replicate = factor(replicate, replicate_levels)
+  )
+barcode_stats
+```
+
+## Combine emptyDrops results and cell metadata
+
+```{r}
+emptydrops_metadata <- bind_cols(
+  emptydrops_out %>% as_tibble(),
+  barcode_stats
+)
+rm(emptydrops_out, barcodes, barcode_stats)
+emptydrops_metadata
+```
+
+## Plot
+
+```{r}
+ggplot(emptydrops_metadata, aes(x = FDR)) +
+  geom_histogram(bins = 100) +
+  geom_hline(yintercept = 30E3, linetype = "dashed", color = "red") +
+  facet_wrap(~sample) +
+  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw()
+```
+
+## Notes
+
+```{r}
+range(emptydrops_metadata$Total)
+```
+

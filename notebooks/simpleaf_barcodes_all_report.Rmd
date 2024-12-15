@@ -10,7 +10,24 @@ umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
-dir.create("results/alevin-reports/data/", showWarnings = FALSE)
+out_data_dir <- file.path(dirname(snakemake@output[[1]]), "data")
+dir.create(out_data_dir, showWarnings = FALSE)
+```
+
+```{r check_inputs, include=FALSE}
+rds_input_file <- snakemake@input[["rds"]]
+stopifnot(file.exists(rds_input_file))
+```
+
+```{r check_params, include=FALSE}
+umi_cutoff_low <- snakemake@params[["umi_cutoff_low"]]
+stopifnot(is.numeric(umi_cutoff_low))
+genes_cutoff_low <- snakemake@params[["genes_cutoff_low"]]
+stopifnot(is.numeric(genes_cutoff_low))
+umi_cutoff_final <- snakemake@params[["umi_cutoff_final"]]
+stopifnot(is.numeric(umi_cutoff_final))
+genes_cutoff_final <- snakemake@params[["genes_cutoff_final"]]
+stopifnot(is.numeric(genes_cutoff_final))
 ```
 
 ## Libraries
@@ -28,7 +45,7 @@ library(tidyverse)
 ## Load sce
 
 ```{r load_sce, echo=FALSE}
-sce <- readRDS(snakemake@input[["rds"]])
+sce <- readRDS(rds_input_file)
 sce
 ```
 
@@ -77,17 +94,15 @@ rm(sce)
 ```
 
 ```{r write_barcode_stats, include=FALSE}
-write_tsv(barcode_stats, "results/alevin-reports/data/barcode_stats.tsv.gz")
+write_tsv(barcode_stats, file.path(out_data_dir, "barcode_stats.tsv.gz"))
 ```
 
 ## Proposed QC cutoffs
 
-```{r set_cutoffs}
-umi_cutoff_low <- snakemake@params[["umi_cutoff_low"]]
-genes_cutoff_low <- snakemake@params[["genes_cutoff_low"]]
-umi_cutoff_final <- snakemake@params[["umi_cutoff_final"]]
-genes_cutoff_final <- snakemake@params[["genes_cutoff_final"]]
-```
+- UMI low threshold: `r umi_cutoff_low`
+- Genes low threshold: `r genes_cutoff_low`
+- UMI final threshold: `r umi_cutoff_final`
+- Genes final threshold: `r genes_cutoff_final`
 
 ## Plots
 

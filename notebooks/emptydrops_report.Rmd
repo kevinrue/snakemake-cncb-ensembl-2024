@@ -6,18 +6,19 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
+library(S4Vectors)
 library(tidyverse)
 ```
 
 ```{r snakemake, include=FALSE}
-tsv_file <- snakemake@input[["tsv"]]
+rds_file <- snakemake@input[["rds"]]
 ```
 
 ## EmptyDrops results
 
 ```{r read_tsv, echo=FALSE}
 #| message: false
-emptydrops_results <- read_tsv(tsv_file)
+emptydrops_results <- readRDS(rds_file)
 emptydrops_results
 ```
 

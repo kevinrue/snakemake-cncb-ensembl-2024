@@ -31,11 +31,8 @@ message("Done.")
 
 message("Table object size: ", format(object.size(emptydrops_out), unit = "GB"))
 
-message("Saving to TSV file ...")
-write_tsv(
-    emptydrops_out %>% as.data.frame() %>% as_tibble(),
-    snakemake@output[["tsv"]]
-)
+message("Saving to RDS file ...")
+saveRDS(emptydrops_out, snakemake@output[["rds"]])
 message("Done.")
 
 message(Sys.time())
