@@ -6,7 +6,7 @@ rule simpleaf_all_report:
     params:
         umi_cutoff=config["filters"]["barcodes"]["min_umis"],
         genes_cutoff=config["filters"]["barcodes"]["min_genes"],
-        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
+        expect_cells=config["filters"]["barcodes"]["expected"], # not ideal, same value for all samples!
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -18,7 +18,7 @@ rule simpleaf_all_report:
 
 rule simpleaf_sample_report:
     input:
-        simpleaf="results/alevin/{sample}",
+        simpleaf="results/simpleaf/quant/{sample}",
     output:
         "results/reports/simpleaf/{sample}.html",
     params:
@@ -48,9 +48,9 @@ rule barcoderanks_report:
 
 rule emptydrop_report_all:
     input:
-        rds="results/emptydrops/results.rds",
+        rds="results/emptyDrops/results.rds",
     output:
-        "results/reports/emptydrops.html",
+        "results/reports/emptyDrops.html",
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2
@@ -62,9 +62,9 @@ rule emptydrop_report_all:
 
 rule emptydrop_report_sample:
     input:
-        rds="results/emptydrops/{sample}.rds",
+        rds="results/emptyDrops/{sample}.rds",
     output:
-        "results/reports/emptydrops/{sample}.html",
+        "results/reports/emptyDrops/{sample}.html",
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2

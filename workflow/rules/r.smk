@@ -32,7 +32,7 @@ rule dropletutils_emptydrops_per_sample:
     input:
         alevin="results/simpleaf/quant/{sample}",
     output:
-        rds="results/emptydrops/{sample}.rds",
+        rds="results/emptyDrops/{sample}.rds",
     params:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],

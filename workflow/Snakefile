@@ -22,8 +22,8 @@ rule all:
     input:
         "results/reports/simpleaf.html",
         expand("results/reports/simpleaf/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        "results/reports/emptydrops.html",
-        expand("results/reports/emptydrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "results/reports/emptyDrops.html",
+        expand("results/reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("results/reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "results/umap-reports/without-integration.html",
         "results/umap-reports/without-integration-final.html",

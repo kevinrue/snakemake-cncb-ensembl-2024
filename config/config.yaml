@@ -20,6 +20,7 @@ emptydrops:
 
 filters:
   barcodes:
+    expected: 30000
     min_umis: 3000
     min_genes: 1000
 
