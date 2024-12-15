@@ -18,10 +18,8 @@ emptydrops:
   lower: 1000
   niters: 1000000
 
-barcode_filters:
-  min_umis: 500
-  min_genes: 250
-  final:
+filters:
+  barcodes:
     min_umis: 3000
     min_genes: 1000
 

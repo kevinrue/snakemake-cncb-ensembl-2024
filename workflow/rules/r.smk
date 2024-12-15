@@ -18,7 +18,7 @@ rule alevin_all_rds:
     input:
         expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
     output:
-        rds="results/sce/all.rds",
+        rds="results/sce/counts.rds",
     threads: 16
     resources:
         mem="128G",
@@ -47,7 +47,7 @@ rule dropletutils_emptydrops_per_sample:
 
 rule dropletutils_emptydrops_all:
     input:
-        rds="results/sce/all.rds",
+        rds="results/sce/counts.rds",
     output:
         rds="results/emptyDrops/results.rds",
     params:
@@ -80,7 +80,7 @@ rule dropletutils_barcode_ranks:
 
 rule alevin_all_hdf5:
     input:
-        rds="results/sce/all.rds",
+        rds="results/sce/counts.rds",
     output:
         hdf5=directory("results/hdf5/all"),
     resources:
@@ -93,12 +93,12 @@ rule alevin_all_hdf5:
 
 rule scuttle_lognorm:
     input:
-        rds="results/sce/all.rds",
+        rds="results/sce/counts.rds",
     output:
         rds="results/sce/lognorm.rds",
     params:
-        min_umis=config["barcode_filters"]["min_umis"],
-        min_genes=config["barcode_filters"]["min_genes"],        
+        min_umis=config["filters"]["barcodes"]["min_umis"],
+        min_genes=config["filters"]["barcodes"]["min_genes"],        
     resources:
         mem="128G",
         runtime="1h",
@@ -110,12 +110,12 @@ rule scuttle_lognorm:
 
 rule scuttle_lognorm_final:
     input:
-        rds="results/sce/all.rds",
+        rds="results/sce/counts.rds",
     output:
         rds="results/sce/lognorm-final.rds",
     params:
-        min_umis=config["barcode_filters"]["final"]["min_umis"],
-        min_genes=config["barcode_filters"]["final"]["min_genes"],        
+        min_umis=config["filters"]["barcodes"]["min_umis"],
+        min_genes=config["filters"]["barcodes"]["min_genes"],        
     resources:
         mem="128G",
         runtime="1h",

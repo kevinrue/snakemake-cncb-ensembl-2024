@@ -4,10 +4,9 @@ rule simpleaf_all_report:
     output:
         "results/reports/simpleaf.html",
     params:
-        umi_cutoff_low=config["barcode_filters"]["min_umis"],
-        genes_cutoff_low=config["barcode_filters"]["min_genes"],
-        umi_cutoff_final=config["barcode_filters"]["final"]["min_umis"],
-        genes_cutoff_final=config["barcode_filters"]["final"]["min_genes"],
+        umi_cutoff=config["filters"]["barcodes"]["min_umis"],
+        genes_cutoff=config["filters"]["barcodes"]["min_genes"],
+        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -23,7 +22,7 @@ rule simpleaf_sample_report:
     output:
         "results/reports/simpleaf/{sample}.html",
     params:
-        umi_cutoff=config["barcode_filters"]["final"]["min_umis"],
+        umi_cutoff=config["filters"]["barcodes"]["min_umis"],
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
