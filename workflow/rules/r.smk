@@ -108,42 +108,11 @@ rule scuttle_lognormcounts:
     script:
         "../../scripts/scuttle_lognormcounts.R"
 
-rule scuttle_lognormcounts_final:
-    input:
-        rds="results/sce/counts.rds",
-    output:
-        rds="results/sce/logcounts-final.rds",
-    params:
-        min_umis=config["filters"]["barcodes"]["min_umis"],
-        min_genes=config["filters"]["barcodes"]["min_genes"],        
-    resources:
-        mem="128G",
-        runtime="1h",
-    threads: 32
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    script:
-        "../../scripts/scuttle_lognormcounts.R"
-
 rule filtered_gene_ids:
     input:
         rds="results/sce/logcounts.rds",
     output:
         txt="results/sce/logcounts_rownames.txt"
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    threads: 2
-    resources:
-        mem="64G",
-        runtime="30m",
-    script:
-        "../../scripts/sce_rownames.R"
-        
-rule filtered_gene_ids_final:
-    input:
-        rds="results/sce/logcounts-final.rds",
-    output:
-        txt="results/sce/logcounts_rownames-final.txt"
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -160,24 +129,6 @@ rule scran_hvgs:
         tsv="results/model_gene_var/decomposed_variance.tsv",
         fit="results/model_gene_var/fit.pdf",
         hvgs="results/model_gene_var/variable_genes.txt",
-    params:
-        hvgs_prop=config["variable_genes"]["proportion"],
-    resources:
-        mem="128G",
-        runtime="30m",
-    threads: 32
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    script:
-        "../../scripts/scran_modelgenevar.R"
-
-rule scran_hvgs_final:
-    input:
-        rds="results/sce/logcounts-final.rds",
-    output:
-        tsv="results/model_gene_var/decomposed_variance-final.tsv",
-        fit="results/model_gene_var/fit-final.pdf",
-        hvgs="results/model_gene_var/variable_genes-final.txt",
     params:
         hvgs_prop=config["variable_genes"]["proportion"],
     resources:
@@ -207,45 +158,11 @@ rule scran_fixed_pca:
     script:
         "../../scripts/scran_fixedpca.R"
 
-rule scran_fixed_pca_final:
-    input:
-        sce="results/sce/logcounts-final.rds",
-        hvgs="results/model_gene_var/variable_genes-final.txt",
-    output:
-        var_explained="results/fixed_pca/var_explained-final.pdf",
-        sce="results/sce/pca-final.rds",
-    params:
-        rank=config["fixed_pca"]["rank"],
-    resources:
-        mem="256G",
-        runtime="6h",
-    threads: 24
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    script:
-        "../../scripts/scran_fixedpca.R"
-
 rule scran_umap:
     input:
         sce="results/sce/pca.rds",
     output:
         sce="results/sce/umap.rds",
-    params:
-        pcs=config["umap"]["n_pcs"],
-    resources:
-        mem="20G",
-        runtime="1h",
-    threads: 32
-    conda:
-        "../../conda/bioconductor_3_20.yaml"
-    script:
-        "../../scripts/scater_umap.R"
-
-rule scran_umap_final:
-    input:
-        sce="results/sce/pca-final.rds",
-    output:
-        sce="results/sce/umap-final.rds",
     params:
         pcs=config["umap"]["n_pcs"],
     resources:
@@ -263,21 +180,6 @@ rule enrichgo_hvgs:
         bg="results/sce/logcounts_rownames.txt"
     output:
         rds="results/enrichgo/hvgs.rds",
-    conda:
-        "../../conda/bioconductor_3_20-v2.yaml"
-    threads: 2
-    resources:
-        mem="8G",
-        runtime="10m",
-    script:
-        "../../scripts/enrichgo_genes.R"
-
-rule enrichgo_hvgs_final:
-    input:
-        hvgs="results/model_gene_var/variable_genes-final.txt",
-        bg="results/sce/logcounts_rownames-final.txt"
-    output:
-        rds="results/enrichgo/hvgs-final.rds",
     conda:
         "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2
