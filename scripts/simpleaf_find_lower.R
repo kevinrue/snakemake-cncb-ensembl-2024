@@ -7,7 +7,7 @@ message("Job configuration: None")
 message("- expect_cells: ", snakemake@params[["expect_cells"]])
 stopifnot(is.numeric(snakemake@params[["expect_cells"]]))
 
-sample_fry_dir <- file.path(snakemake@input[["alevin"]], "af_quant")
+sample_fry_dir <- file.path(snakemake@input[["simpleaf"]], "af_quant")
 message("Input directory: ", sample_fry_dir)
 stopifnot(dir.exists(sample_fry_dir))
 

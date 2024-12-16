@@ -1,6 +1,6 @@
 rule simpleaf_lower_umi_per_sample:
     input:
-        alevin="results/simpleaf/quant/{sample}",
+        simpleaf="results/simpleaf/quant/{sample}",
     output:
         txt="results/simpleaf/lower/{sample}.txt",
     params:
@@ -14,7 +14,7 @@ rule simpleaf_lower_umi_per_sample:
     script:
         "../../scripts/simpleaf_find_lower.R"
 
-rule alevin_counts_rds:
+rule simpleaf_counts_rds:
     input:
         expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
     output:
@@ -30,7 +30,7 @@ rule alevin_counts_rds:
 
 rule dropletutils_emptydrops_per_sample:
     input:
-        alevin="results/simpleaf/quant/{sample}",
+        simpleaf="results/simpleaf/quant/{sample}",
     output:
         rds="results/emptyDrops/{sample}.rds",
     params:
@@ -64,7 +64,7 @@ rule dropletutils_emptydrops_all:
 
 rule dropletutils_barcode_ranks:
     input:
-        alevin="results/simpleaf/quant/{sample}",
+        simpleaf="results/simpleaf/quant/{sample}",
     output:
         rds="results/barcodeRanks/{sample}.rds",
     params:
@@ -78,11 +78,11 @@ rule dropletutils_barcode_ranks:
     script:
         "../../scripts/dropletutils_barcoderanks.R"
 
-rule alevin_counts_hdf5:
+rule simpleaf_counts_hdf5:
     input:
         rds="results/sce/counts.rds",
     output:
-        hdf5=directory("results/hdf5/all"),
+        hdf5=directory("results/hdf5/counts"),
     resources:
         mem="64G",
         runtime="6h",

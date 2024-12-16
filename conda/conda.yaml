@@ -3,23 +3,6 @@ channels:
   - bioconda
 dependencies:
   - alevin-fry
-  - bwa
-  - conda
-  - fastqc
-  - gatk4
-  - kb-python
-  - mamba
-  - multiqc
-  - picard
-  - piscem
-  - samtools
-  - simpleaf
-  - r-biocmanager
-  - r-cowplot
-  - r-ggplot2
-  - r-scales
-  - r-stringr
-  - r-tidyverse
   - bioconductor-biocparallel
   - bioconductor-biocsingular
   - bioconductor-bluster
@@ -34,3 +17,20 @@ dependencies:
   - bioconductor-scuttle
   - bioconductor-summarizedexperiment
   - bioconductor-singlecellexperiment
+  - bwa
+  - conda
+  - fastqc
+  - gatk4
+  - kb-python
+  - mamba
+  - multiqc
+  - picard
+  - piscem
+  - r-biocmanager
+  - r-cowplot
+  - r-ggplot2
+  - r-scales
+  - r-stringr
+  - r-tidyverse
+  - samtools
+  - simpleaf

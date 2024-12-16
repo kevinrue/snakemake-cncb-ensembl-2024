@@ -78,7 +78,7 @@ rule scran_umap_report:
     input:
         rds="results/sce/umap.rds",
     output:
-        "results/umap-reports/without-integration.html",
+        "results/reports/umap.html",
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -92,7 +92,7 @@ rule scran_umap_report_final:
     input:
         rds="results/sce/umap-final.rds",
     output:
-        "results/umap-reports/without-integration-final.html",
+        "results/reports/umap-final.html",
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -106,7 +106,7 @@ rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
     output:
-        "results/enrichgo-reports/hvgs.html",
+        "results/reports/enrichgo/hvgs.html",
     conda:
         "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2
@@ -120,7 +120,7 @@ rule enrichgo_hvgs_report_final:
     input:
         rds="results/enrichgo/hvgs-final.rds",
     output:
-        "results/enrichgo-reports/hvgs-final.html",
+        "results/reports/enrichgo/hvgs-final.html",
     conda:
         "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2
