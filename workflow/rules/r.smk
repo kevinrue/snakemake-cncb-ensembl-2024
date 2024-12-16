@@ -14,7 +14,7 @@ rule simpleaf_lower_umi_per_sample:
     script:
         "../../scripts/simpleaf_find_lower.R"
 
-rule alevin_all_rds:
+rule alevin_counts_rds:
     input:
         expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
     output:
@@ -78,7 +78,7 @@ rule dropletutils_barcode_ranks:
     script:
         "../../scripts/dropletutils_barcoderanks.R"
 
-rule alevin_all_hdf5:
+rule alevin_counts_hdf5:
     input:
         rds="results/sce/counts.rds",
     output:
@@ -91,11 +91,11 @@ rule alevin_all_hdf5:
     script:
         "../../scripts/simpleaf_hdf5.R"
 
-rule scuttle_lognorm:
+rule scuttle_lognormcounts:
     input:
         rds="results/sce/counts.rds",
     output:
-        rds="results/sce/lognorm.rds",
+        rds="results/sce/logcounts.rds",
     params:
         min_umis=config["filters"]["barcodes"]["min_umis"],
         min_genes=config["filters"]["barcodes"]["min_genes"],        
@@ -106,13 +106,13 @@ rule scuttle_lognorm:
     conda:
         "../../conda/bioconductor_3_20.yaml"
     script:
-        "../../scripts/scuttle_lognorm.R"
+        "../../scripts/scuttle_lognormcounts.R"
 
-rule scuttle_lognorm_final:
+rule scuttle_lognormcounts_final:
     input:
         rds="results/sce/counts.rds",
     output:
-        rds="results/sce/lognorm-final.rds",
+        rds="results/sce/logcounts-final.rds",
     params:
         min_umis=config["filters"]["barcodes"]["min_umis"],
         min_genes=config["filters"]["barcodes"]["min_genes"],        
@@ -123,13 +123,13 @@ rule scuttle_lognorm_final:
     conda:
         "../../conda/bioconductor_3_20.yaml"
     script:
-        "../../scripts/scuttle_lognorm.R"
+        "../../scripts/scuttle_lognormcounts.R"
 
-rule background_gene_ids:
+rule filtered_gene_ids:
     input:
-        rds="results/sce/lognorm.rds",
+        rds="results/sce/logcounts.rds",
     output:
-        txt="results/sce/lognorm_rownames.txt"
+        txt="results/sce/logcounts_rownames.txt"
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -139,11 +139,11 @@ rule background_gene_ids:
     script:
         "../../scripts/sce_rownames.R"
         
-rule background_gene_ids_final:
+rule filtered_gene_ids_final:
     input:
-        rds="results/sce/lognorm-final.rds",
+        rds="results/sce/logcounts-final.rds",
     output:
-        txt="results/sce/lognorm_rownames-final.txt"
+        txt="results/sce/logcounts_rownames-final.txt"
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -155,7 +155,7 @@ rule background_gene_ids_final:
 
 rule scran_hvgs:
     input:
-        rds="results/sce/lognorm.rds",
+        rds="results/sce/logcounts.rds",
     output:
         tsv="results/model_gene_var/decomposed_variance.tsv",
         fit="results/model_gene_var/fit.pdf",
@@ -173,7 +173,7 @@ rule scran_hvgs:
 
 rule scran_hvgs_final:
     input:
-        rds="results/sce/lognorm-final.rds",
+        rds="results/sce/logcounts-final.rds",
     output:
         tsv="results/model_gene_var/decomposed_variance-final.tsv",
         fit="results/model_gene_var/fit-final.pdf",
@@ -191,7 +191,7 @@ rule scran_hvgs_final:
 
 rule scran_fixed_pca:
     input:
-        sce="results/sce/lognorm.rds",
+        sce="results/sce/logcounts.rds",
         hvgs="results/model_gene_var/variable_genes.txt",
     output:
         var_explained="results/fixed_pca/var_explained.pdf",
@@ -209,7 +209,7 @@ rule scran_fixed_pca:
 
 rule scran_fixed_pca_final:
     input:
-        sce="results/sce/lognorm-final.rds",
+        sce="results/sce/logcounts-final.rds",
         hvgs="results/model_gene_var/variable_genes-final.txt",
     output:
         var_explained="results/fixed_pca/var_explained-final.pdf",
@@ -260,7 +260,7 @@ rule scran_umap_final:
 rule enrichgo_hvgs:
     input:
         hvgs="results/model_gene_var/variable_genes.txt",
-        bg="results/sce/lognorm_rownames.txt"
+        bg="results/sce/logcounts_rownames.txt"
     output:
         rds="results/enrichgo/hvgs.rds",
     conda:
@@ -275,7 +275,7 @@ rule enrichgo_hvgs:
 rule enrichgo_hvgs_final:
     input:
         hvgs="results/model_gene_var/variable_genes-final.txt",
-        bg="results/sce/lognorm_rownames-final.txt"
+        bg="results/sce/logcounts_rownames-final.txt"
     output:
         rds="results/enrichgo/hvgs-final.rds",
     conda:
