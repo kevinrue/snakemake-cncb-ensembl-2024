@@ -22,6 +22,11 @@ emptydrops_results <- readRDS(rds_file)
 emptydrops_results
 ```
 
+EmptyDrops parameters:
+
+- lower: `r metadata(emptydrops_results)[["lower"]]`
+- niters: `r metadata(emptydrops_results)[["niters"]]`
+
 ## Overall statistics
 
 ```{r filter_stats, echo=FALSE}

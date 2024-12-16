@@ -16,7 +16,7 @@ simpleaf:
 
 emptydrops:
   lower: 1000
-  niters: 1000000
+  niters: 100000
 
 filters:
   barcodes:

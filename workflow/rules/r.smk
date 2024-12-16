@@ -2,7 +2,7 @@ rule simpleaf_lower_umi_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
     output:
-        txt="results/simpleaf/lower/{sample}.txt",
+        txt="results/simpleaf/ignore/{sample}.txt"
     params:
         expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     threads: 2
@@ -31,10 +31,10 @@ rule simpleaf_counts_rds:
 rule dropletutils_emptydrops_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
+        ignore="results/simpleaf/ignore/{sample}.txt"
     output:
         rds="results/emptyDrops/{sample}.rds",
     params:
-        lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
     conda:
         "../../conda/bioc_dropletutils.yaml"

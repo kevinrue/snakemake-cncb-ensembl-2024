@@ -22,12 +22,19 @@ message("Loading sample ... ")
 sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
 message("Done.")
 
+message("Loading lower threshold from file ... ")
+ignore <- scan(snakemake@input[["ignore"]], "integer")
+message("Done.")
+
+message("Lower threshold: ", lower)
+
 message("Running emptyDrops ...")
 set.seed(100)
 emptydrops_out <- emptyDrops(
     m = assay(sce, "counts"),
-    lower = snakemake@params[["lower"]],
+    lower = lower,
     niters = snakemake@params[["niters"]],
+    ignore = ignore
     BPPARAM = MulticoreParam(workers = as.integer(snakemake@threads))
 )
 message("Done.")

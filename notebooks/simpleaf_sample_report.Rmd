@@ -47,54 +47,58 @@ sce <- loadFry(
 sce
 ```
 
-## Basic quality control
+## Barcode statistics
 
-```{r umi_sum, include=FALSE}
-colData(sce)[["sum"]] <- colSums(assay(sce, "counts"))
+```{r compute_statistics, include=FALSE}
+barcode_stats <- tibble(
+  umi_sum = colSums(assay(sce, "counts")),
+  genes = colSums(assay(sce, "counts") > 0)
+) %>% 
+  filter(umi_sum > 0) %>% 
+  arrange(desc(umi_sum)) %>% 
+  mutate(rank_umi = row_number()) %>% 
+  arrange(desc(genes)) %>% 
+  mutate(rank_genes = row_number())
+barcode_stats
+rm(sce)
 ```
 
 ### Range of UMI per barcode
 
 ```{r range_umi_sum, include=FALSE}
-range(colData(sce)[["sum"]])
+range(barcode_stats$umi_sum)
 ```
 
 ### Barcode-Rank Plot
 
 ```{r barcode_rank_plot, echo=FALSE}
-tmp <- data.frame(
-  sum = sce$sum,
-  rank = rank(-sce$sum)
-) %>%
-  filter(sum > 0)
-tmp_top <- tmp %>%
-  slice_max(sum, n = 1)
-tmp_umi_cutoff <- data.frame(
-  sum = umi_cutoff,
-  rank = sum(tmp$sum >= umi_cutoff)
-)
-gg_barcode_rank_plot <- ggplot(tmp, aes(rank, sum)) +
-  geom_point() +
-  geom_label(aes(label = format(sum, big.mark = ",")), data = tmp_top, alpha = 0.5, hjust = 0) +
-  geom_label(aes(label = format(rank, big.mark = ",")), data = tmp_umi_cutoff, alpha = 0.5) +
+filtered_stats <- barcode_stats %>% 
+  filter(umi_sum > 0) %>% 
+  summarise(
+    barcodes = sum(umi_sum >= umi_cutoff),
+  )
+top_stats <- barcode_stats %>%
+  slice_max(umi_sum, n = 1)
+ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
+  geom_line() +
+  geom_label(aes(label = format(umi_sum, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
+  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_vline(aes(xintercept = barcodes), data = filtered_stats, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = barcodes, y = 1, label = format(barcodes, big.mark = ",")), filtered_stats, colour = "red", vjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_log10(limits = c(1, NA), breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  labs(
-    subtitle = sprintf("Maximum UMI & Number of cells >= %s UMI", format(umi_cutoff, big.mark = ","))
-  ) +
+  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     y = "UMI Counts",
-    x = "Barcodes"
+    x = "Barcodes",
+    title = paste0("Maximum UMI count & Number of barcodes >= ", format(umi_cutoff, big.mark = ","), " UMIs")
   )
-rm(tmp, tmp_top, tmp_umi_cutoff)
-gg_barcode_rank_plot
 ```
 
 ### Histogram of UMI per barcode
 
 ```{r umi_sum_histogram, echo=FALSE, fig.width=12, fig.height=4}
-gg1 <- ggplot(colData(sce), aes(x = sum)) +
+gg1 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
@@ -104,7 +108,7 @@ gg1 <- ggplot(colData(sce), aes(x = sum)) +
     y = "Barcodes",
     x = "UMI Counts"
   )
-gg2 <- ggplot(colData(sce), aes(x = sum)) +
+gg2 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
   geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
@@ -116,7 +120,7 @@ gg2 <- ggplot(colData(sce), aes(x = sum)) +
     y = "Barcodes",
     x = "UMI Counts"
   )
-gg3 <- ggplot(colData(sce), aes(x = sum)) +
+gg3 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
   geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
@@ -128,7 +132,7 @@ gg3 <- ggplot(colData(sce), aes(x = sum)) +
     y = "Barcodes",
     x = "UMI Counts"
   )
-gg4 <- ggplot(colData(sce), aes(x = sum)) +
+gg4 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(5E3, NA), ylim = c(0, 100)) +
