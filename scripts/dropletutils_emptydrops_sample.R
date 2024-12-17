@@ -8,9 +8,11 @@ suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
+message("- expect_cells: ", snakemake@params[["expect_cells"]])
 message("- lower: ", snakemake@params[["lower"]])
 message("- niters: ", snakemake@params[["niters"]])
 stopifnot(is.numeric(snakemake@threads))
+stopifnot(is.numeric(snakemake@params[["expect_cells"]]))
 stopifnot(is.numeric(snakemake@params[["lower"]]))
 stopifnot(is.numeric(snakemake@params[["niters"]]))
 
@@ -22,17 +24,18 @@ message("Loading sample ... ")
 sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
 message("Done.")
 
-message("Loading lower threshold from file ... ")
-ignore <- scan(snakemake@input[["ignore"]], "integer")
+message("Identifying lower UMI count for expected cell number  ...")
+umi_sum <- colSums(assay(sce, "counts"))
+ignore <- sort(umi_sum, decreasing = TRUE)[snakemake@params[["expect_cells"]]]
 message("Done.")
 
-message("Lower threshold: ", lower)
+message("Value: ", ignore)
 
 message("Running emptyDrops ...")
 set.seed(100)
 emptydrops_out <- emptyDrops(
     m = assay(sce, "counts"),
-    lower = lower,
+    lower = snakemake@params[["lower"]],
     niters = snakemake@params[["niters"]],
     ignore = ignore
     BPPARAM = MulticoreParam(workers = as.integer(snakemake@threads))

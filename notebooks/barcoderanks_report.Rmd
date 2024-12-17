@@ -27,20 +27,20 @@ stopifnot(file.exists(rds_file))
 
 ```{r read_rds, echo=FALSE}
 #| message: false
-emptydrops_results <- readRDS(rds_file)
-emptydrops_results
+barcoderanks_results <- readRDS(rds_file)
+barcoderanks_results
 ```
 
 ## Plot
 
 ```{r filter_stats, echo=FALSE}
-emptydrops_results %>%
+barcoderanks_results %>%
   as.data.frame() %>%
   as_tibble() %>%
   ggplot(aes(rank, total)) +
   geom_line() +
-  geom_hline(yintercept = metadata(emptydrops_results)$knee, linetype = "dashed", color = "red") +
-  geom_hline(yintercept = metadata(emptydrops_results)$inflection, linetype = "dashed", color = "orange") +
+  geom_hline(yintercept = metadata(barcoderanks_results)$knee, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = metadata(barcoderanks_results)$inflection, linetype = "dashed", color = "orange") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +

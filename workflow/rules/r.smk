@@ -14,6 +14,22 @@ rule simpleaf_lower_umi_per_sample:
     script:
         "../../scripts/simpleaf_find_lower.R"
 
+rule dropletutils_barcode_ranks:
+    input:
+        simpleaf="results/simpleaf/quant/{sample}",
+    output:
+        rds="results/barcodeRanks/{sample}.rds",
+    params:
+        lower=config["emptydrops"]["lower"],
+    conda:
+        "../../conda/bioc_dropletutils.yaml"
+    threads: 12
+    resources:
+        mem="64G",
+        runtime="30m",
+    script:
+        "../../scripts/dropletutils_barcoderanks.R"
+
 rule simpleaf_counts_rds:
     input:
         expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
@@ -31,10 +47,11 @@ rule simpleaf_counts_rds:
 rule dropletutils_emptydrops_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
-        ignore="results/simpleaf/ignore/{sample}.txt"
     output:
         rds="results/emptyDrops/{sample}.rds",
     params:
+        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
+        lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
     conda:
         "../../conda/bioc_dropletutils.yaml"
@@ -61,22 +78,6 @@ rule dropletutils_emptydrops_all:
         runtime="1h",
     script:
         "../../scripts/dropletutils_emptydrops.R"
-
-rule dropletutils_barcode_ranks:
-    input:
-        simpleaf="results/simpleaf/quant/{sample}",
-    output:
-        rds="results/barcodeRanks/{sample}.rds",
-    params:
-        lower=config["emptydrops"]["lower"],
-    conda:
-        "../../conda/bioc_dropletutils.yaml"
-    threads: 12
-    resources:
-        mem="64G",
-        runtime="30m",
-    script:
-        "../../scripts/dropletutils_barcoderanks.R"
 
 rule simpleaf_counts_hdf5:
     input:
