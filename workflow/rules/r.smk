@@ -2,7 +2,7 @@ rule simpleaf_lower_umi_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
     output:
-        txt="results/simpleaf/ignore/{sample}.txt"
+        txt="results/umi_min_expected/{sample}.txt"
     params:
         expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     threads: 2
@@ -17,10 +17,9 @@ rule simpleaf_lower_umi_per_sample:
 rule dropletutils_barcode_ranks:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
+        lower="results/umi_min_expected/{sample}.txt",
     output:
         rds="results/barcodeRanks/{sample}.rds",
-    params:
-        lower=config["emptydrops"]["lower"],
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 12

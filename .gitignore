@@ -7,6 +7,7 @@ nohup.out
 slurm-*.out
 sps-*
 af_home/**
+reports/**
 results/**
 resources/**
 logs/**
