@@ -31,6 +31,11 @@ barcoderanks_results <- readRDS(rds_file)
 barcoderanks_results
 ```
 
+Metadata:
+
+- **knee:** `r metadata(barcoderanks_results)[["knee"]]`
+- **inflection:** `r metadata(barcoderanks_results)[["inflection"]]`
+
 ## Plot
 
 ```{r filter_stats, echo=FALSE}

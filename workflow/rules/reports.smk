@@ -2,7 +2,7 @@ rule simpleaf_all_report:
     input:
         rds="results/sce/counts.rds",
     output:
-        "results/reports/simpleaf.html",
+        "reports/simpleaf.html",
     params:
         umi_cutoff=config["filters"]["barcodes"]["min_umis"],
         genes_cutoff=config["filters"]["barcodes"]["min_genes"],
@@ -20,7 +20,7 @@ rule simpleaf_sample_report:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
     output:
-        "results/reports/simpleaf/{sample}.html",
+        "reports/simpleaf/{sample}.html",
     params:
         umi_cutoff=config["filters"]["barcodes"]["min_umis"],
     conda:
@@ -36,7 +36,7 @@ rule barcoderanks_report:
     input:
         rds="results/barcodeRanks/{sample}.rds",
     output:
-        "results/reports/barcodeRanks/{sample}.html",
+        "reports/barcodeRanks/{sample}.html",
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2
@@ -50,7 +50,7 @@ rule emptydrop_report_all:
     input:
         rds="results/emptyDrops/results.rds",
     output:
-        "results/reports/emptyDrops.html",
+        "reports/emptyDrops.html",
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2
@@ -64,7 +64,7 @@ rule emptydrop_report_sample:
     input:
         rds="results/emptyDrops/{sample}.rds",
     output:
-        "results/reports/emptyDrops/{sample}.html",
+        "reports/emptyDrops/{sample}.html",
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2
@@ -78,7 +78,7 @@ rule scran_umap_report:
     input:
         rds="results/sce/umap.rds",
     output:
-        "results/reports/umap.html",
+        "reports/umap.html",
     conda:
         "../../conda/bioconductor_3_20.yaml"
     threads: 2
@@ -92,7 +92,7 @@ rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
     output:
-        "results/reports/enrichgo/hvgs.html",
+        "reports/enrichgo/hvgs.html",
     conda:
         "../../conda/bioconductor_3_20-v2.yaml"
     threads: 2

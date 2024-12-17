@@ -37,7 +37,7 @@ emptydrops_out <- emptyDrops(
     m = assay(sce, "counts"),
     lower = snakemake@params[["lower"]],
     niters = snakemake@params[["niters"]],
-    ignore = ignore
+    ignore = ignore,
     BPPARAM = MulticoreParam(workers = as.integer(snakemake@threads))
 )
 message("Done.")
