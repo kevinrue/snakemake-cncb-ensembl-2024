@@ -46,6 +46,8 @@ rule simpleaf_counts_rds:
 rule dropletutils_emptydrops_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
+        barcoderank="results/barcodeRanks/{sample}.rds",
+        ignore="results/umi_min_expected/{sample}.txt"
     output:
         rds="results/emptyDrops/{sample}.rds",
     params:

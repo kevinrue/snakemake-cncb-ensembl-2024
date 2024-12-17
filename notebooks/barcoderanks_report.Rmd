@@ -21,6 +21,8 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```{r snakemake, include=FALSE}
 rds_file <- snakemake@input[["rds"]]
 stopifnot(file.exists(rds_file))
+expect_cells <- snakemake@params[["expect_cells"]]
+stopifnot(is.numeric(expect_cells))
 ```
 
 ## Load barcodeRanks results
@@ -33,25 +35,40 @@ barcoderanks_results
 
 Metadata:
 
-- **knee:** `r metadata(barcoderanks_results)[["knee"]]`
-- **inflection:** `r metadata(barcoderanks_results)[["inflection"]]`
+- **knee:** `r format(metadata(barcoderanks_results)[["knee"]], big.mark = ",")`
+- **inflection:** `r format(metadata(barcoderanks_results)[["inflection"]], big.mark = ",")`
 
 ## Plot
 
 ```{r filter_stats, echo=FALSE}
+min_umi_expected <- sort(barcoderanks_results$total, decreasing = TRUE)[expect_cells]
+barcodes_above_knee <- sum(barcoderanks_results$total >= metadata(barcoderanks_results)[["knee"]])
+barcodes_above_inflection <- sum(barcoderanks_results$total >= metadata(barcoderanks_results)[["inflection"]])
 barcoderanks_results %>%
+  as.data.frame() %>% 
+  as_tibble() %>% 
+  filter(total > 0) %>% 
   as.data.frame() %>%
   as_tibble() %>%
   ggplot(aes(rank, total)) +
   geom_line() +
-  geom_hline(yintercept = metadata(barcoderanks_results)$knee, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = metadata(barcoderanks_results)$knee, linetype = "dashed", color = "green") +
+  geom_label(aes(x = 1, y = metadata(barcoderanks_results)$knee, label = format(metadata(barcoderanks_results)$knee, big.mark = ",")), data = tibble(), color = "green", hjust = 0) +
   geom_hline(yintercept = metadata(barcoderanks_results)$inflection, linetype = "dashed", color = "orange") +
+  geom_label(aes(x = 10, y = metadata(barcoderanks_results)$inflection, label = format(metadata(barcoderanks_results)$inflection, big.mark = ",")), data = tibble(), color = "orange", hjust = 0) +
+  geom_hline(yintercept = min_umi_expected, linetype = "dashed", color = "red") +
+  geom_label(aes(x = 100, y = min_umi_expected, label = format(min_umi_expected, big.mark = ",")), data = tibble(), color = "red", hjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     y = "UMI Counts",
-    x = "Barcodes"
+    x = "Barcodes",
+    subtitle = sprintf(
+      "Barcodes >= knee (%s) | Barcodes >= inflection (%s)",
+      format(barcodes_above_knee, big.mark = ","),
+      format(barcodes_above_inflection, big.mark = ",")
+    )
   )
 ```
 

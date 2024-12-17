@@ -37,6 +37,8 @@ rule barcoderanks_report:
         rds="results/barcodeRanks/{sample}.rds",
     output:
         "reports/barcodeRanks/{sample}.html",
+    params:
+        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     conda:
         "../../conda/bioc_dropletutils.yaml"
     threads: 2
