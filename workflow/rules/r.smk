@@ -1,3 +1,17 @@
+rule simpleaf_counts_sample_rds:
+    input:
+        simpleaf="results/simpleaf/quant/{sample}"
+    output:
+        rds="results/fishpond/{sample}.rds"
+    threads: 2
+    resources:
+        mem="32G",
+        runtime="20m",
+    conda:
+        "../../conda/bioconductor_3_20.yaml"
+    script:
+        "../../scripts/simpleaf_counts_rds.R"
+
 rule simpleaf_lower_umi_per_sample:
     input:
         simpleaf="results/simpleaf/quant/{sample}",
@@ -29,7 +43,7 @@ rule dropletutils_barcode_ranks:
     script:
         "../../scripts/dropletutils_barcoderanks.R"
 
-rule simpleaf_counts_rds:
+rule simpleaf_counts_all_rds:
     input:
         expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
     output:

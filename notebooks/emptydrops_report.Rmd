@@ -61,17 +61,22 @@ emptydrops_results <- emptydrops_results %>%
 ```{r barcode_rank_color_fdr_plots, echo=FALSE}
 for (fdr_cutoff in fdr_thresholds) {
     gg <- emptydrops_results %>% 
+        mutate(
+            cell = factor(FDR < fdr_cutoff, c(TRUE, FALSE, NA), c("Cell", "Empty"))
+        ) %>%
         ggplot(aes(Rank, Total)) +
         # geom_point_rast(aes(color = FDR < 0.01), size = 0.1) +
-        geom_point(aes(color = factor(FDR < fdr_cutoff, c(TRUE, FALSE, NA))), size = 0.1) +
+        geom_point(aes(color = cell), size = 0.1) +
         scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
         scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+        facet_wrap(~ cell) +
         theme_bw() +
         labs(
             y = "UMI Counts",
             x = "Barcodes",
             subtitle = paste0("FDR threshold: ", fdr_cutoff)
-        )
+        ) +
+        guides(color = "none")
     print(gg)
 }
 ```

@@ -31,3 +31,4 @@ rule all:
         "resources/gtf/duplicated_gene_models.tsv",
         expand("results/barcodeRanks/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
         expand("results/umi_min_expected/{sample}.txt", sample=SAMPLES['sample_name'].unique()),
+        expand("results/fishpond/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
