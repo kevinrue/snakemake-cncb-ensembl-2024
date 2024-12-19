@@ -8,6 +8,7 @@ date: "`r Sys.Date()`"
 ```{r libraries, include=FALSE}
 # library(ggrastr)
 library(S4Vectors)
+library(SummarizedExperiment)
 library(scales)
 library(tidyverse)
 umi_breaks <- 10^(-1:10)
@@ -22,19 +23,23 @@ rds_file <- snakemake@input[["rds"]]
 
 ## EmptyDrops results
 
-```{r read_tsv, echo=FALSE}
+```{r read_tsv}
 #| message: false
 emptydrops_results <- readRDS(rds_file)
 emptydrops_results
 ```
 
+```{r metadata, include=FALSE}
+emptydrops_metadata <- metadata(emptydrops_results)
+```
+
 EmptyDrops parameters:
 
-- retain: `r metadata(emptydrops_results)[["retain"]]`
-- lower: `r metadata(emptydrops_results)[["lower"]]`
-- niters: `r metadata(emptydrops_results)[["niters"]]`
-- alpha: `r metadata(emptydrops_results)[["alpha"]]`
-- ignore: `r metadata(emptydrops_results)[["ignore"]]`
+- retain: `r format(emptydrops_metadata[["retain"]], big.mark = ",")`
+- lower: `r format(emptydrops_metadata[["lower"]], big.mark = ",")`
+- niters: `r format(emptydrops_metadata[["niters"]], big.mark = ",")`
+- alpha: `r format(emptydrops_metadata[["alpha"]], big.mark = ",")`
+- ignore: `r format(emptydrops_metadata[["ignore"]], big.mark = ",")`
 
 ## Overall statistics
 
@@ -66,7 +71,9 @@ for (fdr_cutoff in fdr_thresholds) {
             cell = factor(FDR < fdr_cutoff, c(TRUE, FALSE, NA), c("Cell", "Empty"))
         ) %>%
         ggplot(aes(Rank, Total)) +
-        geom_hline(yintercept = metadata(emptydrops_results)[["ignore"]], linetype = "dashed", color = "grey") +
+        geom_hline(yintercept = emptydrops_metadata[["retain"]], linetype = "dashed", color = "green", linewidth = 0.5) +
+        geom_hline(yintercept = emptydrops_metadata[["ignore"]], linetype = "dashed", color = "red", linewidth = 0.5) +
+        geom_hline(yintercept = emptydrops_metadata[["lower"]], linetype = "dashed", color = "grey", linewidth = 0.5) +
         # geom_point_rast(aes(color = FDR < 0.01), size = 0.1) +
         geom_point(aes(color = cell), size = 0.1) +
         scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +

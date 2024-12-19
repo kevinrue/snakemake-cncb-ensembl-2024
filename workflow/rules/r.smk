@@ -59,7 +59,7 @@ rule simpleaf_counts_all_rds:
 
 rule dropletutils_emptydrops_per_sample:
     input:
-        simpleaf="results/simpleaf/quant/{sample}",
+        sce="results/fishpond/{sample}.rds",
         barcoderank="results/barcodeRanks/{sample}.rds",
         ignore="results/umi_min_expected/{sample}.txt"
     output:

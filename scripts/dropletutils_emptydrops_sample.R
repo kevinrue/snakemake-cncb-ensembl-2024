@@ -14,9 +14,7 @@ stopifnot(is.numeric(snakemake@threads))
 stopifnot(is.numeric(snakemake@params[["lower"]]))
 stopifnot(is.numeric(snakemake@params[["niters"]]))
 
-sample_fry_dir <- file.path(snakemake@input[["simpleaf"]], "af_quant")
-message("Input directory: ", sample_fry_dir)
-stopifnot(dir.exists(sample_fry_dir))
+stopifnot(file.exists(snakemake@input[["sce"]]))
 
 barcoderank_file <- snakemake@input[["barcoderank"]]
 message("barcodeRanks file: ", barcoderank_file)
@@ -40,7 +38,7 @@ message("Done.")
 message("retain: ", retain)
 
 message("Loading sample ... ")
-sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
 message("Running emptyDrops ...")
