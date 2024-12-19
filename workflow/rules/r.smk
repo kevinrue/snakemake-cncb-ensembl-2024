@@ -8,7 +8,7 @@ rule simpleaf_counts_sample_rds:
         mem="32G",
         runtime="20m",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/simpleaf_counts_rds.R"
 
@@ -24,7 +24,7 @@ rule simpleaf_lower_umi_per_sample:
         mem="32G",
         runtime="10m",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/simpleaf_find_lower.R"
 
@@ -35,7 +35,7 @@ rule dropletutils_barcode_ranks:
     output:
         rds="results/barcodeRanks/{sample}.rds",
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 12
     resources:
         mem="64G",
@@ -53,7 +53,7 @@ rule simpleaf_counts_all_rds:
         mem="128G",
         runtime="1h",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/simpleaf_merge.R"
 
@@ -69,7 +69,7 @@ rule dropletutils_emptydrops_per_sample:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 12
     resources:
         mem="64G",
@@ -86,7 +86,7 @@ rule dropletutils_emptydrops_all:
         lower=config["emptydrops"]["lower"],
         niters=config["emptydrops"]["niters"],
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 24
     resources:
         mem="256G",
@@ -103,7 +103,7 @@ rule simpleaf_counts_hdf5:
         mem="64G",
         runtime="6h",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/simpleaf_hdf5.R"
 
@@ -120,7 +120,7 @@ rule scuttle_lognormcounts:
         runtime="1h",
     threads: 32
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/scuttle_lognormcounts.R"
 
@@ -130,7 +130,7 @@ rule filtered_gene_ids:
     output:
         txt="results/sce/logcounts_rownames.txt"
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="64G",
@@ -152,7 +152,7 @@ rule scran_hvgs:
         runtime="30m",
     threads: 32
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/scran_modelgenevar.R"
 
@@ -170,7 +170,7 @@ rule scran_fixed_pca:
         runtime="6h",
     threads: 24
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/scran_fixedpca.R"
 
@@ -186,7 +186,7 @@ rule scran_umap:
         runtime="1h",
     threads: 32
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     script:
         "../../scripts/scater_umap.R"
 
@@ -197,7 +197,7 @@ rule enrichgo_hvgs:
     output:
         rds="results/enrichgo/hvgs.rds",
     conda:
-        "../../conda/bioconductor_3_20-v2.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="8G",

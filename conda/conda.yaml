@@ -29,6 +29,7 @@ dependencies:
   - r-biocmanager
   - r-cowplot
   - r-ggplot2
+  - r-ggrastr
   - r-scales
   - r-stringr
   - r-tidyverse

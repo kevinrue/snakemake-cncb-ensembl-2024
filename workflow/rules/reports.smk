@@ -8,7 +8,7 @@ rule simpleaf_all_report:
         genes_cutoff=config["filters"]["barcodes"]["min_genes"],
         expect_cells=config["filters"]["barcodes"]["expected"], # not ideal, same value for all samples!
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="64G",
@@ -24,7 +24,7 @@ rule simpleaf_sample_report:
     params:
         umi_cutoff=config["filters"]["barcodes"]["min_umis"],
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="16G",
@@ -40,7 +40,7 @@ rule barcoderanks_report:
     params:
         expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="16G",
@@ -54,7 +54,7 @@ rule emptydrop_report_all:
     output:
         "reports/emptyDrops.html",
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="32G",
@@ -68,7 +68,7 @@ rule emptydrop_report_sample:
     output:
         "reports/emptyDrops/{sample}.html",
     conda:
-        "../../conda/bioc_dropletutils.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="16G",
@@ -82,7 +82,7 @@ rule scran_umap_report:
     output:
         "reports/umap.html",
     conda:
-        "../../conda/bioconductor_3_20.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="64G",
@@ -96,7 +96,7 @@ rule enrichgo_hvgs_report:
     output:
         "reports/enrichgo/hvgs.html",
     conda:
-        "../../conda/bioconductor_3_20-v2.yaml"
+        "../../conda/conda.yaml"
     threads: 2
     resources:
         mem="8G",
