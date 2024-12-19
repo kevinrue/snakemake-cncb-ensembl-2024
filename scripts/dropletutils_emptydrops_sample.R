@@ -55,6 +55,10 @@ emptydrops_out <- emptyDrops(
 )
 message("Done.")
 
+message("Adding custom metadata ...")
+metadata(emptydrops_out)[["ignore"]] <- ignore
+message("Done.")
+
 message("Saving to RDS file ...")
 saveRDS(emptydrops_out, snakemake@output[["rds"]])
 message("Done.")

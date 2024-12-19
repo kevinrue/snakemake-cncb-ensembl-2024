@@ -34,6 +34,7 @@ EmptyDrops parameters:
 - lower: `r metadata(emptydrops_results)[["lower"]]`
 - niters: `r metadata(emptydrops_results)[["niters"]]`
 - alpha: `r metadata(emptydrops_results)[["alpha"]]`
+- ignore: `r metadata(emptydrops_results)[["ignore"]]`
 
 ## Overall statistics
 
@@ -58,13 +59,14 @@ emptydrops_results <- emptydrops_results %>%
   mutate(Rank = row_number())
 ```
 
-```{r barcode_rank_color_fdr_plots, echo=FALSE}
+```{r barcode_rank_color_fdr_plots, echo=FALSE, fig.height=5, fig.width=7}
 for (fdr_cutoff in fdr_thresholds) {
     gg <- emptydrops_results %>% 
         mutate(
             cell = factor(FDR < fdr_cutoff, c(TRUE, FALSE, NA), c("Cell", "Empty"))
         ) %>%
         ggplot(aes(Rank, Total)) +
+        geom_hline(yintercept = metadata(emptydrops_results)[["ignore"]], linetype = "dashed", color = "grey") +
         # geom_point_rast(aes(color = FDR < 0.01), size = 0.1) +
         geom_point(aes(color = cell), size = 0.1) +
         scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
