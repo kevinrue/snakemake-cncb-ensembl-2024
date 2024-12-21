@@ -71,8 +71,8 @@ rule scran_umap_report:
         "../../conda/conda.yaml"
     threads: 2
     resources:
-        mem="64G",
-        runtime="30m",
+        mem="8G",
+        runtime="5m",
     script:
         "../../notebooks/osca_umap_report.Rmd"
 

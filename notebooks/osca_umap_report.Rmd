@@ -44,14 +44,18 @@ colData(sce)
 
 ```{r umap-coloured, echo=FALSE, fig.width=7, fig.height=5}
 for (coldata in colnames(colData(sce))) {
-  gg <- reducedDim(sce, "UMAP") %>%
+  gg_data <- reducedDim(sce, "UMAP") %>%
     as_tibble() %>%
     mutate(
       COLOUR = colData(sce)[[coldata]]
     ) %>%
-    slice_sample(prop = 1) %>%
-    ggplot(aes(UMAP1, UMAP2, colour = COLOUR), size = 0.1) +
-    geom_point_rast(size = 0.05) +
+    slice_sample(prop = 1)
+  gg_label_data <- gg_data %>%
+    group_by(COLOUR) %>%
+    summarise(across(everything(), mean))
+  gg <- ggplot() +
+    geom_point_rast(aes(UMAP1, UMAP2, colour = COLOUR), gg_data, size = 0.05) +
+    geom_text(aes(UMAP1, UMAP2, label = COLOUR), gg_label_data) +
     theme_bw() +
     labs(
       colour = coldata
