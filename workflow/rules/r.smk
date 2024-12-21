@@ -6,7 +6,7 @@ rule simpleaf_quant_merge:
     threads: 2
     resources:
         mem="128G",
-        runtime="30m",
+        runtime="1h",
     conda:
         "../../conda/conda.yaml"
     script:
