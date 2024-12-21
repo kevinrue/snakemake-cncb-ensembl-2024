@@ -43,20 +43,6 @@ rule dropletutils_barcode_ranks:
     script:
         "../../scripts/dropletutils_barcoderanks.R"
 
-rule simpleaf_counts_all_rds:
-    input:
-        expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
-    output:
-        rds="results/sce/counts.rds",
-    threads: 16
-    resources:
-        mem="128G",
-        runtime="1h",
-    conda:
-        "../../conda/conda.yaml"
-    script:
-        "../../scripts/simpleaf_merge.R"
-
 rule dropletutils_emptydrops_per_sample:
     input:
         sce="results/fishpond/{sample}.rds",
@@ -77,22 +63,36 @@ rule dropletutils_emptydrops_per_sample:
     script:
         "../../scripts/dropletutils_emptydrops_sample.R"
 
-rule dropletutils_emptydrops_all:
+rule sce_after_emptydrops:
     input:
-        rds="results/sce/counts.rds",
+        sce="results/fishpond/{sample}.rds",
+        emptydrops="results/emptyDrops/{sample}.rds",
     output:
-        rds="results/emptyDrops/results.rds",
+        rds="results/sce/after_emptydrops/{sample}.rds",
     params:
-        lower=config["emptydrops"]["lower"],
-        niters=config["emptydrops"]["niters"],
+        lower=config["emptydrops"]["fdr"],
     conda:
         "../../conda/conda.yaml"
-    threads: 24
+    threads: 12
     resources:
-        mem="256G",
-        runtime="1h",
+        mem="64G",
+        runtime="30m",
     script:
-        "../../scripts/dropletutils_emptydrops.R"
+        "../../scripts/apply_emptydrops.R"
+
+rule simpleaf_counts_all_rds:
+    input:
+        expand("results/sce/after_emptydrops/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+    output:
+        rds="results/sce/counts.rds",
+    threads: 2
+    resources:
+        mem="128G",
+        runtime="2h",
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/simpleaf_merge.R"
 
 rule simpleaf_counts_hdf5:
     input:
@@ -117,7 +117,7 @@ rule scuttle_lognormcounts:
         min_genes=config["filters"]["barcodes"]["min_genes"],        
     resources:
         mem="128G",
-        runtime="1h",
+        runtime="2h",
     threads: 32
     conda:
         "../../conda/conda.yaml"

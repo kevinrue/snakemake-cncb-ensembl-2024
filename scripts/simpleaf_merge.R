@@ -1,52 +1,34 @@
 message(Sys.time())
 
-suppressPackageStartupMessages({library(fishpond)})
 suppressPackageStartupMessages({library(SummarizedExperiment)})
-
-stopifnot(nzchar(snakemake@output[["rds"]]))
-
-alevin_quant_dir <- dirname(snakemake@input[[1]])
-stopifnot(nzchar(alevin_quant_dir))
-message("Input directory: ", alevin_quant_dir)
-
-sample_basedirs <- list.files(path = alevin_quant_dir, include.dirs = TRUE)
-stopifnot(length(sample_basedirs) > 0)
-message("Detected ", length(sample_basedirs), " samples.")
 
 message("Loading samples ... ")
 sce_list <- list()
-for (sample_basedir in sample_basedirs) {
-  message("- ", sample_basedir)
-  message("  * loadFry")
-  sce <- loadFry(fryDir = file.path(alevin_quant_dir, sample_basedir, "af_quant"), outputFormat = "S+A", quiet = TRUE)
-  message("  * Filter barcode below 100 UMI")
-  umi_sum <- colSums(assay(sce, "counts"))
-  sce <- sce[, umi_sum >= 100]
-  sce$sample <- sample_basedir
-  colnames(sce) <- paste0(colnames(sce), "-", sample_basedir)
-  sce_list[[sample_basedir]] <- sce
+for (rds_file in snakemake@input) {
+  sample_name <- basename(rds_file)
+  message("- ", rds_file)
+  message("  * readRDS")
+  sce <- readRDS(rds_file)
+  sce$sample <- sample_name
+  colnames(sce) <- paste0(colnames(sce), "-", sample_name)
+  sce_list[[sample_name]] <- sce
   message("  * Added to list")
   rm(sce)
 }
 message("Done.")
 
+message("Checking that feature identifiers match ... ")
+feature_ids_1 <- rownames(assay(sce_list[[1]], "counts"))
+for (sce2 in sce_list) {
+  feature_ids_2 <- rownames(assay(sce2, "counts"))
+  if (!identical(feature_ids_1, feature_ids_2)) {
+    stop("Feature identifiers do not match.")
+  }
+}
+message("Done.")
+
 message("Merging all samples ...")
 sce <- do.call("cbind", sce_list)
-message("Done.")
-
-message("Garbage collection ...")
-rm(sce_list)
-gc()
-message("Done.")
-
-message("Removing undetected genes ...")
-keep <- rowSums(assay(sce, "counts")) > 0
-sce <- sce[keep, ]
-message("Done.")
-
-message("Garbage collection ...")
-rm(keep)
-gc()
 message("Done.")
 
 message("Saving to RDS file ...")

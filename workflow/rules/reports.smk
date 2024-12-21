@@ -48,20 +48,6 @@ rule barcoderanks_report:
     script:
         "../../notebooks/barcoderanks_report.Rmd"
 
-rule emptydrop_report_all:
-    input:
-        rds="results/emptyDrops/results.rds",
-    output:
-        "reports/emptyDrops.html",
-    conda:
-        "../../conda/conda.yaml"
-    threads: 2
-    resources:
-        mem="32G",
-        runtime="30m",
-    script:
-        "../../notebooks/emptydrops_report.Rmd"
-
 rule emptydrop_report_sample:
     input:
         rds="results/emptyDrops/{sample}.rds",

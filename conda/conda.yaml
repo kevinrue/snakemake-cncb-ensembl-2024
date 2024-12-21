@@ -3,6 +3,7 @@ channels:
   - bioconda
 dependencies:
   - alevin-fry
+  - bioconductor-batchelor
   - bioconductor-biocparallel
   - bioconductor-biocsingular
   - bioconductor-bluster
