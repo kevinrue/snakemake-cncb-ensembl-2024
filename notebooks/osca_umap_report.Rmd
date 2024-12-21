@@ -50,7 +50,7 @@ for (coldata in colnames(colData(sce))) {
       COLOUR = colData(sce)[[coldata]]
     ) %>%
     slice_sample(prop = 1) %>%
-    ggplot(aes(UMAP1, UMAP2, colour  = COLOUR)) +
+    ggplot(aes(UMAP1, UMAP2, colour = COLOUR), size = 0.1) +
     geom_point_rast(size = 0.05) +
     theme_bw() +
     labs(
