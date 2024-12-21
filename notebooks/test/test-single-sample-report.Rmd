@@ -1,158 +1,199 @@
 ---
 title: "Individual sample quality control"
 output: html_document
-date: "2024-11-29"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
 ---
 
-## Libraries
+## Sample information
 
-```{r}
-#| message: false
+- Name: `r basename(snakemake@input[["simpleaf"]])`
+
+```{r libraries, include=FALSE}
+.libPaths()
 library(cowplot)
-library(fishpond)
 library(ggplot2)
 library(rtracklayer)
 library(scales)
 library(stringr)
 library(SummarizedExperiment)
 library(tidyverse)
-```
-
-## Parameters
-
-```{r}
-alevin_quant_dir <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/alevin"
-gtf_file <- "/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/resources/genome/genome.gtf.gz"
-sample_index <- 1L
-timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
-replicate_levels <- c("1", "2")
-umi_cutoff <- 500
-```
-
-## Load alevin results
-
-```{r}
-sample_basedirs <- list.files(path = alevin_quant_dir, include.dirs = TRUE)
-sample_basedir <- sample_basedirs[sample_index]
-sample_basedir
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r}
+expected_cells <- 30E3
+```
+
+## Load raw counts
+
+- Output format: `S+A`
+
+```{r read_rds, echo=FALSE}
 #| message: false
-sce <- loadFry(fryDir = file.path(alevin_quant_dir, sample_basedir, "af_quant"), outputFormat = "S+A", nonzero = TRUE)
+sce <- readRDS("~/Downloads/rsync/cncb-fly/WPPm024hrs_rep1.rds")
 sce
 ```
 
-## Rename barcodes
+## Load mitochondrial gene list
 
 ```{r}
-colnames(sce) <- paste0(colnames(sce), "-", sample_basedir)
-sce
+mito_gene_ids <- readr::read_tsv("../../mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+str(mito_gene_ids)
 ```
 
-## Add sample name to cell metadata
 
-```{r}
-colData(sce)[["sample"]] <- sample_basedir
-sce
-```
+## Barcode statistics
 
-## Separate sample metadata
-
-```{r}
-tmp <- str_match(string = colData(sce)[["sample"]], pattern = "WPP(?<timepoint>[mp][[:digit:]]{3}hrs)_rep(?<replicate>[[:digit:]]{1})")
-tmp <- tmp[, -1]
-tmp <- as(tmp, "DataFrame")
-tmp$timepoint <- factor(tmp$timepoint, levels = timepoint_levels)
-tmp$replicate <- factor(tmp$replicate, levels = replicate_levels)
-colData(sce) <- append(colData(sce), tmp)
-rm(tmp)
-sce
-```
-
-## Add gene annotations
-
-```{r}
-tmp <- import(gtf_file)
-tmp <- unique(mcols(tmp)[, c("gene_id", "gene_name")])
-rownames(tmp) <- tmp$gene_id
-rowData(sce)[["gene_name"]] <- tmp[rowData(sce)$gene_ids, "gene_name"]
-rm(tmp)
-sce
-```
-
-## Basic quality control
-
-```{r}
-colData(sce)[["sum"]] <- colSums(assay(sce, "counts"))
-```
-
-```{r}
-range(colData(sce)[["sum"]])
-```
-
-```{r}
-# TODO: turn this plot into a raster
-tmp <- data.frame(
-  sum = sce$sum,
-  rank = rank(-sce$sum)
+```{r compute_statistics, include=FALSE}
+barcode_stats <- tibble(
+  umi_sum = colSums(assay(sce, "counts")),
+  genes = colSums(assay(sce, "counts") > 0),
+  mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
 ) %>% 
-  filter(sum > 0)
-tmp_top <- tmp %>% 
-  slice_max(sum, n = 1)
-tmp_umi_cutoff <- data.frame(
-  sum = umi_cutoff,
-  rank = sum(tmp$sum >= umi_cutoff)
-)
-gg_barcode_rank_plot <- ggplot(tmp, aes(rank, sum)) +
-  geom_point() +
-  geom_label(aes(label = sum), data = tmp_top) +
-  geom_label(aes(label = rank), data = tmp_umi_cutoff) +
-  scale_x_log10() +
-  scale_y_log10(limits = c(1, NA), labels = scales::comma) +
-  labs(
-    subtitle = sprintf("Max UMI & Number of cells >= %s UMI", umi_cutoff)
-  ) +
-  theme_bw()
-rm(tmp, tmp_top, tmp_umi_cutoff)
-gg_barcode_rank_plot
+  filter(umi_sum > 0) %>% 
+  arrange(desc(umi_sum)) %>% 
+  mutate(rank_umi = row_number()) %>% 
+  arrange(desc(genes)) %>% 
+  mutate(rank_genes = row_number())
+barcode_stats
+rm(sce)
 ```
 
-```{r, fig.width=12, fig.height=4}
-gg1 <- ggplot(colData(sce), aes(x = sum)) +
+### Range of UMI per barcode
+
+```{r range_umi_sum, include=FALSE}
+range(barcode_stats$umi_sum)
+```
+
+### Range of mitochondrial contents
+
+```{r range_umi_sum, include=FALSE}
+range(barcode_stats$mt_pct)
+```
+
+### Barcode-Rank Plot
+
+```{r barcode_rank_plot, echo=FALSE}
+expected_cells_min_umi <- barcode_stats %>% 
+	arrange(desc(umi_sum)) %>% 
+	slice_head(n = expected_cells) %>% 
+	slice_tail(n = 1) %>% 
+	pull(umi_sum)
+filtered_stats <- barcode_stats %>% 
+  summarise(
+    barcodes = sum(umi_sum >= expected_cells_min_umi),
+  )
+top_stats <- barcode_stats %>%
+  slice_max(umi_sum, n = 1)
+ggplot() +
+  geom_line(aes(x = rank_umi, y = umi_sum), barcode_stats) +
+  geom_label(aes(x = rank_umi, y = umi_sum, label = format(umi_sum, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
+  geom_hline(yintercept = expected_cells_min_umi, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_vline(xintercept = expected_cells, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 1, y = expected_cells_min_umi, label = format(expected_cells_min_umi, big.mark = ",")), data = tibble(), colour = "red", hjust = 0) +
+	geom_label(aes(x = expected_cells, y = 1, label = format(expected_cells, big.mark = ",")), data = tibble(), colour = "red", vjust = 0) +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    y = "UMI Counts",
+    x = "Barcodes",
+    title = paste0("Maximum UMI count & minimum UMI counts for expected number of cells")
+  )
+```
+
+### Histogram of UMI per barcode
+
+- Red dashed line: Minimum UMI count for expected number of cells.
+
+```{r umi_sum_histogram, echo=FALSE, fig.width=12, fig.height=4}
+gg1 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   labs(title = "Full view") +
-  theme_bw()
-gg2 <- ggplot(colData(sce), aes(x = sum)) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
+gg2 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = expected_cells_min_umi, color = "red", linetype = "dashed") +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3)) +
-  labs(title = "Total UMI (0 - 10,000)") +
-  theme_bw()
-gg3 <- ggplot(colData(sce), aes(x = sum)) +
+  labs(title = "Total UMI (0 - 5,000)") +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
+gg3 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = expected_cells_min_umi, color = "red", linetype = "dashed") +
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3), ylim = c(0, 5E3)) +
   labs(title = "Total UMI (0 - 5,000) & Bin count (0 - 5,000)") +
-  theme_bw()
-gg4 <- ggplot(colData(sce), aes(x = sum)) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
+gg4 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
-  coord_cartesian(xlim = c(5E3, NA), ylim = c(0, 100)) +
-  labs(title = "Total UMI (5,000 - max) & Bin count (0 - 100)") +
-  theme_bw()
+  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  coord_cartesian(xlim = c(expected_cells_min_umi, NA), ylim = c(0, 100)) +
+  labs(title = sprintf("Total UMI (%s - max) & Bin count (0 - 100)", format(expected_cells_min_umi, big.mark = ","))) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "UMI Counts"
+  )
 plot_grid(gg1, gg2, gg3, gg4)
 rm(gg1, gg2, gg3, gg4)
 ```
 
-## Filter worse barcodes
+## Mitochondrial content
 
-```{r}
-sce <- sce[, sce$sum >= umi_cutoff]
-sce
+```{r, echo=FALSE}
+# need iSEE
+# plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
+#     width=0.4, varwidth=FALSE, adjust=1,
+#     method='quasirandom', nbins=NULL);
+barcode_stats %>% 
+  filter(umi_sum >= expected_cells_min_umi) %>% 
+  ggplot(aes(x = mt_pct)) +
+  geom_histogram(binwidth = 0.01) +
+  coord_cartesian(xlim = c(0, 1)) +
+  # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Mitochondrial content"
+  )
 ```
 
-## Export raw object
+Number of barcodes:
 
-```{r}
-saveRDS(sce, sprintf("sce.%s.rds", sample_basedir))
+- Above minimum UMI count for expected number of cells
+- Below 25% mitochondrial content
+
+```{r, echo=FALSE}
+barcode_stats %>% 
+  filter(umi_sum >= expected_cells_min_umi) %>% 
+  summarise(mt_pass = sum(mt_pct < 0.25))
+```
+
+## Session info
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
 ```

@@ -1,0 +1,71 @@
+---
+title: "Mitochondrial content"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(SingleCellExperiment)
+library(tidyverse)
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+## Load sample data
+
+```{r sce, echo=FALSE}
+#| message: false
+sce <- readRDS(snakemake@input[["sce"]])
+sce
+```
+
+## Load mitochondrial gene list
+
+```{r mito_gene_ids, echo=FALSE}
+mito_gene_ids <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+str(mito_gene_ids)
+```
+
+## Barcode statistics
+
+```{r compute_statistics, include=FALSE}
+barcode_stats <- tibble(
+  umi_sum = colSums(assay(sce, "counts")),
+  genes = colSums(assay(sce, "counts") > 0),
+  mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+) %>% 
+  filter(umi_sum > 0) %>% 
+  arrange(desc(umi_sum)) %>% 
+  mutate(rank_umi = row_number()) %>% 
+  arrange(desc(genes)) %>% 
+  mutate(rank_genes = row_number())
+barcode_stats
+rm(sce)
+```
+
+## Plot
+
+```{r histogram, echo=FALSE}
+barcode_stats %>% 
+  filter(umi_sum >= expected_cells_min_umi) %>% 
+  ggplot(aes(x = mt_pct)) +
+  geom_histogram(binwidth = 0.01, color = "black", fill = "grey") +
+  coord_cartesian(xlim = c(0, 1)) +
+  # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Mitochondrial content"
+  )
+```
+
+## Session info
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

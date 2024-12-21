@@ -1,0 +1,107 @@
+---
+title: "Single sample analysis"
+author: "Author name goes here"
+date: "2024-12-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+library(org.Dm.eg.db)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(tidyverse)
+```
+
+```{r}
+sce <- readRDS("~/Downloads/rsync/cncb-fly/WPPm024hrs_rep1.rds")
+sce
+```
+
+```{r}
+umi_sums <- colSums(assay(sce, "counts"))
+if (any(umi_sums == 0)) {
+	message(sum(umi_sums == 0), " UMI counts equal 0: Removing ...")
+	sce <- sce[, umi_sums > 0]
+}
+sce
+```
+
+```{r}
+umi_sums <- colSums(assay(sce, "counts"))
+if (any(umi_sums < 2E3)) {
+	message(sum(umi_sums < 2E3), " UMI counts lower than 2,000: Removing ...")
+	sce <- sce[, colSums(assay(sce, "counts")) >= 2E3]
+}
+sce
+```
+
+```{r}
+sce <- logNormCounts(sce)
+```
+
+```{r}
+dec <- modelGeneVar(sce)
+```
+
+```{r}
+hvgs <- getTopHVGs(dec, prop = 0.1)
+str(hvgs)
+```
+
+
+```{r}
+sce <- fixedPCA(sce, subset.row = hvgs)
+```
+
+```{r}
+sce <- runUMAP(sce)
+```
+
+```{r}
+ggplot(reducedDim(sce, "UMAP")) +
+	geom_point(aes(UMAP1, UMAP2), size = 0.1) +
+	theme_bw()
+```
+
+```{r}
+g <- buildSNNGraph(sce, use.dimred = "PCA")
+```
+
+```{r}
+colData(sce)[["clusters"]] <- as.factor(membership(igraph::cluster_louvain(g, resolution = 0.1)))
+```
+
+```{r}
+tmp <- reducedDim(sce, "UMAP") %>% 
+	bind_cols(colData(sce) %>% as.data.frame() %>% as_tibble())
+tmp_label <- tmp %>% 
+	select(UMAP1, UMAP2, clusters) %>% 
+	group_by(clusters) %>% 
+	summarise(across(everything(), median))
+ggplot() +
+	geom_point(aes(UMAP1, UMAP2, colour = clusters), tmp, size = 0.1) +
+	geom_text(aes(UMAP1, UMAP2, label = clusters), tmp_label) +
+	theme_bw() +
+	guides(
+		colour = guide_legend(override.aes = list(size = 5))
+	)
+```
+
+```{r}
+markers <- findMarkers(sce, sce$clusters)
+```
+
+```{r}
+markers[["4"]] %>% 
+	as.data.frame() %>% 
+	tibble::rownames_to_column("FLYBASE") %>% 
+	dplyr::select(FLYBASE, p.value, FDR) %>% 
+	as_tibble() %>% 
+	mutate(
+		SYMBOL = mapIds(org.Dm.eg.db, FLYBASE, "SYMBOL", "FLYBASE")
+	)
+```
+

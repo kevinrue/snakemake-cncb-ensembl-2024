@@ -1,0 +1,25 @@
+---
+title: "Mitochondrial genes"
+author: "Author name goes here"
+date: "2024-12-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rtracklayer)
+library(tidyverse)
+```
+
+```{r}
+gtf_data <- import.gff("~/Downloads/Drosophila_melanogaster.BDGP6.46.113.gtf.gz")
+```
+
+```{r}
+gtf_data %>% 
+	subset(seqnames == "mitochondrion_genome" & type == "gene") %>% 
+	mcols() %>% 
+	as_tibble() %>% 
+	dplyr::select(c(gene_id, gene_name)) %>% 
+	readr::write_tsv("mitochdondrial_genes.tsv")
+```

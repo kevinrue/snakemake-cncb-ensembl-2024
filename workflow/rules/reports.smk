@@ -62,6 +62,20 @@ rule emptydrop_report_sample:
     script:
         "../../notebooks/emptydrops_report.Rmd"
 
+rule mitochondrial_report_sample:
+    input:
+        sce="results/sce/after_emptydrops/{sample}.rds",
+    output:
+        "reports/mitochondria/{sample}.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/mitochondrial_report.Rmd"
+
 rule scran_umap_report:
     input:
         rds="results/sce/umap.rds",

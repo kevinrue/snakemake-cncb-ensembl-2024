@@ -22,9 +22,9 @@ rule all:
     input:
         "reports/simpleaf.html",
         expand("reports/simpleaf/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        "reports/emptyDrops.html",
-        expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/mitochondria/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "reports/umap.html",
         "reports/enrichgo/hvgs.html",
         # "results/hdf5/counts",
