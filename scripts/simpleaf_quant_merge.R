@@ -8,7 +8,7 @@ sce_list <- list()
 for (simpleaf_sample_dir in snakemake@input) {
   sample_name <- basename(simpleaf_sample_dir)
   message("- ", sample_name)
-  message("  * readRDS")
+  message("  * loadFry")
   sce <- loadFry(fryDir = file.path(simpleaf_sample_dir, "af_quant"), outputFormat = "S+A", quiet = TRUE)
   sce$sample <- sample_name
   colnames(sce) <- paste0(colnames(sce), "-", sample_name)
