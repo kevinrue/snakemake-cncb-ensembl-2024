@@ -21,6 +21,7 @@ emptydrops:
 
 filters:
   barcodes:
+    mt_pct_max: 0.25
     expected: 30000
     min_umis: 3000
     min_genes: 1000
