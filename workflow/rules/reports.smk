@@ -1,6 +1,6 @@
 rule simpleaf_all_report:
     input:
-        rds="results/sce/counts.rds",
+        rds="results/sce/simpleaf.rds",
     output:
         "reports/simpleaf.html",
     params:

@@ -1,3 +1,17 @@
+rule simpleaf_quant_merge:
+    input:
+        expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
+    output:
+        rds="results/sce/simpleaf.rds",
+    threads: 2
+    resources:
+        mem="128G",
+        runtime="30m",
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/simpleaf_quant_merge.R"
+
 rule simpleaf_counts_sample_rds:
     input:
         simpleaf="results/simpleaf/quant/{sample}"

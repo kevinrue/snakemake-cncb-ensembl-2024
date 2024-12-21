@@ -26,11 +26,6 @@ barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
-```{r out_data_dir, include=FALSE}
-out_data_dir <- file.path(dirname(snakemake@output[[1]]), "simpleaf_data")
-dir.create(out_data_dir, showWarnings = FALSE)
-```
-
 ## Libraries
 
 ```{r, message=FALSE}
@@ -92,10 +87,6 @@ barcode_stats <- barcode_stats %>%
   ungroup()
 barcode_stats
 rm(sce)
-```
-
-```{r write_barcode_stats, include=FALSE}
-write_tsv(barcode_stats, file.path(out_data_dir, "barcode_stats.tsv.gz"))
 ```
 
 ## Proposed QC cutoffs
