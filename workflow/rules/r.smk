@@ -70,7 +70,7 @@ rule sce_after_emptydrops:
     output:
         rds="results/sce/after_emptydrops/{sample}.rds",
     params:
-        lower=config["emptydrops"]["fdr"],
+        fdr=config["emptydrops"]["fdr"],
     conda:
         "../../conda/conda.yaml"
     threads: 12
@@ -88,7 +88,7 @@ rule simpleaf_counts_all_rds:
     threads: 2
     resources:
         mem="128G",
-        runtime="2h",
+        runtime="30m",
     conda:
         "../../conda/conda.yaml"
     script:
@@ -112,9 +112,6 @@ rule scuttle_lognormcounts:
         rds="results/sce/counts.rds",
     output:
         rds="results/sce/logcounts.rds",
-    params:
-        min_umis=config["filters"]["barcodes"]["min_umis"],
-        min_genes=config["filters"]["barcodes"]["min_genes"],        
     resources:
         mem="128G",
         runtime="2h",
