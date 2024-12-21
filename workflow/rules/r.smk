@@ -21,7 +21,7 @@ rule simpleaf_lower_umi_per_sample:
         expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
     threads: 2
     resources:
-        mem="32G",
+        mem="16G",
         runtime="10m",
     conda:
         "../../conda/conda.yaml"
@@ -113,8 +113,8 @@ rule scuttle_lognormcounts:
     output:
         rds="results/sce/logcounts.rds",
     resources:
-        mem="128G",
-        runtime="2h",
+        mem="64G",
+        runtime="30m",
     threads: 32
     conda:
         "../../conda/conda.yaml"
