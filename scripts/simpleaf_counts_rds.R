@@ -13,7 +13,7 @@ sce <- loadFry(fryDir = file.path(snakemake@input[["simpleaf"]], "af_quant"), ou
 message("Done.")
 
 message("Removing zero-UMI barcodes ... ")
-umi_sum <- rowSums(assay(sce, "counts"))
+umi_sum <- colSums(assay(sce, "counts"))
 message("* Removing ", sum(umi_sum == 0), " barcodes.")
 sce <- sce[, umi_sum > 0]
 message("Done.")

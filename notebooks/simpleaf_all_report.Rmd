@@ -80,14 +80,6 @@ barcode_stats
 rm(sce)
 ```
 
-## Remove zero-UMI barcodes
-
-```{r remove_zero_umi, echo=FALSE}
-barcode_stats <- barcode_stats %>% 
-  filter(umi_sum > 0)
-barcode_stats
-```
-
 ## Plots
 
 ### Total UMI
