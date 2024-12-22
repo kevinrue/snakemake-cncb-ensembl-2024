@@ -1,6 +1,6 @@
 message(Sys.time())
 
-suppressPackageStartupMessages({library(SummarizedExperiment)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
 suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
@@ -14,12 +14,13 @@ message("Loading sample ... ")
 sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
-message("Compute mitochondrial content ...")
+message("Computing mitochondrial content ...")
 mt_pct <- colSums(assay(sce, "counts")[mito_gene_ids, ]) / colSums(assay(sce, "counts"))
 message("Done.")
 
-message("Apply emptyDrops filter ...")
-keep <- which(mt_pct <= snakemake@params[["pct_max"]])
+message("Applying mitochondrial content filter ...")
+keep <- (mt_pct <= snakemake@params[["pct_max"]])
+message("* Barcodes filtered: ", format(sum(!keep), big.mark = ","))
 sce <- sce[, keep]
 message("Done.")
 
