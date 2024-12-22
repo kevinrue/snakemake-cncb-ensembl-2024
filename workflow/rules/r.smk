@@ -94,9 +94,25 @@ rule sce_after_emptydrops:
     script:
         "../../scripts/apply_emptydrops.R"
 
-rule scran_hvgs_sample:
+rule filter_mitochondria:
     input:
         sce="results/sce/after_emptydrops/{sample}.rds",
+    output:
+        sce="results/filter_mitochondria/{sample}.rds",
+    params:
+        pct_max=config["filters"]["barcodes"]["mt_pct_max"],
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="32",
+        runtime="30m",
+    script:
+        "../../scripts/filter_mitochondria.R"
+
+rule scran_hvgs_sample:
+    input:
+        sce="results/filter_mitochondria/{sample}.rds",
     output:
         tsv="results/model_gene_var/{sample}/decomposed_variance.tsv",
         fit="results/model_gene_var/{sample}/fit.pdf",
@@ -114,7 +130,7 @@ rule scran_hvgs_sample:
 
 rule simpleaf_counts_all_rds:
     input:
-        expand("results/sce/after_emptydrops/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+        expand("results/filter_mitochondria/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
     output:
         rds="results/sce/counts.rds",
     threads: 2
