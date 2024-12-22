@@ -2,6 +2,7 @@ message(Sys.time())
 
 suppressPackageStartupMessages({library(batchelor)})
 suppressPackageStartupMessages({library(BiocNeighbors)})
+suppressPackageStartupMessages({library(BiocParallel)})
 suppressPackageStartupMessages({library(BiocSingular)})
 suppressPackageStartupMessages({library(SummarizedExperiment)})
 
