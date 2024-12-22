@@ -25,6 +25,7 @@ rule all:
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/mitochondria/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "results/fastmnn/sce.rds",
         "reports/umap.html",
         "reports/enrichgo/hvgs.html",
         # "results/hdf5/counts",

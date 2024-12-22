@@ -16,7 +16,7 @@ message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
-message("Importing variable genes form TXT file ...")
+message("Importing variable genes from TXT file ...")
 hvgs <- scan(snakemake@input[["hvgs"]], what = character())
 message("Done.")
 

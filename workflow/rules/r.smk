@@ -167,6 +167,25 @@ rule scran_hvgs:
     script:
         "../../scripts/scran_modelgenevar.R"
 
+rule batchelor_fastmnn:
+    input:
+        sce="results/sce/logcounts.rds",
+        hvgs="results/model_gene_var/variable_genes.txt",
+    output:
+        sce="results/fastmnn/sce.rds",
+    params:
+        batch=config["fastmnn"]["batch"],
+        d=config["fastmnn"]["d"],
+        k=config["fastmnn"]["k"],
+    resources:
+        mem="64G",
+        runtime="1h",
+    threads: 32
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/batchelor_fastmnn.R"
+
 rule scran_fixed_pca:
     input:
         sce="results/sce/logcounts.rds",
