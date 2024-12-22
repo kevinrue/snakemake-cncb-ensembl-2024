@@ -63,7 +63,7 @@ barcode_stats <- tibble(
 - rank_umi: Ranking by decreasing UMI detected
 - rank_genes: Ranking by decreasing genes detected
 
-```{r compute_statistics, include=FALSE}
+```{r compute_statistics, echo=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
 barcode_stats$genes <- colSums(assay(sce, "counts") > 0)
 barcode_stats <- barcode_stats %>% 
@@ -78,6 +78,14 @@ barcode_stats <- barcode_stats %>%
   ungroup()
 barcode_stats
 rm(sce)
+```
+
+## Remove zero-UMI barcodes
+
+```{r remove_zero_umi, echo=FALSE}
+barcode_stats <- barcode_stats %>% 
+  filter(umi_sum > 0)
+barcode_stats
 ```
 
 ## Plots
