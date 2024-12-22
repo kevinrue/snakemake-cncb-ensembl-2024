@@ -3,15 +3,25 @@ message(Sys.time())
 suppressPackageStartupMessages({library(BiocParallel)})
 suppressPackageStartupMessages({library(SingleCellExperiment)})
 suppressPackageStartupMessages({library(scran)})
+suppressPackageStartupMessages({library(scuttle)})
 suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
 message("- HVGs proportion:", snakemake@params[["hvgs_prop"]])
 
-message("Importing from RDS file ...")
-sce <- readRDS(snakemake@input[["rds"]])
+message("Importing SCE from RDS file ...")
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
+
+message("SCE object size: ", format(object.size(sce), unit = "GB"))
+
+if (!"logcounts" %in% names(assays(sce))) {
+    message("Computing log-normalisation ...")
+    sce <- logNormCounts(sce, BPPARAM = MulticoreParam(workers = snakemake@threads))
+    assay(sce, "counts") <- NULL
+    message("Done.")   
+}
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))
 

@@ -94,6 +94,24 @@ rule sce_after_emptydrops:
     script:
         "../../scripts/apply_emptydrops.R"
 
+rule scran_hvgs_sample:
+    input:
+        sce="results/sce/after_emptydrops/{sample}.rds",
+    output:
+        tsv="results/model_gene_var/{sample}/decomposed_variance.tsv",
+        fit="results/model_gene_var/{sample}/fit.pdf",
+        hvgs="results/model_gene_var/{sample}/variable_genes.txt",
+    params:
+        hvgs_prop=config["variable_genes"]["proportion"],
+    resources:
+        mem="16G",
+        runtime="30m",
+    threads: 16
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/scran_modelgenevar.R"
+
 rule simpleaf_counts_all_rds:
     input:
         expand("results/sce/after_emptydrops/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
@@ -151,7 +169,7 @@ rule filtered_gene_ids:
 
 rule scran_hvgs:
     input:
-        rds="results/sce/logcounts.rds",
+        sce="results/sce/logcounts.rds",
     output:
         tsv="results/model_gene_var/decomposed_variance.tsv",
         fit="results/model_gene_var/fit.pdf",

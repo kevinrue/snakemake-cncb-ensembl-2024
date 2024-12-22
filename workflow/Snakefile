@@ -33,3 +33,4 @@ rule all:
         expand("results/barcodeRanks/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
         expand("results/umi_min_expected/{sample}.txt", sample=SAMPLES['sample_name'].unique()),
         expand("results/fishpond/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+        expand("results/model_gene_var/{sample}/variable_genes.txt", sample=SAMPLES['sample_name'].unique()),
