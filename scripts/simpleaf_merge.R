@@ -9,7 +9,9 @@ for (rds_file in snakemake@input) {
   message("- ", rds_file)
   message("  * readRDS")
   sce <- readRDS(rds_file)
-  sce$sample <- sample_name
+  message("  * Adding sample name to colData")
+  colData(sce)[["sample"]] <- sample_name
+  message("  * Appending sample name to colnames")
   colnames(sce) <- paste0(colnames(sce), "-", sample_name)
   sce_list[[sample_name]] <- sce
   message("  * Added to list")

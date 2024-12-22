@@ -1,18 +1,4 @@
-rule simpleaf_quant_merge:
-    input:
-        expand("results/simpleaf/quant/{sample}", sample=SAMPLES['sample_name'].unique()),
-    output:
-        rds="results/sce/simpleaf.rds",
-    threads: 2
-    resources:
-        mem="128G",
-        runtime="1h",
-    conda:
-        "../../conda/conda.yaml"
-    script:
-        "../../scripts/simpleaf_quant_merge.R"
-
-rule simpleaf_counts_sample_rds:
+rule simpleaf_quant_rds:
     input:
         simpleaf="results/simpleaf/quant/{sample}"
     output:
@@ -25,6 +11,20 @@ rule simpleaf_counts_sample_rds:
         "../../conda/conda.yaml"
     script:
         "../../scripts/simpleaf_counts_rds.R"
+
+rule simpleaf_quant_merge_rds:
+    input:
+        expand("results/fishpond/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+    output:
+        rds="results/fishpond/_all.rds",
+    threads: 2
+    resources:
+        mem="128G",
+        runtime="1h",
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/simpleaf_merge.R"
 
 rule simpleaf_lower_umi_per_sample:
     input:
