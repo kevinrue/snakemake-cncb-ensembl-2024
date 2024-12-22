@@ -105,7 +105,7 @@ rule filter_mitochondria:
         "../../conda/conda.yaml"
     threads: 2
     resources:
-        mem="32",
+        mem="16G",
         runtime="30m",
     script:
         "../../scripts/filter_mitochondria.R"

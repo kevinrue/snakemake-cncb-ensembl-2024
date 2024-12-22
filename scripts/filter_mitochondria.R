@@ -19,9 +19,9 @@ mt_pct <- colSums(assay(sce, "counts")[mito_gene_ids, ]) / colSums(assay(sce, "c
 message("Done.")
 
 message("Applying mitochondrial content filter ...")
-keep <- (mt_pct <= snakemake@params[["pct_max"]])
+keep <- mt_pct <= snakemake@params[["pct_max"]]
 message("* Barcodes filtered: ", format(sum(!keep), big.mark = ","))
-sce <- sce[, keep]
+sce <- sce[, which(keep)]
 message("Done.")
 
 message("Saving to RDS file ...")
