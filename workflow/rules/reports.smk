@@ -3,10 +3,6 @@ rule simpleaf_all_report:
         rds="results/fishpond/_all.rds",
     output:
         "reports/simpleaf.html",
-    params:
-        umi_cutoff=config["filters"]["barcodes"]["min_umis"],
-        genes_cutoff=config["filters"]["barcodes"]["min_genes"],
-        expect_cells=config["filters"]["barcodes"]["expected"], # not ideal, same value for all samples!
     conda:
         "../../conda/conda.yaml"
     threads: 2

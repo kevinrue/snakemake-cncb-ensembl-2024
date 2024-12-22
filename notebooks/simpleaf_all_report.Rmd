@@ -10,15 +10,6 @@ rds_input_file <- snakemake@input[["rds"]]
 stopifnot(file.exists(rds_input_file))
 ```
 
-```{r check_params, include=FALSE}
-umi_cutoff <- snakemake@params[["umi_cutoff"]]
-stopifnot(is.numeric(umi_cutoff))
-genes_cutoff <- snakemake@params[["genes_cutoff"]]
-stopifnot(is.numeric(genes_cutoff))
-expect_cells <- snakemake@params[["expect_cells"]]
-stopifnot(is.numeric(expect_cells))
-```
-
 ```{r setup, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
@@ -89,62 +80,26 @@ barcode_stats
 rm(sce)
 ```
 
-## Proposed QC cutoffs
-
-- UMI threshold: `r umi_cutoff`
-- Genes threshold: `r genes_cutoff`
-
 ## Plots
 
 ### Total UMI
 
-```{r umi_rank_facet_sample_umi_cutoff, fig.width=9, fig.height=7, echo=FALSE}
-filtered_stats <- barcode_stats %>% 
-  group_by(sample) %>% 
-  summarise(
-    barcodes = sum(umi_sum >= umi_cutoff),
-  )
+```{r umi_rank_facet_sample, fig.width=9, fig.height=7, echo=FALSE}
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_label(aes(x = 10, y = umi_cutoff, label = format(barcodes, big.mark = ",")), filtered_stats, colour = "red") +
   facet_wrap(~sample) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     y = "UMI Counts",
-    x = "Barcodes",
-    title = paste0("Number of barcodes above ", format(umi_cutoff, big.mark = ","), " UMIs")
-  )
-```
-
-```{r umi_rank_facet_sample_barcode_cutoff, fig.width=9, fig.height=7, echo=FALSE}
-filtered_stats <- barcode_stats %>% 
-  group_by(sample) %>% 
-  summarise(
-    umi_lower = sort(umi_sum, decreasing = TRUE)[expect_cells]
-  )
-ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
-  geom_line() +
-  geom_hline(aes(yintercept = umi_lower), filtered_stats, linetype = "dashed", linewidth = 0.5, colour = "orange") +
-  geom_label(aes(x = 10, y = umi_lower, label = format(umi_lower, big.mark = ",")), filtered_stats, colour = "orange") +
-  geom_vline(xintercept = expect_cells, linetype = "dashed", linewidth = 0.5, colour = "orange") +
-  facet_wrap(~sample) +
-  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  theme_bw() +
-  labs(
-    y = "UMI Counts",
-    x = "Barcodes",
-    title = paste0("Lower number of UMIs for ", format(expect_cells, big.mark = ","), " barcodes")
+    x = "Barcodes"
   )
 ```
 
 ```{r umi_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
@@ -154,7 +109,6 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(ylim = c(1, 10E3), xlim = c(10E3, NA)) +
@@ -167,30 +121,11 @@ plot_grid(gg1, gg2)
 rm(gg1, gg2)
 ```
 
-```{r umi_histogram_facet_sample, fig.width=9, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 20E3), aes(x = umi_sum)) +
-  facet_wrap(~sample) +
-  geom_histogram(color = "black", fill = "white", binwidth = 100, position = "identity", alpha = 0.5, linewidth = 0.1) +
-  geom_vline(xintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_log10(labels = label_number(scale_cut = cut_short_scale())) +
-  theme_bw() +
-  labs(
-    x = "Barcodes",
-    y = "UMI counts"
-  )
-```
-
 ### Genes detected
 
 ```{r genes_rank_facet_sample, fig.width=9, fig.height=7, echo=FALSE}
-filtered_stats <- barcode_stats %>% 
-  group_by(sample) %>% 
-  summarise(barcodes = sum(genes >= genes_cutoff))
 ggplot(barcode_stats, aes(x = rank_genes, y = genes)) +
   geom_line() +
-  geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_label(aes(x = 10, y = genes_cutoff, label = format(barcodes, big.mark = ",")), filtered_stats, colour = "red") +
   facet_wrap(~sample) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
@@ -204,7 +139,6 @@ ggplot(barcode_stats, aes(x = rank_genes, y = genes)) +
 ```{r genes_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
 gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw() +
@@ -214,7 +148,6 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   )
 gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
-  geom_hline(yintercept = genes_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
   coord_cartesian(ylim = c(0, 2E3), xlim = c(10E3, NA)) +
@@ -227,51 +160,20 @@ plot_grid(gg1, gg2)
 rm(gg1, gg2)
 ```
 
-```{r genes_histogram_colour_sample, fig.width=9, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(genes < 5E3), aes(x = genes)) +
-  facet_wrap(~sample) +
-  geom_histogram(color = "black", fill = "white", binwidth = 25, position = "identity", alpha = 0.5, linewidth = 0.1) +
-  scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  theme_bw() +
-  labs(
-    x = "Genes",
-    y = "Barcodes"
-  )
-```
-
 ### Total UMI and genes detected
 
 ```{r umi_genes_scatterplot_colour_sample, fig.width=9, fig.height=6, echo=FALSE}
 ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = genes, y = umi_sum)) +
   facet_wrap(~sample) +
   geom_point_rast(size = 0.1) +
-  geom_vline(xintercept = genes_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
-    x = "UMI counts",
-    y = "Barcodes"
+    x = "Genes detected",
+    y = "UMI counts"
   )
 ```
-
-## Apply filters
-
-```{r filters}
-barcode_stats %>% 
-  group_by(sample) %>% 
-  summarise(
-    umi_filter = sum(umi_sum >= umi_cutoff),
-    genes_filter = sum(genes >= genes_cutoff),
-    all_filters = sum(umi_sum >= umi_cutoff & genes >= genes_cutoff)
-  ) %>%
-  knitr::kable(format.args = list(big.mark = ","))
-```
-
-Total: `r format(with(barcode_stats, sum(umi_sum >= umi_cutoff & genes >= genes_cutoff)), big.mark = ",")`
 
 ## Session info
 
