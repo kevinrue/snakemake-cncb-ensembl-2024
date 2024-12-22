@@ -12,6 +12,12 @@ message("Loading simpleaf results ... ")
 sce <- loadFry(fryDir = file.path(snakemake@input[["simpleaf"]], "af_quant"), outputFormat = "S+A", quiet = TRUE)
 message("Done.")
 
+message("Removing zero-UMI barcodes ... ")
+umi_sum <- rowSums(assay(sce, "counts"))
+message("* Removing ", sum(umi_sum == 0), " barcodes.")
+sce <- sce[, umi_sum > 0]
+message("Done.")
+
 message("Saving to RDS file ...")
 saveRDS(sce, snakemake@output[["rds"]])
 message("Done.")
