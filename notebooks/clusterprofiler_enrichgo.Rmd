@@ -24,3 +24,13 @@ head(ego, n = 50) %>%
   select(-geneID) %>%
   knitr::kable("pipe")
 ```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

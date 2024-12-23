@@ -92,6 +92,10 @@ for (fdr_cutoff in fdr_thresholds) {
 
 ## Session info
 
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
 ```{r session_info, echo=FALSE}
 sessionInfo()
 ```

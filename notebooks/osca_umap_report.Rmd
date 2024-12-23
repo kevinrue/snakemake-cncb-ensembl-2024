@@ -69,6 +69,8 @@ for (coldata in colnames(colData(sce))) {
 
 ## Session info
 
+`r date()`
+
 Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}

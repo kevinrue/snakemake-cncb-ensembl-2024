@@ -195,6 +195,8 @@ ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = umi_sum, 
 
 ## Session info
 
+`r date()`
+
 Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}

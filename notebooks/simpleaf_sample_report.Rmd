@@ -25,9 +25,9 @@ expect_cells <- snakemake@params[["expect_cells"]]
 ```
 
 - Name: `r basename(snakemake@input[["sce"]])`
-- Expected cells: `r expect_cells`
+- Expected number of cells: `r expect_cells`
 
-## Load sampleaf output
+## Load SCE object
 
 - Output format: `S+A`
 
@@ -37,12 +37,20 @@ sce <- readRDS(snakemake@input[["sce"]])
 sce
 ```
 
+## Load mitochondrial gene list
+
+```{r}
+mito_gene_ids <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+str(mito_gene_ids)
+```
+
 ## Barcode statistics
 
 ```{r compute_statistics, include=FALSE}
 barcode_stats <- tibble(
   umi_sum = colSums(assay(sce, "counts")),
-  genes = colSums(assay(sce, "counts") > 0)
+  genes = colSums(assay(sce, "counts") > 0),
+  mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
 ) %>% 
   filter(umi_sum > 0) %>% 
   arrange(desc(umi_sum)) %>% 
@@ -53,42 +61,53 @@ barcode_stats
 rm(sce)
 ```
 
-## Secondary statistics
-
-```{r umi_lower, include=FALSE}
-umi_lower <- sort(barcode_stats$umi_sum, decreasing = TRUE)[expect_cells]
-```
-
-- Minimum number of UMI for top `r expect_cells` barcodes: `r umi_lower`
-
 ### Range of UMI per barcode
 
 ```{r range_umi_sum, include=FALSE}
 range(barcode_stats$umi_sum)
 ```
 
+### Range of mitochondrial contents
+
+```{r range_mt_pct, include=FALSE}
+range(barcode_stats$mt_pct)
+```
+
 ### Barcode-Rank Plot
 
 ```{r barcode_rank_plot, echo=FALSE}
+expect_cells_min_umi <- barcode_stats %>% 
+	arrange(desc(umi_sum)) %>% 
+	slice_head(n = expect_cells) %>% 
+	slice_tail(n = 1) %>% 
+	pull(umi_sum)
+# ties might capture more than expect_cells
+filtered_stats <- barcode_stats %>% 
+  summarise(
+    barcodes = sum(umi_sum >= expect_cells_min_umi),
+  )
 top_stats <- barcode_stats %>%
   slice_max(umi_sum, n = 1)
-ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
-  geom_line() +
-  geom_label(aes(label = format(umi_sum, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
-  geom_hline(yintercept = umi_lower, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_vline(aes(xintercept = expect_cells), data = tibble(), linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_label(aes(x = 1, y = umi_lower, label = format(umi_lower, big.mark = ",")), tibble(), colour = "red", hjust = 0) +
+ggplot() +
+  geom_line(aes(x = rank_umi, y = umi_sum), barcode_stats) +
+  geom_label(aes(x = rank_umi, y = umi_sum, label = format(umi_sum, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
+  geom_hline(yintercept = expect_cells_min_umi, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_vline(xintercept = expect_cells, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 1, y = expect_cells_min_umi, label = format(expect_cells_min_umi, big.mark = ",")), data = tibble(), colour = "red", hjust = 0) +
+	geom_label(aes(x = expect_cells, y = 1, label = format(expect_cells, big.mark = ",")), data = tibble(), colour = "red", vjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     y = "UMI Counts",
     x = "Barcodes",
-    subtitle = sprintf("Maximum UMI & Minimum UMI for expected cells (%s)", format(expect_cells, big.mark = ","))
+    subtitle = "Maximum UMI count & minimum UMI counts for expected number of cells"
   )
 ```
 
 ### Histogram of UMI per barcode
+
+- Red dashed line: Minimum UMI count for expected number of cells.
 
 ```{r umi_sum_histogram, echo=FALSE, fig.width=12, fig.height=4}
 gg1 <- ggplot(barcode_stats, aes(x = umi_sum)) +
@@ -103,7 +122,7 @@ gg1 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   )
 gg2 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = expect_cells_min_umi, color = "red", linetype = "dashed") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3)) +
@@ -115,7 +134,7 @@ gg2 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   )
 gg3 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = umi_cutoff, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = expect_cells_min_umi, color = "red", linetype = "dashed") +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(xlim = c(0, 5E3), ylim = c(0, 5E3)) +
@@ -128,8 +147,8 @@ gg3 <- ggplot(barcode_stats, aes(x = umi_sum)) +
 gg4 <- ggplot(barcode_stats, aes(x = umi_sum)) +
   geom_histogram(binwidth = 100) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  coord_cartesian(xlim = c(5E3, NA), ylim = c(0, 100)) +
-  labs(title = "Total UMI (5,000 - max) & Bin count (0 - 100)") +
+  coord_cartesian(xlim = c(expect_cells_min_umi, NA), ylim = c(0, 100)) +
+  labs(title = sprintf("Total UMI (%s - max) & Bin count (0 - 100)", format(expect_cells_min_umi, big.mark = ","))) +
   theme_bw() +
   labs(
     y = "Barcodes",
@@ -139,7 +158,29 @@ plot_grid(gg1, gg2, gg3, gg4)
 rm(gg1, gg2, gg3, gg4)
 ```
 
+## Mitochondrial content
+
+```{r, echo=FALSE}
+# need iSEE
+# plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
+#     width=0.4, varwidth=FALSE, adjust=1,
+#     method='quasirandom', nbins=NULL);
+barcode_stats %>% 
+  filter(umi_sum >= expect_cells_min_umi) %>% 
+  ggplot(aes(x = mt_pct)) +
+  geom_histogram(binwidth = 0.01) +
+  coord_cartesian(xlim = c(0, 1)) +
+  # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Mitochondrial content"
+  )
+```
+
 ## Session info
+
+`r date()`
 
 Bioconductor version `r BiocManager::version()`
 

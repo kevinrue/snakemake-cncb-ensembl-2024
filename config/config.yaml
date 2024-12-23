@@ -15,7 +15,7 @@ simpleaf:
     rlen: 150
 
 emptydrops:
-  lower: 1000
+  lower: 500
   niters: 10000
   fdr: 0.001
 
