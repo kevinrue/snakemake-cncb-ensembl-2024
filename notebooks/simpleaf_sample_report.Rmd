@@ -7,10 +7,9 @@ date: "`r Sys.Date()`"
 
 ## Sample information
 
-- Name: `r basename(snakemake@input[["simpleaf"]])`
+- Name: `r basename(snakemake@input[["sce"]])`
 
 ```{r libraries, include=FALSE}
-.libPaths()
 library(cowplot)
 library(fishpond)
 library(ggplot2)

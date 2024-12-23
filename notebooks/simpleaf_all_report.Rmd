@@ -36,6 +36,13 @@ sce <- readRDS(rds_input_file)
 sce
 ```
 
+## Load mitochondrial gene list
+
+```{r mito_gene_ids, echo=FALSE}
+mito_gene_ids <- read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+str(mito_gene_ids)
+```
+
 ## Barcode statistics
 
 ```{r barcode_metadata, include=FALSE}
@@ -76,6 +83,10 @@ barcode_stats <- barcode_stats %>%
   group_by(sample) %>% 
   mutate(rank_genes = row_number()) %>% 
   ungroup()
+barcode_stats <- barcode_stats %>% 
+  mutate(
+    mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+  )
 barcode_stats
 rm(sce)
 ```
@@ -160,18 +171,25 @@ plot_grid(gg1, gg2)
 rm(gg1, gg2)
 ```
 
+### Mitochondrial content
+
+To do:
+
+- overlaid density plot of mitochondrial content
+- scatter plot of mitochondrial content vs. UMI counts
+
 ### Total UMI and genes detected
 
 ```{r umi_genes_scatterplot_colour_sample, fig.width=9, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = genes, y = umi_sum)) +
+ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = umi_sum, y = genes)) +
   facet_wrap(~sample) +
   geom_point_rast(size = 0.1) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
-    x = "Genes detected",
-    y = "UMI counts"
+    x = "UMI counts",
+    y = "Genes detected"
   )
 ```
 
