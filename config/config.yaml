@@ -27,11 +27,12 @@ filters:
     min_genes: 1000
 
 fastmnn:
-  batch: sample
+  block: timepoint
   k: 20
   d: 50
 
 variable_genes:
+  block: sample
   proportion: 0.1
 
 fixed_pca:

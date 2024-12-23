@@ -188,9 +188,10 @@ rule scran_hvgs:
         sce="results/sce/logcounts.rds",
     output:
         tsv="results/model_gene_var/decomposed_variance.tsv",
-        fit="results/model_gene_var/fit.pdf",
+        # fit="results/model_gene_var/fit.pdf",
         hvgs="results/model_gene_var/variable_genes.txt",
     params:
+        block=config["variable_genes"]["block"],
         hvgs_prop=config["variable_genes"]["proportion"],
     resources:
         mem="128G",
@@ -199,7 +200,7 @@ rule scran_hvgs:
     conda:
         "../../conda/conda.yaml"
     script:
-        "../../scripts/scran_modelgenevar.R"
+        "../../scripts/scran_modelgenevar_block.R"
 
 rule batchelor_fastmnn:
     input:
@@ -208,12 +209,12 @@ rule batchelor_fastmnn:
     output:
         sce="results/fastmnn/sce.rds",
     params:
-        batch=config["fastmnn"]["batch"],
+        block=config["fastmnn"]["block"],
         d=config["fastmnn"]["d"],
         k=config["fastmnn"]["k"],
     resources:
         mem="64G",
-        runtime="1h",
+        runtime="6h",
     threads: 32
     conda:
         "../../conda/conda.yaml"
