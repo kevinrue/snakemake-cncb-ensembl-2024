@@ -7,16 +7,12 @@ date: "`r Sys.Date()`"
 
 ## Sample information
 
-- Name: `r basename(snakemake@input[["sce"]])`
 
 ```{r libraries, include=FALSE}
 library(cowplot)
-library(fishpond)
 library(ggplot2)
-library(rtracklayer)
 library(scales)
-library(stringr)
-library(SummarizedExperiment)
+library(SingleCellExperiment)
 library(tidyverse)
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
@@ -25,8 +21,11 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r parameters, include=FALSE}
-umi_cutoff <- snakemake@params[["umi_cutoff"]]
+expect_cells <- snakemake@params[["expect_cells"]]
 ```
+
+- Name: `r basename(snakemake@input[["sce"]])`
+- Expected cells: `r expect_cells`
 
 ## Load sampleaf output
 
@@ -54,6 +53,14 @@ barcode_stats
 rm(sce)
 ```
 
+## Secondary statistics
+
+```{r umi_lower, include=FALSE}
+umi_lower <- sort(barcode_stats$umi_sum, decreasing = TRUE)[expect_cells]
+```
+
+- Minimum number of UMI for top `r expect_cells` barcodes: `r umi_lower`
+
 ### Range of UMI per barcode
 
 ```{r range_umi_sum, include=FALSE}
@@ -63,26 +70,21 @@ range(barcode_stats$umi_sum)
 ### Barcode-Rank Plot
 
 ```{r barcode_rank_plot, echo=FALSE}
-filtered_stats <- barcode_stats %>% 
-  filter(umi_sum > 0) %>% 
-  summarise(
-    barcodes = sum(umi_sum >= umi_cutoff),
-  )
 top_stats <- barcode_stats %>%
   slice_max(umi_sum, n = 1)
 ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   geom_line() +
   geom_label(aes(label = format(umi_sum, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
-  geom_hline(yintercept = umi_cutoff, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_vline(aes(xintercept = barcodes), data = filtered_stats, linetype = "dashed", linewidth = 0.5, colour = "red") +
-  geom_label(aes(x = barcodes, y = 1, label = format(barcodes, big.mark = ",")), filtered_stats, colour = "red", vjust = 0) +
+  geom_hline(yintercept = umi_lower, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_vline(aes(xintercept = expect_cells), data = tibble(), linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 1, y = umi_lower, label = format(umi_lower, big.mark = ",")), tibble(), colour = "red", hjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     y = "UMI Counts",
     x = "Barcodes",
-    title = paste0("Maximum UMI count & Number of barcodes >= ", format(umi_cutoff, big.mark = ","), " UMIs")
+    subtitle = sprintf("Maximum UMI & Minimum UMI for expected cells (%s)", format(expect_cells, big.mark = ","))
   )
 ```
 

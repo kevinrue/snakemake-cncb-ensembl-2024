@@ -1,3 +1,19 @@
+rule simpleaf_sample_report:
+    input:
+        sce="results/fishpond/{sample}.rds",
+    output:
+        "reports/simpleaf/{sample}.html",
+    params:
+        expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="30m",
+    script:
+        "../../notebooks/simpleaf_sample_report.Rmd"
+
 rule simpleaf_all_report:
     input:
         rds="results/fishpond/_all.rds",
@@ -11,22 +27,6 @@ rule simpleaf_all_report:
         runtime="30m",
     script:
         "../../notebooks/simpleaf_all_report.Rmd"
-
-rule simpleaf_sample_report:
-    input:
-        rds="results/fishpond/{sample}.rds",
-    output:
-        "reports/simpleaf/{sample}.html",
-    params:
-        umi_cutoff=config["filters"]["barcodes"]["min_umis"],
-    conda:
-        "../../conda/conda.yaml"
-    threads: 2
-    resources:
-        mem="16G",
-        runtime="30m",
-    script:
-        "../../notebooks/simpleaf_sample_report.Rmd"
 
 rule barcoderanks_report:
     input:
