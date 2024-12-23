@@ -227,7 +227,7 @@ rule batchelor_fastmnn:
         d=config["fastmnn"]["d"],
         k=config["fastmnn"]["k"],
     resources:
-        mem="16G",
+        mem="64G",
         runtime="2h",
     threads: 32
     conda:
@@ -245,8 +245,8 @@ rule scran_fixed_pca:
     params:
         rank=config["fixed_pca"]["rank"],
     resources:
-        mem="256G",
-        runtime="6h",
+        mem="128G",
+        runtime="1h",
     threads: 24
     conda:
         "../../conda/conda.yaml"

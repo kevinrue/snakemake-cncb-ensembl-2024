@@ -31,12 +31,12 @@ message("Saving modelGeneVar result to RDS ...")
 saveRDS(dec, snakemake@output[["rds"]])
 message("Done.")
 
-message("Selecting highly variable genes ...")
-chosen <- getTopHVGs(dec, prop = snakemake@params[["hvgs_prop"]])
-message("Done.")
+# message("Selecting highly variable genes ...")
+# chosen <- getTopHVGs(dec, prop = snakemake@params[["hvgs_prop"]])
+# message("Done.")
 
-message("Writing highly variable genes to TXT ...")
-write(chosen, snakemake@output[["hvgs"]])
-message("Done.")
+# message("Writing highly variable genes to TXT ...")
+# write(chosen, snakemake@output[["hvgs"]])
+# message("Done.")
 
 message(Sys.time())
