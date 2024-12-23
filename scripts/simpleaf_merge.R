@@ -1,6 +1,6 @@
 message(Sys.time())
 
-suppressPackageStartupMessages({library(SummarizedExperiment)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
 
 message("Loading samples ... ")
 sce_list <- list()
@@ -34,7 +34,7 @@ sce <- do.call("cbind", sce_list)
 message("Done.")
 
 message("Saving to RDS file ...")
-saveRDS(sce, snakemake@output[["rds"]])
+saveRDS(sce, snakemake@output[["sce"]])
 message("Done.")
 
 message(Sys.time())

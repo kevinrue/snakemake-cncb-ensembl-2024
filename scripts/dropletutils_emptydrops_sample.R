@@ -2,8 +2,7 @@ message(Sys.time())
 
 suppressPackageStartupMessages({library(BiocParallel)})
 suppressPackageStartupMessages({library(DropletUtils)})
-suppressPackageStartupMessages({library(fishpond)})
-suppressPackageStartupMessages({library(SummarizedExperiment)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
 suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")

@@ -9,7 +9,7 @@ suppressPackageStartupMessages({library(tidyverse)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
-message("- block: ", snakemake@params[["block"]])
+message("- batch: ", snakemake@params[["batch"]])
 message("- k: ", snakemake@params[["k"]])
 message("- d: ", snakemake@params[["d"]])
 
@@ -19,6 +19,8 @@ message("Done.")
 
 message("Loading sample ... ")
 sce <- readRDS(snakemake@input[["sce"]])
+message("* Number of cells: ", ncol(sce))
+message("* Number of feature: ", nrow(sce))
 message("Done.")
 
 timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
@@ -32,9 +34,10 @@ colData(sce) <- str_match(string = colData(sce)[["sample"]], pattern = "WPP(?<ti
   as("DataFrame")
 
 message("Apply fastMNN ...")
+message("* Number of batches: ", length(unique(colData(sce)[[snakemake@params[["batch"]]]])))
 sce <- fastMNN(
     sce,
-    batch = colData(sce)[[snakemake@params[["block"]]]],
+    batch = colData(sce)[[snakemake@params[["batch"]]]],
     k = snakemake@params[["k"]],
     d = snakemake@params[["d"]],
     auto.merge = TRUE,
@@ -48,7 +51,7 @@ sce <- fastMNN(
 message("Done.")
 
 message("Saving to RDS file ...")
-saveRDS(sce, snakemake@output[["rds"]])
+saveRDS(sce, snakemake@output[["sce"]])
 message("Done.")
 
 message(Sys.time())

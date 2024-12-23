@@ -14,7 +14,7 @@ rule simpleaf_all_report:
 
 rule simpleaf_sample_report:
     input:
-        simpleaf="results/simpleaf/quant/{sample}",
+        rds="results/fishpond/{sample}.rds",
     output:
         "reports/simpleaf/{sample}.html",
     params:
@@ -46,7 +46,7 @@ rule barcoderanks_report:
 
 rule emptydrop_report_sample:
     input:
-        rds="results/emptyDrops/{sample}.rds",
+        rds="results/emptyDrops/result/{sample}.rds",
     output:
         "reports/emptyDrops/{sample}.html",
     conda:
@@ -60,9 +60,9 @@ rule emptydrop_report_sample:
 
 rule mitochondrial_report_sample:
     input:
-        sce="results/sce/after_emptydrops/{sample}.rds",
+        sce="results/filter_mitochondria/{sample}.rds",
     output:
-        "reports/mitochondria/{sample}.html",
+        "reports/filter_mitochondria/{sample}.html",
     conda:
         "../../conda/conda.yaml"
     threads: 2
@@ -74,7 +74,7 @@ rule mitochondrial_report_sample:
 
 rule scran_umap_report:
     input:
-        rds="results/sce/umap.rds",
+        sce="results/filter_mitochondria/_umap.rds",
     output:
         "reports/umap.html",
     conda:

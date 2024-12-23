@@ -27,7 +27,7 @@ filters:
     min_genes: 1000
 
 fastmnn:
-  block: timepoint
+  batch: timepoint
   k: 20
   d: 50
 

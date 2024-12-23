@@ -2,7 +2,7 @@ rule simpleaf_quant_rds:
     input:
         simpleaf="results/simpleaf/quant/{sample}"
     output:
-        rds="results/fishpond/{sample}.rds"
+        sce="results/fishpond/{sample}.rds"
     threads: 2
     resources:
         mem="32G",
@@ -16,7 +16,7 @@ rule simpleaf_quant_merge_rds:
     input:
         expand("results/fishpond/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
     output:
-        rds="results/fishpond/_all.rds",
+        sce="results/fishpond/_all.rds",
     threads: 2
     resources:
         mem="128G",
@@ -28,7 +28,7 @@ rule simpleaf_quant_merge_rds:
 
 rule simpleaf_lower_umi_per_sample:
     input:
-        simpleaf="results/simpleaf/quant/{sample}",
+        sce="results/fishpond/{sample}.rds",
     output:
         txt="results/umi_min_expected/{sample}.txt"
     params:
@@ -40,11 +40,11 @@ rule simpleaf_lower_umi_per_sample:
     conda:
         "../../conda/conda.yaml"
     script:
-        "../../scripts/simpleaf_find_lower.R"
+        "../../scripts/lower_umi_sample.R"
 
 rule dropletutils_barcode_ranks:
     input:
-        simpleaf="results/simpleaf/quant/{sample}",
+        sce="results/fishpond/{sample}.rds",
         lower="results/umi_min_expected/{sample}.txt",
     output:
         rds="results/barcodeRanks/{sample}.rds",
@@ -63,7 +63,7 @@ rule dropletutils_emptydrops_per_sample:
         barcoderank="results/barcodeRanks/{sample}.rds",
         ignore="results/umi_min_expected/{sample}.txt"
     output:
-        rds="results/emptyDrops/{sample}.rds",
+        rds="results/emptyDrops/result/{sample}.rds",
     params:
         expect_cells=lambda wildcards, input: SAMPLES['expect_cells'][wildcards.sample],
         lower=config["emptydrops"]["lower"],
@@ -80,9 +80,9 @@ rule dropletutils_emptydrops_per_sample:
 rule sce_after_emptydrops:
     input:
         sce="results/fishpond/{sample}.rds",
-        emptydrops="results/emptyDrops/{sample}.rds",
+        emptydrops="results/emptyDrops/result/{sample}.rds",
     output:
-        rds="results/sce/after_emptydrops/{sample}.rds",
+        rds="results/emptyDrops/sce/{sample}.rds",
     params:
         fdr=config["emptydrops"]["fdr"],
     conda:
@@ -96,7 +96,7 @@ rule sce_after_emptydrops:
 
 rule filter_mitochondria:
     input:
-        sce="results/sce/after_emptydrops/{sample}.rds",
+        sce="results/emptyDrops/sce/{sample}.rds",
     output:
         sce="results/filter_mitochondria/{sample}.rds",
     params:
@@ -132,7 +132,7 @@ rule simpleaf_counts_all_rds:
     input:
         expand("results/filter_mitochondria/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
     output:
-        rds="results/sce/counts.rds",
+        sce="results/filter_mitochondria/_all.rds",
     threads: 2
     resources:
         mem="128G",
@@ -144,9 +144,9 @@ rule simpleaf_counts_all_rds:
 
 rule simpleaf_counts_hdf5:
     input:
-        rds="results/sce/counts.rds",
+        sce="results/filter_mitochondria/_all.rds"
     output:
-        hdf5=directory("results/hdf5/counts"),
+        sce=directory("results/filter_mitochondria/hdf5"),
     resources:
         mem="64G",
         runtime="6h",
@@ -157,9 +157,9 @@ rule simpleaf_counts_hdf5:
 
 rule scuttle_lognormcounts:
     input:
-        rds="results/sce/counts.rds",
+        sce="results/filter_mitochondria/_all.rds"
     output:
-        rds="results/sce/logcounts.rds",
+        sce="results/filter_mitochondria/_logcounts.rds",
     resources:
         mem="64G",
         runtime="30m",
@@ -171,9 +171,9 @@ rule scuttle_lognormcounts:
 
 rule filtered_gene_ids:
     input:
-        rds="results/sce/logcounts.rds",
+        sce="results/filter_mitochondria/_logcounts.rds",
     output:
-        txt="results/sce/logcounts_rownames.txt"
+        txt="results/filter_mitochondria/_logcounts_rownames.txt"
     conda:
         "../../conda/conda.yaml"
     threads: 2
@@ -183,13 +183,11 @@ rule filtered_gene_ids:
     script:
         "../../scripts/sce_rownames.R"
 
-rule scran_hvgs:
+rule scran_modelgenevar_block:
     input:
-        sce="results/sce/logcounts.rds",
+        sce="results/filter_mitochondria/_logcounts.rds",
     output:
-        tsv="results/model_gene_var/decomposed_variance.tsv",
-        # fit="results/model_gene_var/fit.pdf",
-        hvgs="results/model_gene_var/variable_genes.txt",
+        rds="results/model_gene_var/modelGeneVar.rds",
     params:
         block=config["variable_genes"]["block"],
         hvgs_prop=config["variable_genes"]["proportion"],
@@ -202,19 +200,35 @@ rule scran_hvgs:
     script:
         "../../scripts/scran_modelgenevar_block.R"
 
+rule scran_top_hvgs:
+    input:
+        rds="results/model_gene_var/modelGeneVar.rds",
+    output:
+        hvgs="results/model_gene_var/variable_genes.txt",
+    params:
+        prop=config["variable_genes"]["proportion"],
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="10m",
+    script:
+        "../../scripts/scran_top_hvgs.R"
+
 rule batchelor_fastmnn:
     input:
-        sce="results/sce/logcounts.rds",
+        sce="results/filter_mitochondria/_logcounts.rds",
         hvgs="results/model_gene_var/variable_genes.txt",
     output:
         sce="results/fastmnn/sce.rds",
     params:
-        block=config["fastmnn"]["block"],
+        batch=config["fastmnn"]["batch"],
         d=config["fastmnn"]["d"],
         k=config["fastmnn"]["k"],
     resources:
-        mem="64G",
-        runtime="6h",
+        mem="16G",
+        runtime="2h",
     threads: 32
     conda:
         "../../conda/conda.yaml"
@@ -223,11 +237,11 @@ rule batchelor_fastmnn:
 
 rule scran_fixed_pca:
     input:
-        sce="results/sce/logcounts.rds",
+        sce="results/filter_mitochondria/_logcounts.rds",
         hvgs="results/model_gene_var/variable_genes.txt",
     output:
         var_explained="results/fixed_pca/var_explained.pdf",
-        sce="results/sce/pca.rds",
+        sce="results/filter_mitochondria/_pca.rds",
     params:
         rank=config["fixed_pca"]["rank"],
     resources:
@@ -241,9 +255,9 @@ rule scran_fixed_pca:
 
 rule scran_umap:
     input:
-        sce="results/sce/pca.rds",
+        sce="results/filter_mitochondria/_pca.rds",
     output:
-        sce="results/sce/umap.rds",
+        sce="results/filter_mitochondria/_umap.rds",
     params:
         pcs=config["umap"]["n_pcs"],
     resources:
@@ -258,7 +272,7 @@ rule scran_umap:
 rule enrichgo_hvgs:
     input:
         hvgs="results/model_gene_var/variable_genes.txt",
-        bg="results/sce/logcounts_rownames.txt"
+        bg="results/filter_mitochondria/_logcounts_rownames.txt"
     output:
         rds="results/enrichgo/hvgs.rds",
     conda:

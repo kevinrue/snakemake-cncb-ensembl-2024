@@ -2,16 +2,11 @@ message(Sys.time())
 
 suppressPackageStartupMessages({library(BiocParallel)})
 suppressPackageStartupMessages({library(DropletUtils)})
-suppressPackageStartupMessages({library(fishpond)})
-suppressPackageStartupMessages({library(SummarizedExperiment)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
 stopifnot(is.numeric(snakemake@threads))
-
-sample_fry_dir <- file.path(snakemake@input[["simpleaf"]], "af_quant")
-message("Input directory: ", sample_fry_dir)
-stopifnot(dir.exists(sample_fry_dir))
 
 lower_file <- snakemake@input[["lower"]]
 message("Lower file: ", lower_file)
@@ -24,7 +19,7 @@ message("Done.")
 message("lower: ", format(lower, big.mark = ","))
 
 message("Loading sample ... ")
-sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))

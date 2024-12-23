@@ -21,7 +21,7 @@ library(tidyverse)
 ## Load sce
 
 ```{r load_sce, echo=FALSE}
-sce <- readRDS(snakemake@input[["rds"]])
+sce <- readRDS(snakemake@input[["sce"]])
 sce
 ```
 

@@ -3,7 +3,7 @@ message(Sys.time())
 suppressPackageStartupMessages({library(SingleCellExperiment)})
 
 message("Importing from RDS file ...")
-sce <- readRDS(snakemake@input[["rds"]])
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))

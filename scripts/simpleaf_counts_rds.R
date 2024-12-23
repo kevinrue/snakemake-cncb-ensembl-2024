@@ -19,7 +19,7 @@ sce <- sce[, umi_sum > 0]
 message("Done.")
 
 message("Saving to RDS file ...")
-saveRDS(sce, snakemake@output[["rds"]])
+saveRDS(sce, snakemake@output[["sce"]])
 message("Done.")
 
 message(Sys.time())

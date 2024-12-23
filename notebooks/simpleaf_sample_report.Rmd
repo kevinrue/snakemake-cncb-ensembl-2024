@@ -25,11 +25,6 @@ barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
-```{r snakemake, include=FALSE}
-sample_name <- basename(snakemake@input[["simpleaf"]])
-alevin_quant_dir <- dirname(snakemake@input[["simpleaf"]])
-```
-
 ```{r parameters, include=FALSE}
 umi_cutoff <- snakemake@params[["umi_cutoff"]]
 ```
@@ -40,10 +35,7 @@ umi_cutoff <- snakemake@params[["umi_cutoff"]]
 
 ```{r load_fry, echo=FALSE}
 #| message: false
-sce <- loadFry(
-  fryDir = file.path(alevin_quant_dir, sample_name, "af_quant"),
-  outputFormat = "S+A"
-)
+sce <- readRDS(snakemake@input[["sce"]])
 sce
 ```
 

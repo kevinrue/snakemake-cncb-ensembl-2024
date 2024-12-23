@@ -1,18 +1,14 @@
 message(Sys.time())
 
 suppressPackageStartupMessages({library(fishpond)})
-suppressPackageStartupMessages({library(SummarizedExperiment)})
+suppressPackageStartupMessages({library(SingleCellExperiment)})
 
 message("Job configuration: None")
 message("- expect_cells: ", snakemake@params[["expect_cells"]])
 stopifnot(is.numeric(snakemake@params[["expect_cells"]]))
 
-sample_fry_dir <- file.path(snakemake@input[["simpleaf"]], "af_quant")
-message("Input directory: ", sample_fry_dir)
-stopifnot(dir.exists(sample_fry_dir))
-
 message("Loading sample ... ")
-sce <- loadFry(fryDir = sample_fry_dir, outputFormat = "S+A", quiet = TRUE)
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))

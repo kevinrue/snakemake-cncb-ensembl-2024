@@ -8,7 +8,7 @@ message("Job configuration")
 message("- threads: ", snakemake@threads)
 
 message("Importing from RDS file ...")
-sce <- readRDS(snakemake@input[["rds"]])
+sce <- readRDS(snakemake@input[["sce"]])
 message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))
@@ -26,7 +26,7 @@ message("Done.")
 message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
 message("Saving to RDS file ...")
-saveRDS(sce, snakemake@output[["rds"]])
+saveRDS(sce, snakemake@output[["sce"]])
 message("Done.")
 
 message(Sys.time())
