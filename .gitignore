@@ -1,6 +1,7 @@
 .condarc
 .Rprofile
 .Rproj.user
+export.yaml
 nohup.out
 renv.lock
 snakemake-cncb-ensembl-2024.Rproj
