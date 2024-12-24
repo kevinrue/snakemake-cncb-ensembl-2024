@@ -9,8 +9,8 @@ rule simpleaf_sample_report:
         "../../conda/conda.yaml"
     threads: 2
     resources:
-        mem="16G",
-        runtime="30m",
+        mem="8G",
+        runtime="5m",
     script:
         "../../notebooks/simpleaf_sample_report.Rmd"
 
