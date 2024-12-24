@@ -111,12 +111,12 @@ ggplot() +
 
 ### Features-Rank Plot
 
-```{r barcode_rank_plot, echo=FALSE}
+```{r feature_rank_plot, echo=FALSE}
 top_stats <- barcode_stats %>%
   slice_max(genes, n = 1)
 ggplot() +
-  geom_line(aes(x = rank_umi, y = genes), barcode_stats) +
-  geom_label(aes(x = rank_umi, y = genes, label = format(genes, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
+  geom_line(aes(x = rank_genes, y = genes), barcode_stats) +
+  geom_label(aes(x = rank_genes, y = genes, label = format(genes, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
