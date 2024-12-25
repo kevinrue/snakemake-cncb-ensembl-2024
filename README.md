@@ -16,6 +16,10 @@ If you use this workflow in a paper, don't forget to give credits to the authors
 Typical usage:
 
 ```
+# Cleanup
+rm nohup.out
+mv sps-* .sps
+
 # Working directory
 cd $(realpath .) # containers prefer real paths
 

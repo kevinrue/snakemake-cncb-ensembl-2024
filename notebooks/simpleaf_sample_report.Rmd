@@ -25,11 +25,9 @@ expect_cells <- snakemake@params[["expect_cells"]]
 ```
 
 - Name: `r basename(snakemake@input[["sce"]])`
-- Expected number of cells: `r expect_cells`
+- Expected number of cells: `r format(expect_cells, big.mark = ",")`
 
 ## Load SCE object
-
-- Output format: `S+A`
 
 ```{r load_fry, echo=FALSE}
 #| message: false
@@ -39,7 +37,7 @@ sce
 
 ## Load mitochondrial gene list
 
-```{r}
+```{r, echo=FALSE}
 mito_gene_ids <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
 str(mito_gene_ids)
 ```
@@ -77,8 +75,9 @@ range(barcode_stats$mt_pct)
 
 Labels:
 
-- Maximum UMI count.
-- Minimum UMI counts for expected number of cells.
+- Maximum UMI count (black).
+- Minimum UMI counts for expected number of cells (red).
+- Expected number of cells (red).
 
 ```{r barcode_rank_plot, echo=FALSE}
 expect_cells_min_umi <- barcode_stats %>% 
@@ -86,11 +85,6 @@ expect_cells_min_umi <- barcode_stats %>%
 	slice_head(n = expect_cells) %>% 
 	slice_tail(n = 1) %>% 
 	pull(umi_sum)
-# ties might capture more than expect_cells
-filtered_stats <- barcode_stats %>% 
-  summarise(
-    barcodes = sum(umi_sum >= expect_cells_min_umi),
-  )
 top_stats <- barcode_stats %>%
   slice_max(umi_sum, n = 1)
 ggplot() +
@@ -111,14 +105,29 @@ ggplot() +
 
 ### Features-Rank Plot
 
+Labels:
+
+- Maximum genes detected (black).
+- Minimum genes detected for expected number of cells (red).
+- Expected number of cells (red).
+
 ```{r feature_rank_plot, echo=FALSE}
+expect_cells_min_genes <- barcode_stats %>% 
+	arrange(desc(genes)) %>% 
+	slice_head(n = expect_cells) %>% 
+	slice_tail(n = 1) %>% 
+	pull(genes)
 top_stats <- barcode_stats %>%
   slice_max(genes, n = 1)
 ggplot() +
   geom_line(aes(x = rank_genes, y = genes), barcode_stats) +
   geom_label(aes(x = rank_genes, y = genes, label = format(genes, big.mark = ",")), data = top_stats, alpha = 0.5, hjust = 0) +
+  geom_hline(yintercept = expect_cells_min_genes, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_vline(xintercept = expect_cells, linetype = "dashed", linewidth = 0.5, colour = "red") +
+  geom_label(aes(x = 1, y = expect_cells_min_genes, label = format(expect_cells_min_genes, big.mark = ",")), data = tibble(), colour = "red", hjust = 0) +
+	geom_label(aes(x = expect_cells, y = 1, label = format(expect_cells, big.mark = ",")), data = tibble(), colour = "red", vjust = 0) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
   labs(
     x = "Barcodes",
@@ -126,76 +135,26 @@ ggplot() +
   )
 ```
 
-### Histogram of UMI per barcode
-
-- Red dashed line: Minimum UMI count for expected number of cells.
-
-```{r umi_sum_histogram, echo=FALSE, fig.width=12, fig.height=4}
-gg1 <- ggplot(barcode_stats, aes(x = umi_sum)) +
-  geom_histogram(binwidth = 100) +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  labs(title = "Full view") +
-  theme_bw() +
-  labs(
-    y = "Barcodes",
-    x = "UMI Counts"
-  )
-gg2 <- ggplot(barcode_stats, aes(x = umi_sum)) +
-  geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = expect_cells_min_umi, color = "red", linetype = "dashed") +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  coord_cartesian(xlim = c(0, 5E3)) +
-  labs(title = "Total UMI (0 - 5,000)") +
-  theme_bw() +
-  labs(
-    y = "Barcodes",
-    x = "UMI Counts"
-  )
-gg3 <- ggplot(barcode_stats, aes(x = umi_sum)) +
-  geom_histogram(binwidth = 100) +
-  geom_vline(xintercept = expect_cells_min_umi, color = "red", linetype = "dashed") +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  coord_cartesian(xlim = c(0, 5E3), ylim = c(0, 5E3)) +
-  labs(title = "Total UMI (0 - 5,000) & Bin count (0 - 5,000)") +
-  theme_bw() +
-  labs(
-    y = "Barcodes",
-    x = "UMI Counts"
-  )
-gg4 <- ggplot(barcode_stats, aes(x = umi_sum)) +
-  geom_histogram(binwidth = 100) +
-  scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  coord_cartesian(xlim = c(expect_cells_min_umi, NA), ylim = c(0, 100)) +
-  labs(title = sprintf("Total UMI (%s - max) & Bin count (0 - 100)", format(expect_cells_min_umi, big.mark = ","))) +
-  theme_bw() +
-  labs(
-    y = "Barcodes",
-    x = "UMI Counts"
-  )
-plot_grid(gg1, gg2, gg3, gg4)
-rm(gg1, gg2, gg3, gg4)
-```
-
 ## Mitochondrial content
 
-```{r, echo=FALSE}
-# need iSEE
-# plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
-#     width=0.4, varwidth=FALSE, adjust=1,
-#     method='quasirandom', nbins=NULL);
+Mitochondrial content is displayed only for barcodes with:
+
+- at least `r format(expect_cells_min_umi, big.mark = ",")` UMI counts
+- at least `r format(expect_cells_min_genes, big.mark = ",")` genes detected
+
+```{r mito_histogram, echo=FALSE}
 barcode_stats %>% 
   filter(umi_sum >= expect_cells_min_umi) %>% 
+  filter(genes >= expect_cells_min_genes) %>%
   ggplot(aes(x = mt_pct)) +
-  geom_histogram(binwidth = 0.01) +
-  coord_cartesian(xlim = c(0, 1)) +
-  # scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  geom_histogram(binwidth = 0.01, colour = "black", fill = "grey", linewidth = 0.1) +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, NA)) +
+  scale_x_continuous(labels = label_percent()) +
+  scale_y_continuous(labels = label_comma()) +
   theme_bw() +
   labs(
     y = "Barcodes",
-    x = "Mitochondrial content"
+    x = "Proportion of mitochondrial counts"
   )
 ```
 
