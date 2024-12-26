@@ -1,17 +1,17 @@
-sample_name	expect_cells
-WPPm048hrs_rep1	30000
-WPPm048hrs_rep2	30000
-WPPm024hrs_rep1	30000
-WPPm024hrs_rep2	30000
-WPPp000hrs_rep1	30000
-WPPp000hrs_rep2	30000
-WPPp024hrs_rep1	30000
-WPPp024hrs_rep2	30000
-WPPp048hrs_rep1	30000
-WPPp048hrs_rep2	30000
-WPPp072hrs_rep1	30000
-WPPp072hrs_rep2	30000
-WPPp096hrs_rep1	30000
-WPPp096hrs_rep2	30000
-WPPp120hrs_rep1	30000
-WPPp120hrs_rep2	30000
+sample_name	timepoint	replicate	expect_cells
+WPPm048hrs_rep1	m048hrs	1	30000
+WPPm048hrs_rep2	m048hrs	2	30000
+WPPm024hrs_rep1	m024hrs	1	30000
+WPPm024hrs_rep2	m024hrs	2	30000
+WPPp000hrs_rep1	p000hrs	1	30000
+WPPp000hrs_rep2	p000hrs	2	30000
+WPPp024hrs_rep1	p024hrs	1	30000
+WPPp024hrs_rep2	p024hrs	2	30000
+WPPp048hrs_rep1	p048hrs	1	30000
+WPPp048hrs_rep2	p048hrs	2	30000
+WPPp072hrs_rep1	p072hrs	1	30000
+WPPp072hrs_rep2	p072hrs	2	30000
+WPPp096hrs_rep1	p096hrs	1	30000
+WPPp096hrs_rep2	p096hrs	2	30000
+WPPp120hrs_rep1	p120hrs	1	30000
+WPPp120hrs_rep2	p120hrs	2	30000

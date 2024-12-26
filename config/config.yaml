@@ -10,6 +10,22 @@ genome:
     - https://ftp.ensembl.org/pub/release-113/fasta/drosophila_melanogaster/dna/Drosophila_melanogaster.BDGP6.46.dna.primary_assembly.mitochondrion_genome.fa.gz
   gtf: https://ftp.ensembl.org/pub/release-113/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.46.113.gtf.gz
 
+metadata:
+  samples:
+    factors:
+      timepoints:
+        - m048hrs
+        - m024hrs
+        - p000hrs
+        - p024hrs
+        - p048hrs
+        - p072hrs
+        - p096hrs
+        - p120hrs
+      replicates:
+        - 1
+        - 2
+
 simpleaf:
   index:
     rlen: 150
@@ -26,14 +42,14 @@ filters:
     min_umis: 3000
     min_genes: 1000
 
+variable_genes:
+  block: sample
+  proportion: 0.1
+
 fastmnn:
   batch: timepoint
   k: 20
   d: 50
-
-variable_genes:
-  block: sample
-  proportion: 0.1
 
 fixed_pca:
   rank: 100
