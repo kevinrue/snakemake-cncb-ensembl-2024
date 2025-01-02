@@ -192,8 +192,8 @@ rule scran_modelgenevar_block:
         block=config["variable_genes"]["block"],
         hvgs_prop=config["variable_genes"]["proportion"],
     resources:
-        mem="128G",
-        runtime="30m",
+        mem="64G",
+        runtime="15m",
     threads: 32
     conda:
         "../../conda/conda.yaml"
