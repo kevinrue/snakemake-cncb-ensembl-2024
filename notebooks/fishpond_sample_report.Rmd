@@ -1,5 +1,5 @@
 ---
-title: "Fishpond report (sample)"
+title: "Fishpond (sample)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"

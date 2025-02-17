@@ -76,7 +76,7 @@ rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
     output:
-        "reports/enrichgo/hvgs.html",
+        "reports/hvgs.html",
     conda:
         "../../conda/conda.yaml"
     threads: 2

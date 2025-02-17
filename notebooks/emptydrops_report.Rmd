@@ -1,5 +1,5 @@
 ---
-title: "emptyDrops"
+title: "emptyDrops (sample)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"

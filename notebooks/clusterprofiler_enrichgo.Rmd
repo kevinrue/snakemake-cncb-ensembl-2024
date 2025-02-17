@@ -1,5 +1,5 @@
 ---
-title: "GO enrichment of variable genes"
+title: "enrichGO - HVGs (merged)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"
