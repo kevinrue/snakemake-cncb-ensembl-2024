@@ -20,8 +20,8 @@ include: "rules/simpleaf.smk"
 ##### main rule #####
 rule all:
     input:
-        "reports/simpleaf.html",
-        expand("reports/simpleaf/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "reports/fishpond.html",
+        expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/mitochondria/{sample}.html", sample=SAMPLES['sample_name'].unique()),
