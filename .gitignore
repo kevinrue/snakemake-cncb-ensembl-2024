@@ -1,6 +1,7 @@
 .condarc
 .Rprofile
 .Rproj.user
+dag.svg
 export.yaml
 nohup.out
 renv.lock
@@ -21,4 +22,3 @@ logs/**
 .conda/**
 .snakemake/**
 .snakemake/**
-

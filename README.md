@@ -34,9 +34,26 @@ nohup snakemake \
   --apptainer-args "$TMP_APPTAINER_ARGS" &
 ```
 
+Then keep an eye on the `nohup.out` file:
+
+```bash
+tail -f nohup.out
+```
+
 Notes:
 
 - `--bind /var/scratch` binds the directory where Slurm jobs are given a private folder
+
+## Visualisation
+
+```bash
+snakemake \
+  --sdm conda apptainer \
+  --apptainer-args "$TMP_APPTAINER_ARGS" \
+  --dag \
+  | dot -Tsvg \
+  > dag.svg
+```
 
 # TODO
 
