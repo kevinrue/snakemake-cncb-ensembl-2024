@@ -1,5 +1,5 @@
 ---
-title: "Individual sample quality control"
+title: "Fishpond report (sample)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"

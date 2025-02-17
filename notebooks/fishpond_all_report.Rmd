@@ -1,5 +1,5 @@
 ---
-title: "Quality control of barcodes"
+title: "Fishpond report (merged)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"
