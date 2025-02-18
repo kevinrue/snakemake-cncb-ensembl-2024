@@ -7,7 +7,6 @@ date: "`r Sys.Date()`"
 
 ```{r check_inputs, include=FALSE}
 rds_input_file <- snakemake@input[["rds"]]
-stopifnot(file.exists(rds_input_file))
 ```
 
 ```{r setup, include=FALSE}

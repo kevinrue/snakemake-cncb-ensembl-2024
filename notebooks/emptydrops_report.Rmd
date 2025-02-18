@@ -86,7 +86,8 @@ ggplot_data <- emptydrops_results %>%
   arrange(FDR) %>% 
   mutate(
     rank = row_number()
-  )
+  ) %>%
+  filter(FDR > 0)
 ggplot() +
   geom_line(aes(rank, FDR), ggplot_data) +
   geom_label(aes(barcodes, threshold, label = format(barcodes, big.mark = ",")), filter_stats) +
@@ -100,6 +101,10 @@ ggplot() +
 ```
 
 ## Plot
+
+- <span style="color:green">Green (retain)</span>: UMI count above which barcodes are retained.
+- <span style="color:red">Red (ignore)</span>: UMI count below which barcodes are not tested.
+- <span style="color:grey">Grey (lower)</span>: UMI count below which barcodes are used to compute the ambient profile. 
 
 ```{r barcode_rank, echo=FALSE}
 emptydrops_results <- emptydrops_results %>%
