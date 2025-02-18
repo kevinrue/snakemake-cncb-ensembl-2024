@@ -29,7 +29,7 @@ library(stringr)
 library(tidyverse)
 ```
 
-## Load sce
+## Load SingleCellExperiment object
 
 ```{r load_sce, echo=FALSE}
 sce <- readRDS(rds_input_file)
@@ -61,14 +61,14 @@ barcode_stats <- tibble(
   )
 ```
 
-- barcode: Barcode
-- sample: Sample name
-- timepoint: Developmental time point
-- replicate: Experimental replicate
-- umi_sum: Total UMIs detected
-- genes: Total genes detected
-- rank_umi: Ranking by decreasing UMI detected
-- rank_genes: Ranking by decreasing genes detected
+- **barcode:** Barcode
+- **sample:** Sample name
+- **timepoint:** Developmental time point
+- **replicate:** Experimental replicate
+- **umi_sum:** Total UMIs detected
+- **genes:** Total genes detected
+- **rank_umi:** Ranking by decreasing UMI detected
+- **rank_genes:** Ranking by decreasing genes detected
 
 ```{r compute_statistics, echo=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
