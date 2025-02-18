@@ -20,12 +20,26 @@ barcode_minor_breaks <- 10^rep(-1:10)
 
 ```{r snakemake, include=FALSE}
 rds_file <- snakemake@input[["rds"]]
-stopifnot(file.exists(rds_file))
 expect_cells <- snakemake@params[["expect_cells"]]
-stopifnot(is.numeric(expect_cells))
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Sample name"), fs::path_ext_remove(basename(rds_file)),
+    format_bold("Expected cells"), format(expect_cells, big.mark = ",")
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
 ```
 
 ## Load barcodeRanks results
+
+### Table
 
 ```{r read_rds, echo=FALSE}
 #| message: false
@@ -33,12 +47,28 @@ barcoderanks_results <- readRDS(rds_file)
 barcoderanks_results
 ```
 
-Metadata:
+### Metadata
 
-- **knee:** `r format(metadata(barcoderanks_results)[["knee"]], big.mark = ",")`
-- **inflection:** `r format(metadata(barcoderanks_results)[["inflection"]], big.mark = ",")`
+```{r metadata, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Knee (UMI)"), format(metadata(barcoderanks_results)[["knee"]], big.mark = ","),
+    format_bold("Inflection (UMI)"), format(metadata(barcoderanks_results)[["inflection"]], big.mark = ",")
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+<!-- - **knee:** `r format(metadata(barcoderanks_results)[["knee"]], big.mark = ",")`
+- **inflection:** `r format(metadata(barcoderanks_results)[["inflection"]], big.mark = ",")` -->
 
 ## Plot
+
+- <span style="color:green">Green</span>: Knee.
+- <span style="color:orange">Orange</span>: Inflection point.
+- <span style="color:red">Red</span>: Expected number of cells.
 
 ```{r filter_stats, echo=FALSE}
 min_umi_expected <- sort(barcoderanks_results$total, decreasing = TRUE)[expect_cells]

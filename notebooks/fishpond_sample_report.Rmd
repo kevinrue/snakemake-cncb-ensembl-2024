@@ -5,27 +5,29 @@ author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 
-## Sample information
-
-
 ```{r libraries, include=FALSE}
 library(cowplot)
 library(ggplot2)
 library(scales)
 library(SingleCellExperiment)
 library(tidyverse)
+```
+
+```{r setup, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
-```{r parameters, include=FALSE}
+```{r snakemake, include=FALSE}
 sce_rds <- snakemake@input[["sce"]]
 expect_cells <- snakemake@params[["expect_cells"]]
 ```
 
-```{r run_info, echo=FALSE}
+## Run parameters
+
+```{r parameters, echo=FALSE}
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
@@ -83,11 +85,8 @@ range(barcode_stats$mt_pct)
 
 ### Barcode-Rank Plot
 
-Labels:
-
-- Maximum UMI count (black).
-- Minimum UMI counts for expected number of cells (red).
-- Expected number of cells (red).
+- <span style="color:black">Black</span>: UMI count maximum.
+- <span style="color:red">Red</span>: Expected number of cells & UMI count.
 
 ```{r barcode_rank_plot, echo=FALSE}
 expect_cells_min_umi <- barcode_stats %>% 
@@ -115,11 +114,8 @@ ggplot() +
 
 ### Features-Rank Plot
 
-Labels:
-
-- Maximum genes detected (black).
-- Minimum genes detected for expected number of cells (red).
-- Expected number of cells (red).
+- <span style="color:black">Black</span>: Detected genes maximum.
+- <span style="color:red">Red</span>: Expected number of cells & detected genes.
 
 ```{r feature_rank_plot, echo=FALSE}
 expect_cells_min_genes <- barcode_stats %>% 
@@ -147,10 +143,10 @@ ggplot() +
 
 ## Mitochondrial content
 
-Mitochondrial content is displayed only for barcodes with:
+**NOTE:** Mitochondrial content is displayed only for barcodes that pass all the conditions below:
 
-- at least `r format(expect_cells_min_umi, big.mark = ",")` UMI counts
-- at least `r format(expect_cells_min_genes, big.mark = ",")` genes detected
+- At least `r format(expect_cells_min_umi, big.mark = ",")` UMI counts.
+- At least `r format(expect_cells_min_genes, big.mark = ",")` genes detected.
 
 ```{r mito_histogram, echo=FALSE}
 barcode_stats %>% 
