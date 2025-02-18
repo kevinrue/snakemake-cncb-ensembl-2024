@@ -6,11 +6,14 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
-# library(ggrastr)
+library(ggrastr)
 library(S4Vectors)
 library(SummarizedExperiment)
 library(scales)
 library(tidyverse)
+```
+
+```{r setup, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
@@ -21,36 +24,79 @@ barcode_minor_breaks <- 10^rep(-1:10)
 rds_file <- snakemake@input[["rds"]]
 ```
 
-## EmptyDrops results
+## Run parameters
 
-```{r read_tsv}
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Sample name"), fs::path_ext_remove(basename(rds_file))
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## Load emptyDrops results
+
+### Table
+
+```{r read_rds, echo=FALSE}
 #| message: false
 emptydrops_results <- readRDS(rds_file)
 emptydrops_results
 ```
 
-```{r metadata, include=FALSE}
+### Metadata
+
+```{r metadata, echo=FALSE}
 emptydrops_metadata <- metadata(emptydrops_results)
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("retain (UMI)"), format(emptydrops_metadata[["retain"]], big.mark = ","),
+    format_bold("lower (UMI)"), format(emptydrops_metadata[["lower"]], big.mark = ","),
+    format_bold("niters"), format(emptydrops_metadata[["niters"]], big.mark = ","),
+    format_bold("alpha"), format(emptydrops_metadata[["alpha"]], big.mark = ","),
+    format_bold("ignore (UMI)"), format(emptydrops_metadata[["ignore"]], big.mark = ",")
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
 ```
-
-EmptyDrops parameters:
-
-- retain: `r format(emptydrops_metadata[["retain"]], big.mark = ",")`
-- lower: `r format(emptydrops_metadata[["lower"]], big.mark = ",")`
-- niters: `r format(emptydrops_metadata[["niters"]], big.mark = ",")`
-- alpha: `r format(emptydrops_metadata[["alpha"]], big.mark = ",")`
-- ignore: `r format(emptydrops_metadata[["ignore"]], big.mark = ",")`
 
 ## Overall statistics
 
-```{r filter_stats, echo=FALSE}
-#| message: false
+```{r filter_stats_table, echo=FALSE}
 fdr_thresholds <- c(0.01, 0.001, 0.0001, 0.00001)
 filter_stats <- tibble(
     threshold = fdr_thresholds,
     barcodes = vapply(fdr_thresholds, function(x) sum(emptydrops_results$FDR < x, na.rm = TRUE), integer(1))
 )
-filter_stats
+knitr::kable(filter_stats)
+```
+
+```{r filter_stats_plot, echo=FALSE}
+ggplot_data <- emptydrops_results %>% 
+  as.data.frame() %>% 
+  as_tibble() %>% 
+  mutate(
+    FDR = replace_na(FDR, 1)
+  ) %>% 
+  arrange(FDR) %>% 
+  mutate(
+    rank = row_number()
+  )
+ggplot() +
+  geom_line(aes(rank, FDR), ggplot_data) +
+  geom_label(aes(barcodes, threshold, label = format(barcodes, big.mark = ",")), filter_stats) +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_log10() +
+  theme_bw() +
+  labs(
+    y = "FDR",
+    x = "Barcodes"
+  )
 ```
 
 ## Plot
@@ -65,6 +111,7 @@ emptydrops_results <- emptydrops_results %>%
 ```
 
 ```{r barcode_rank_color_fdr_plots, echo=FALSE, fig.height=5, fig.width=7}
+fdr_thresholds <- c(0.01, 0.001, 0.0001, 0.00001)
 for (fdr_cutoff in fdr_thresholds) {
     gg <- emptydrops_results %>% 
         mutate(
@@ -74,8 +121,8 @@ for (fdr_cutoff in fdr_thresholds) {
         geom_hline(yintercept = emptydrops_metadata[["retain"]], linetype = "dashed", color = "green", linewidth = 0.5) +
         geom_hline(yintercept = emptydrops_metadata[["ignore"]], linetype = "dashed", color = "red", linewidth = 0.5) +
         geom_hline(yintercept = emptydrops_metadata[["lower"]], linetype = "dashed", color = "grey", linewidth = 0.5) +
-        # geom_point_rast(aes(color = FDR < 0.01), size = 0.1) +
-        geom_point(aes(color = cell), size = 0.1) +
+        geom_point_rast(aes(color = cell), size = 0.1) +
+        # geom_point(aes(color = cell), size = 0.1) +
         scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
         scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
         facet_wrap(~ cell) +
