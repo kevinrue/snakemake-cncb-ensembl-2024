@@ -21,17 +21,27 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r parameters, include=FALSE}
+sce_rds <- snakemake@input[["sce"]]
 expect_cells <- snakemake@params[["expect_cells"]]
 ```
 
-- Name: `r basename(snakemake@input[["sce"]])`
-- Expected number of cells: `r format(expect_cells, big.mark = ",")`
+```{r run_info, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Sample name"), fs::path_ext_remove(basename(sce_rds)),
+    format_bold("Expected cells"), format(expect_cells, big.mark = ",")
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
 
 ## Load SCE object
 
 ```{r load_fry, echo=FALSE}
 #| message: false
-sce <- readRDS(snakemake@input[["sce"]])
+sce <- readRDS(sce_rds)
 sce
 ```
 

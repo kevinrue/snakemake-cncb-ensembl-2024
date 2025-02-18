@@ -17,8 +17,8 @@ Typical usage:
 
 ```
 # Cleanup
-rm nohup.out
 mv sps-* .sps
+rm nohup.out
 
 # Working directory
 cd $(realpath .) # containers prefer real paths
