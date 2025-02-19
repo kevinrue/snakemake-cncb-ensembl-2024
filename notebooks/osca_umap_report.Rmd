@@ -5,23 +5,25 @@ author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
-NA
-```
-
-## Libraries
-
-```{r, message=FALSE}
+```{r libraries, include=FALSE}
 library(ggrastr)
 library(SingleCellExperiment)
 library(stringr)
 library(tidyverse)
 ```
 
+```{r setup, include=FALSE}
+NA
+```
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
 ## Load sce
 
 ```{r load_sce, echo=FALSE}
-sce <- readRDS(snakemake@input[["sce"]])
+sce <- readRDS(rds_file)
 sce
 ```
 
