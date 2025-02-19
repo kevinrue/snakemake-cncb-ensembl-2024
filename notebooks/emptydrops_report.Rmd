@@ -30,7 +30,7 @@ rds_file <- snakemake@input[["rds"]]
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Sample name"), fs::path_ext_remove(basename(rds_file))
+    format_bold("Input file"), rds_file
   ),
   ncol = 2, byrow = TRUE
 )

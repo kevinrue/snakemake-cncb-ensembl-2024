@@ -5,20 +5,7 @@ author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 
-```{r check_inputs, include=FALSE}
-rds_input_file <- snakemake@input[["rds"]]
-```
-
-```{r setup, include=FALSE}
-umi_breaks <- 10^(-1:10)
-umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
-barcode_breaks <- 10^(-1:10)
-barcode_minor_breaks <- 10^rep(-1:10)
-```
-
-## Libraries
-
-```{r, message=FALSE}
+```{r libraries, include=FALSE}
 library(cowplot)
 library(ggplot2)
 library(ggrastr)
@@ -28,10 +15,34 @@ library(stringr)
 library(tidyverse)
 ```
 
+```{r setup, include=FALSE}
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Input file"), rds_file
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
 ## Load SingleCellExperiment object
 
 ```{r load_sce, echo=FALSE}
-sce <- readRDS(rds_input_file)
+sce <- readRDS(rds_file)
 sce
 ```
 

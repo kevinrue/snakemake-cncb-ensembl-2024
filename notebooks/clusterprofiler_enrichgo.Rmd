@@ -5,10 +5,31 @@ author: "Kevin Rue"
 date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r libraries, include=FALSE}
 library(clusterProfiler)
 library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+NA
+```
+
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Input file"), rds_file
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
 ```
 
 ## Top 50 GO terms
@@ -16,7 +37,7 @@ library(tidyverse)
 Includes all ontologies: `BP`, `MF`, `CC`.
 
 ```{r readrds, include=FALSE}
-ego <- readRDS("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/enrichgo/hvgs.rds")
+ego <- readRDS(rds_file)
 ```
 
 ```{r, echo=FALSE}

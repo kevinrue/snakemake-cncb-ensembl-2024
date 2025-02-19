@@ -29,7 +29,7 @@ expect_cells <- snakemake@params[["expect_cells"]]
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Sample name"), fs::path_ext_remove(basename(rds_file)),
+    format_bold("Input file"), rds_file,
     format_bold("Expected cells"), format(expect_cells, big.mark = ",")
   ),
   ncol = 2, byrow = TRUE
@@ -42,7 +42,6 @@ knitr::kable(x = df)
 ### Table
 
 ```{r read_rds, echo=FALSE}
-#| message: false
 barcoderanks_results <- readRDS(rds_file)
 barcoderanks_results
 ```

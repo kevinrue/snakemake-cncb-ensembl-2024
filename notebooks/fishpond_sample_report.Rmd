@@ -32,6 +32,7 @@ format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
     format_bold("Sample name"), fs::path_ext_remove(basename(sce_rds)),
+    format_bold("Input file"), sce_rds,
     format_bold("Expected cells"), format(expect_cells, big.mark = ",")
   ),
   ncol = 2, byrow = TRUE
