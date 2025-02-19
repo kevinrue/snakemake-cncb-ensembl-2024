@@ -20,32 +20,42 @@ NA
 rds_file <- snakemake@input[["rds"]]
 ```
 
-## Load sce
+## Load SingleCellExperiment object
 
 ```{r load_sce, echo=FALSE}
 sce <- readRDS(rds_file)
 sce
 ```
 
-## Barcode metadata
-
-```{r barcode_metadata, echo=FALSE}
-timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
-replicate_levels <- c("1", "2")
-colData(sce) <- str_match(string = colData(sce)[["sample"]], pattern = "WPP(?<timepoint>[mp][[:digit:]]{3}hrs)_rep(?<replicate>[[:digit:]]{1})")[, -1] %>%
-  as_tibble() %>%
-  mutate(
-    timepoint = factor(timepoint, timepoint_levels),
-    replicate = factor(replicate, replicate_levels)
-  ) %>%
-  as("DataFrame")
-colData(sce)
+## Add barcode metadata to SingleCellExperiment object
+```{r sample_metadata_table, echo=FALSE, message=FALSE}
+# per-sample metadata
+sample_metadata_table <- read_tsv("config/samples.tsv") %>% 
+  column_to_rownames("sample_name")
+# names and levels of metadata factors
+metadata_barcodes_factor <- yaml::read_yaml("config/config.yaml")[["metadata"]][["barcodes"]][["factor"]]
+# set levels
+for (factor_name in names(metadata_barcodes_factor)) {
+  if (! factor_name %in% colnames(sample_metadata_table)) {
+    stop(sQuote(factor_name), " is not a column in sample metadata")
+  }
+  new_factor <- factor(sample_metadata_table[[factor_name]], levels = metadata_barcodes_factor[[factor_name]])
+  sample_metadata_table[[factor_name]] <- new_factor
+}
+# add to colData
+colData(sce) <- cbind(
+  colData(sce),
+  sample_metadata_table[colData(sce)[["sample"]], names(metadata_barcodes_factor)]
+)
+colData(sce)[, names(metadata_barcodes_factor)] %>%
+  as.data.frame() %>%
+  as_tibble()
 ```
 
 ## Plots
 
 ```{r umap-coloured, echo=FALSE, fig.width=7, fig.height=5}
-for (coldata in colnames(colData(sce))) {
+for (coldata in names(metadata_barcodes_factor)) {
   gg_data <- reducedDim(sce, "UMAP") %>%
     as_tibble() %>%
     mutate(
