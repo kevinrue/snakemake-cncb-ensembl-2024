@@ -60,7 +60,7 @@ rule emptydrop_sample_report:
 
 rule mitochondrial_sample_report:
     input:
-        sce="results/emptyDrops/sce/{sample}.rds",
+        rds="results/emptyDrops/sce/{sample}.rds",
     output:
         "reports/mitochondria/{sample}.html",
     conda:

@@ -8,25 +8,49 @@ date: "`r Sys.Date()`"
 ```{r libraries, include=FALSE}
 library(SingleCellExperiment)
 library(tidyverse)
+```
+
+```{r setup, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
 barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
+```{r sample, include=FALSE}
+sample_name <- fs::path_ext_remove(basename(rds_file))
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Input file"), rds_file
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+
 ## Load sample data
 
 ```{r sce, echo=FALSE}
-#| message: false
-sce <- readRDS(snakemake@input[["sce"]])
+sce <- readRDS(rds_file)
 sce
 ```
 
-## Load mitochondrial gene list
+## Load mitochondrial genes
 
-```{r mito_gene_ids, echo=FALSE}
-mito_gene_ids <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
-str(mito_gene_ids)
+```{r mito_gene_table, echo=FALSE}
+mito_gene_table <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)
+mito_gene_table
 ```
 
 ## Barcode statistics
@@ -35,7 +59,7 @@ str(mito_gene_ids)
 barcode_stats <- tibble(
   umi_sum = colSums(assay(sce, "counts")),
   genes = colSums(assay(sce, "counts") > 0),
-  mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+  mt_pct = colSums(assay(sce, "counts")[mito_gene_table[["gene_id"]], ]) / umi_sum
 ) %>% 
   filter(umi_sum > 0) %>% 
   arrange(desc(umi_sum)) %>% 
@@ -57,7 +81,8 @@ barcode_stats %>%
   theme_bw() +
   labs(
     y = "Barcodes",
-    x = "Mitochondrial content"
+    x = "Mitochondrial content",
+    subtitle = sample_name
   )
 ```
 
