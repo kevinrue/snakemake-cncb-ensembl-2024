@@ -5,7 +5,7 @@ suppressPackageStartupMessages({library(SingleCellExperiment)})
 message("Loading samples ... ")
 sce_list <- list()
 for (rds_file in snakemake@input) {
-  sample_name <- basename(rds_file)
+  sample_name <- fs::path_ext_remove(basename(rds_file))
   message("- ", rds_file)
   message("  * readRDS")
   sce <- readRDS(rds_file)
