@@ -88,7 +88,7 @@ rule enrichgo_hvgs_report:
 
 rule scran_umap_report:
     input:
-        sce="results/filter_mitochondria/_umap.rds",
+        rds="results/filter_mitochondria/_umap.rds",
     output:
         "reports/umap.html",
     conda:
