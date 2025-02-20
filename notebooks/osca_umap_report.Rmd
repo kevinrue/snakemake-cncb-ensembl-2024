@@ -30,7 +30,7 @@ sce
 ## Add barcode metadata to SingleCellExperiment object
 ```{r sample_metadata_table, echo=FALSE, message=FALSE}
 # per-sample metadata
-sample_metadata_table <- read_tsv("config/samples.tsv") %>% 
+sample_metadata_table <- read_tsv("config/samples.tsv") %>%
   column_to_rownames("sample_name")
 # names and levels of metadata factors
 metadata_barcodes_factor <- yaml::read_yaml("config/config.yaml")[["metadata"]][["barcodes"]][["factor"]]
