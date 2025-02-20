@@ -235,6 +235,22 @@ rule batchelor_fastmnn:
     script:
         "../../scripts/batchelor_fastmnn.R"
 
+rule scran_umap_after_integration:
+    input:
+        sce="results/fastmnn/sce.rds",
+    output:
+        sce="results/fastmnn/umap.rds",
+    params:
+        n_pcs=config["fastmnn"]["umap"]["n_pcs"],
+    resources:
+        mem="20G",
+        runtime="1h",
+    threads: 32
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/scater_umap_after_integration.R"
+
 rule scran_fixed_pca:
     input:
         sce="results/filter_mitochondria/_logcounts.rds",
@@ -259,7 +275,7 @@ rule scran_umap:
     output:
         sce="results/filter_mitochondria/_umap.rds",
     params:
-        pcs=config["umap"]["n_pcs"],
+        n_pcs=config["umap"]["n_pcs"],
     resources:
         mem="20G",
         runtime="1h",

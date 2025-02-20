@@ -57,6 +57,10 @@ snakemake \
 
 # TODO
 
+* Generalise script for computing UMAP to receive input dimred as a rule parameter.
+* Why do colnames(sce) disappear after fastMNN integration?
+* Colour UMAP after integration with sample, timepoint, replicate.
+
 * Replace `<owner>` and `<repo>` everywhere in the template (also under .github/workflows) with the correct `<repo>` name and owning user or organization.
 * Replace `<name>` with the workflow name (can be the same as `<repo>`).
 * Replace `<description>` with a description of what the workflow does.

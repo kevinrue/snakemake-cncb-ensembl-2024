@@ -99,3 +99,17 @@ rule scran_umap_report:
         runtime="5m",
     script:
         "../../notebooks/osca_umap_report.Rmd"
+
+rule scran_umap_after_integration_report:
+    input:
+        rds="results/fastmnn/umap.rds",
+    output:
+        "reports/umap_after_integration.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="5m",
+    script:
+        "../../notebooks/osca_umap_after_integration_report.Rmd"

@@ -50,6 +50,8 @@ fastmnn:
   batch: timepoint
   k: 20
   d: 50
+  umap:
+    n_pcs: 50
 
 fixed_pca:
   rank: 100
