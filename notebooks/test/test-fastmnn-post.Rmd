@@ -1,0 +1,39 @@
+---
+title: "Inspect FastMNN output"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(BiocSingular)
+library(SingleCellExperiment)
+```
+
+```{r}
+setwd("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024")
+getwd()
+```
+
+```{r}
+list.files()
+```
+
+```{r}
+sce <- readRDS("results/fastmnn/sce.rds")
+sce
+```
+
+The object comprises:
+
+- A `corrected` matrix in the `reducedDims` slot.
+  Note that the number of columns can be controlled by the `d=` argument of `fastMNN()`.
+- A `batch` column in the `colData` slot.
+  This contains the factor used to identify each sample integrated using `fastMNN()`.
+- A `rotation` column the `rowData` slot, containing the rotation matrix used for the PCA.
+  The number of rows corresponds to the selecteds genes (default: all) and the number of columns is controlled by the `d=` argument of `fastMNN()`.
+- A `reconstructed` matrix in the `assays` slot, containing the low-rank reconstruction of the expression matrix
+- Metadata:
+  - `merge.info`, a `DataFrame` of diagnostic information about each merge step.
+  - `pca.info`, a list of metadata produced by `multiBatchPCA()`.
+
