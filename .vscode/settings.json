@@ -1,0 +1,22 @@
+{
+    "python.analysis.exclude": [
+        ".cache",
+        ".conda",
+        ".github",
+        ".Rproj.user",
+        ".snakemake",
+        ".sps",
+        ".template",
+        ".vscode",
+        "conda",
+        "logs",
+        "renv",
+        "reports",
+        "resources",
+        "results",
+        "slurm"
+    ],
+    "r.rterm.linux": "/package/R-base/4.4.2/bin/R",
+    "r.rpath.linux": "/package/R-base/4.4.2/bin/R",
+    "r.useRenvLibPath": true
+}
