@@ -228,7 +228,7 @@ rule batchelor_fastmnn:
         k=config["fastmnn"]["k"],
     resources:
         mem="64G",
-        runtime="2h",
+        runtime="3h",
     threads: 32
     conda:
         "../../conda/conda.yaml"
@@ -243,8 +243,8 @@ rule scran_umap_after_integration:
     params:
         n_pcs=config["fastmnn"]["umap"]["n_pcs"],
     resources:
-        mem="20G",
-        runtime="1h",
+        mem="64G",
+        runtime="3h",
     threads: 32
     conda:
         "../../conda/conda.yaml"

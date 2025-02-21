@@ -6,7 +6,10 @@ output: html_document
 ---
 
 ```{r}
+library(BiocNeighbors)
+library(BiocParallel)
 library(BiocSingular)
+library(scater)
 library(SingleCellExperiment)
 ```
 
@@ -37,3 +40,13 @@ The object comprises:
   - `merge.info`, a `DataFrame` of diagnostic information about each merge step.
   - `pca.info`, a list of metadata produced by `multiBatchPCA()`.
 
+```{r}
+set.seed(1000)
+sce <- runUMAP(
+  sce,
+  dimred = "corrected",
+  pca = 50, # pca = snakemake@params[["n_pcs"]],
+  BNPARAM = KmknnParam(),
+  BPPARAM = MulticoreParam(workers = 12) # BPPARAM = MulticoreParam(workers = snakemake@threads)
+)
+```

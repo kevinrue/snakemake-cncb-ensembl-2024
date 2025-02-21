@@ -1,17 +1,21 @@
 message(Sys.time())
 
-suppressPackageStartupMessages({library(batchelor)})
-suppressPackageStartupMessages({library(BiocNeighbors)})
-suppressPackageStartupMessages({library(BiocParallel)})
-suppressPackageStartupMessages({library(BiocSingular)})
-suppressPackageStartupMessages({library(SummarizedExperiment)})
-suppressPackageStartupMessages({library(tidyverse)})
+suppressPackageStartupMessages(library(batchelor))
+suppressPackageStartupMessages(library(BiocNeighbors))
+suppressPackageStartupMessages(library(BiocParallel))
+suppressPackageStartupMessages(library(BiocSingular))
+suppressPackageStartupMessages(library(SummarizedExperiment))
+suppressPackageStartupMessages(library(tidyverse))
+
+snakemake_params_batch <- snakemake@params[["batch"]]
+snakemake_params_d <- snakemake@params[["d"]]
+snakemake_params_k <- snakemake@params[["k"]]
 
 message("Job configuration")
 message("- threads: ", snakemake@threads)
-message("- batch: ", snakemake@params[["batch"]])
-message("- k: ", snakemake@params[["k"]])
-message("- d: ", snakemake@params[["d"]])
+message("- batch: ", snakemake_params_batch)
+message("- k: ", snakemake_params_k)
+message("- d: ", snakemake_params_d)
 
 message("Importing variable genes from TXT file ...")
 hvgs <- scan(snakemake@input[["hvgs"]], what = character())
@@ -23,23 +27,24 @@ message("* Number of cells: ", ncol(sce))
 message("* Number of feature: ", nrow(sce))
 message("Done.")
 
-timepoint_levels <- c("m048hrs", "m024hrs", "p000hrs", "p024hrs", "p048hrs", "p072hrs", "p096hrs", "p120hrs")
-replicate_levels <- c("1", "2")
-colData(sce) <- str_match(string = colData(sce)[["sample"]], pattern = "WPP(?<timepoint>[mp][[:digit:]]{3}hrs)_rep(?<replicate>[[:digit:]]{1})")[, -1] %>%
-  as_tibble() %>%
-  mutate(
-    timepoint = factor(timepoint, timepoint_levels),
-    replicate = factor(replicate, replicate_levels)
-  ) %>%
-  as("DataFrame")
+message("Preparing batch variable ...")
+sample_metadata_table <- read_tsv("config/samples.tsv") %>%
+  column_to_rownames("sample_name")
+metadata_barcodes_factor <- yaml::read_yaml("config/config.yaml")[["metadata"]][["barcodes"]][["factor"]]
+batch_factor <- factor(sample_metadata_table[colData(sce)[["sample"]], snakemake_params_batch], levels = metadata_barcodes_factor[[snakemake_params_batch]])
+message("# Overview #")
+table(batch_factor)
+message("############")
+message("Done.")
 
 message("Apply fastMNN ...")
-message("* Number of batches: ", length(unique(colData(sce)[[snakemake@params[["batch"]]]])))
+message("* Number of batches: ", length(unique(colData(sce)[[snakemake_params_batch]])))
 sce <- fastMNN(
     sce,
-    batch = colData(sce)[[snakemake@params[["batch"]]]],
-    k = snakemake@params[["k"]],
-    d = snakemake@params[["d"]],
+    batch = batch_factor,
+    k = snakemake_params_k,
+    d = snakemake_params_d,
+    get.variance = TRUE,
     auto.merge = TRUE,
     subset.row = hvgs,
     correct.all = TRUE,
