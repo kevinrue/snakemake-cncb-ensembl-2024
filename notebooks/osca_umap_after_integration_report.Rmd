@@ -6,6 +6,7 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
+library(BiocSingular)
 library(ggrastr)
 library(SingleCellExperiment)
 library(stringr)
