@@ -100,6 +100,20 @@ rule scran_umap_report:
     script:
         "../../notebooks/osca_umap_report.Rmd"
 
+rule fastmnn_report:
+    input:
+        rds="results/fastmnn/sce.rds",
+    output:
+        "reports/fastmnn.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="5m",
+    script:
+        "../../notebooks/fastmnn_report.Rmd"
+
 rule scran_umap_after_integration_report:
     input:
         rds="results/fastmnn/umap.rds",

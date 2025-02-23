@@ -1,0 +1,50 @@
+---
+title: "fastMNN"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(BiocSingular)
+library(ggrastr)
+library(SingleCellExperiment)
+library(stringr)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+NA
+```
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
+## Load SingleCellExperiment object
+
+```{r load_sce, echo=FALSE}
+message("Reading file ", rds_file)
+sce <- readRDS(rds_file)
+sce
+```
+
+```{r, echo=FALSE}
+plot_data <- tibble(
+  var.explained = metadata(sce)$pca.info$var.explained
+) %>%
+  mutate(
+    pc = row_number()
+  )
+ggplot(plot_data) +
+  geom_col(
+    aes(x = pc, y = var.explained),
+    color = "black", fill = "grey",
+    linewidth = 0.1
+  ) +
+  theme_bw() +
+  labs(
+    x = "Principal component",
+    y = "Variance explained"
+  )
+```

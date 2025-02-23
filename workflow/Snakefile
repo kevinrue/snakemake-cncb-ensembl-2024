@@ -27,6 +27,7 @@ rule all:
         expand("reports/mitochondria/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         # "results/model_gene_var/modelGeneVar.rds",
         "reports/umap.html",
+        "reports/fastmnn.html",
         "reports/umap_after_integration.html",
         "reports/hvgs.html",
         # "results/hdf5/counts",
