@@ -23,8 +23,9 @@ rds_file <- snakemake@input[["rds"]]
 
 ## Load SingleCellExperiment object
 
+Loading from file: `` `r rds_file` ``
+
 ```{r load_sce, echo=FALSE}
-message("Reading file ", rds_file)
 sce <- readRDS(rds_file)
 sce
 ```
