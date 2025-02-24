@@ -58,6 +58,20 @@ rule emptydrop_sample_report:
     script:
         "../../notebooks/emptydrops_report.Rmd"
 
+rule emptydrop_all_report:
+    input:
+        expand("results/emptyDrops/result/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+    output:
+        "reports/emptyDrops.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/emptydrops_all_report.Rmd"
+
 rule mitochondrial_sample_report:
     input:
         rds="results/emptyDrops/sce/{sample}.rds",

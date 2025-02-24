@@ -50,6 +50,8 @@ fastmnn:
   batch: timepoint
   k: 20
   d: 50
+  cluster:
+    k: 10
   umap:
     n_pcs: 50
 

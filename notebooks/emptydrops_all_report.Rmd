@@ -1,0 +1,102 @@
+---
+title: "emptyDrops (all)"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(S4Vectors)
+library(tidyverse)
+```
+
+```{r snakemake, include=FALSE}
+# rds_file <- snakemake@input[["rds"]]
+rds_files <- list.files("/ceph/project/cncb/albrecht/snakemake-cncb-ensembl-2024/results/emptyDrops/result", pattern = ".rds$", full.names = TRUE)
+```
+
+## Run parameters
+
+Input files:
+
+```{r parameters, echo=FALSE}
+df <- tibble(
+  sample_name = fs::path_ext_remove(basename(rds_files)),
+  file_path = rds_files
+)
+knitr::kable(x = df)
+```
+
+## Load and preprocess emptyDrops results
+
+```{r read_rds, echo=FALSE, message=FALSE}
+report_stats <- tibble(
+  sample = character(),
+  "0.01" = numeric(),
+  "0.001" = numeric(),
+  "0.0001" = numeric(),
+  "0.00001" = numeric()
+)
+for (i in seq_len(nrow(df))) {
+  message("Processing sample ", i, " of ", nrow(df))
+  rds_file <- df[["file_path"]][i]
+  sample_name <- df[["sample_name"]][i]
+  emptydrops_result <- readRDS(rds_file)
+  sample_stats <- tibble(
+    sample = sample_name,
+    "0.01" = sum(emptydrops_result$FDR < 0.01, na.rm=TRUE),
+    "0.001" = sum(emptydrops_result$FDR < 0.001, na.rm=TRUE),
+    "0.0001" = sum(emptydrops_result$FDR < 0.0001, na.rm=TRUE),
+    "0.00001" = sum(emptydrops_result$FDR < 0.00001, na.rm=TRUE)
+  )
+  report_stats <- bind_rows(report_stats, sample_stats)
+}
+```
+
+## Overall statistics
+
+```{r filter_stats_table, echo=FALSE}
+knitr::kable(report_stats)
+```
+
+## Plot
+
+```{r filter_stats_plot, echo=FALSE, fig.height=10, fig.width=10}
+ggplot_data <- report_stats %>%
+  pivot_longer(
+    cols = -sample,
+    names_to = "fdr",
+    values_to = "cells"
+  )
+ggplot(ggplot_data) +
+  geom_col(
+    mapping = aes(x = sample, y = cells),
+    colour = "black",
+    fill = "grey90",
+    alpha = 0.5
+  ) +
+  facet_wrap(~fdr) +
+  geom_text(
+    mapping = aes(x = sample, label = sample),
+    y = 0, angle = 90, hjust = -0.05
+  ) +
+  theme_bw() +
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  labs(
+    y = "Barcodes retained",
+    x = "Samples"
+  )
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
