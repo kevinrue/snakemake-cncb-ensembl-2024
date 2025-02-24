@@ -1,5 +1,6 @@
 message(Sys.time())
 
+suppressPackageStartupMessages(library(bluster))
 suppressPackageStartupMessages(library(SingleCellExperiment))
 suppressPackageStartupMessages(library(scran))
 
