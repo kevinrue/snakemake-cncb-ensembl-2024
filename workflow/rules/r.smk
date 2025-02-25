@@ -237,14 +237,14 @@ rule batchelor_fastmnn:
 
 rule scran_cluster_after_integration:
     input:
-        sce="results/fastmnn/sce.rds",
+        rds="results/fastmnn/sce.rds",
     output:
-        sce="results/fastmnn/clusters.rds",
+        rds="results/fastmnn/clusters.rds",
     params:
         k=config["fastmnn"]["cluster"]["k"],
     resources:
-        mem="128G",
-        runtime="6h",
+        mem="8G",
+        runtime="15m",
     threads: 2
     conda:
         "../../conda/conda.yaml"
