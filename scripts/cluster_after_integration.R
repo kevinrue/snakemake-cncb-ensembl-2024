@@ -4,13 +4,13 @@ suppressPackageStartupMessages(library(bluster))
 suppressPackageStartupMessages(library(SingleCellExperiment))
 suppressPackageStartupMessages(library(scran))
 
-snakemake_params_kmeans_centers <- snakemake@params[["kmeans_centers"]]
-snakemake_params_nn_k <- snakemake@params[["kmeans_centers"]]
-snakemake_threads <- snakemake@threads
+params_kmeans_centers <- snakemake@params[["kmeans_centers"]]
+params_nn_k <- snakemake@params[["nn_k"]]
+params_threads <- snakemake@threads
 
 message("Job configuration")
-message("- KmeansParam (centers): ", snakemake_params_kmeans_centers)
-message("- NNGraphParam (k): ", snakemake_params_nn_k)
+message("- KmeansParam (centers): ", params_kmeans_centers)
+message("- NNGraphParam (k): ", params_nn_k)
 
 message("Importing SCE from RDS file ...")
 sce <- readRDS(snakemake@input[["rds"]])
@@ -25,10 +25,10 @@ nn.clusters <- clusterRows(
   reducedDim(sce, "corrected"),
   TwoStepParam(
     KmeansParam(
-      centers = snakemake_params_kmeans_centers
+      centers = params_kmeans_centers
     ),
     NNGraphParam(
-      k = snakemake_params_nn_k
+      k = params_nn_k
     )
   )
 )

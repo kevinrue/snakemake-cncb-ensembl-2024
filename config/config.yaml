@@ -52,7 +52,7 @@ fastmnn:
   d: 50
   cluster:
     kmeans:
-      centers: 1000
+      centers: 2000
     nn:
       k: 5
   umap:
