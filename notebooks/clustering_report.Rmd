@@ -1,0 +1,76 @@
+---
+title: "Clusters after integration"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(BiocSingular)
+library(ggrastr)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+NA
+```
+
+```{r snakemake, include=FALSE}
+umap_file <- snakemake@input[["umap"]]
+clusters_file <- snakemake@input[["clusters"]]
+```
+
+## Load data
+
+### UMAP
+
+```{r load_umap, echo=FALSE}
+sce <- readRDS(umap_file)
+sce
+```
+
+### Clusters
+
+```{r load_sce, echo=FALSE}
+clusters <- readRDS(clusters_file)
+print(table(clusters))
+sce[["cluster"]] <- clusters[colnames(sce)]
+```
+
+## Plots
+
+### Clusters
+
+```{r umap-clusters, echo=FALSE, fig.width=7, fig.height=5}
+coldata <- "cluster"
+gg_data <- reducedDim(sce, "UMAP") %>%
+  as_tibble() %>%
+  mutate(
+    COLOUR = colData(sce)[[coldata]]
+  ) %>%
+  slice_sample(prop = 1)
+gg_label_data <- gg_data %>%
+  group_by(COLOUR) %>%
+  summarise(across(everything(), mean))
+ggplot(gg_data) +
+  geom_point_rast(aes(UMAP1, UMAP2, colour = COLOUR), gg_data, size = 0.05) +
+  geom_text(aes(UMAP1, UMAP2, label = COLOUR), gg_label_data) +
+  theme_bw() +
+  labs(
+    colour = coldata
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(size = 5))
+  )
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

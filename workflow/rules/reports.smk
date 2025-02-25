@@ -141,3 +141,18 @@ rule scran_umap_after_integration_report:
         runtime="5m",
     script:
         "../../notebooks/osca_umap_after_integration_report.Rmd"
+
+rule clustering_report:
+    input:
+        umap="results/fastmnn/umap.rds",
+        clusters="results/fastmnn/clusters.rds",
+    output:
+        "reports/clustering_report.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="20m",
+    script:
+        "../../notebooks/clustering_report.Rmd"
