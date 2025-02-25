@@ -31,5 +31,6 @@ rule all:
         "reports/umap_after_integration.html",
         "reports/clustering_report.html",
         "reports/hvgs.html",
-        "results/fastmnn/clusters.rds",
+        #"results/fastmnn/clusters.rds",
+        "results/fastmnn/markers.rds",
         "resources/gtf/duplicated_gene_models.tsv",

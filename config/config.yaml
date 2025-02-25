@@ -55,6 +55,9 @@ fastmnn:
       centers: 2000
     nn:
       k: 5
+  markers:
+    block: sample
+    lfc: 1
   umap:
     n_pcs: 50
 

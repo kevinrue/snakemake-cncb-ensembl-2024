@@ -252,6 +252,24 @@ rule cluster_after_integration:
     script:
         "../../scripts/cluster_after_integration.R"
 
+rule markers_after_integration:
+    input:
+        logcounts="results/filter_mitochondria/_logcounts.rds",
+        clusters="results/fastmnn/clusters.rds",
+    output:
+        rds="results/fastmnn/markers.rds",
+    params:
+        block=config["fastmnn"]["markers"]["block"],
+        lfc=config["fastmnn"]["markers"]["lfc"],
+    resources:
+        mem="32G",
+        runtime="30m",
+    threads: 32
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/scran_findmarkers.R"
+
 rule scran_umap_after_integration:
     input:
         sce="results/fastmnn/sce.rds",
