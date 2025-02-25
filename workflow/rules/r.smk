@@ -235,13 +235,14 @@ rule batchelor_fastmnn:
     script:
         "../../scripts/batchelor_fastmnn.R"
 
-rule scran_cluster_after_integration:
+rule cluster_after_integration:
     input:
         rds="results/fastmnn/sce.rds",
     output:
         rds="results/fastmnn/clusters.rds",
     params:
-        k=config["fastmnn"]["cluster"]["k"],
+        kmeans_centers=config["fastmnn"]["cluster"]["kmeans"]["centers"],
+        nn_k=config["fastmnn"]["cluster"]["nn"]["k"],
     resources:
         mem="8G",
         runtime="15m",
@@ -249,7 +250,7 @@ rule scran_cluster_after_integration:
     conda:
         "../../conda/conda.yaml"
     script:
-        "../../scripts/scran_cluster_after_integration.R"
+        "../../scripts/cluster_after_integration.R"
 
 rule scran_umap_after_integration:
     input:
