@@ -159,7 +159,7 @@ rule clustering_report:
 
 rule markers_report:
     input:
-        markers="results/fastmnn/markers.rds"
+        markers="results/fastmnn/markers.rds",
     output:
         "reports/markers_report.html",
     conda:
@@ -170,5 +170,20 @@ rule markers_report:
         runtime="20m",
     script:
         "../../notebooks/markers_report.Rmd"
+
+rule custom_markers_report:
+    input:
+        logcounts="results/filter_mitochondria/_logcounts.rds",
+        umap="results/fastmnn/umap.rds",
+    output:
+        "reports/custom_markers_report.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="32G",
+        runtime="20m",
+    script:
+        "../../notebooks/custom_markers_report.Rmd"
 
 

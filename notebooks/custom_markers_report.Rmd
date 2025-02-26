@@ -1,0 +1,129 @@
+---
+title: "Markers"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(ggrastr)
+library(org.Dm.eg.db)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+NA
+```
+
+```{r snakemake, include=FALSE}
+logcounts_file <- snakemake@input[["logcounts"]]
+umap_file <- snakemake@input[["umap"]]
+#logcounts_file <- "results/filter_mitochondria/_logcounts.rds"
+#umap_file <- "results/fastmnn/umap.rds"
+```
+
+## Load log-normalised counts
+
+```{r load_markers, echo=FALSE}
+sce <- readRDS(logcounts_file)
+sce
+```
+
+## Load gene annotations
+
+```{r load_gene_annotations, echo=FALSE}
+org_db <- org.Dm.eg.db
+org_db
+```
+
+```{r markers, echo=FALSE}
+markers_symbols <- c(
+  # Cholinergic Neurons
+  "ChAT",
+  "VAChT",
+  # Glutamatergic Neurons
+  "VGlut",
+  "Gs1",
+  "Gs2",
+  # GABAergic Neurons
+  "Gad1",
+  "VGAT",
+  # Dopaminergic Neurons
+  "ple",
+  "Ddc",
+  # Serotonergic Neurons
+  #"Trhn",
+  "SerT",
+  # Octopaminergic and Tyraminergic Neurons
+  "Tbh",
+  "Tdc2"
+)
+rowData(sce)[["gene_symbol"]] <- mapIds(
+  x = org_db,
+  keys = rowData(sce)[["gene_ids"]],
+  column = "SYMBOL",
+  keytype = "FLYBASE",
+  multiVals = "first"
+)
+sce <- sce[rowData(sce)[["gene_symbol"]] %in% markers_symbols, ]
+rownames(sce) <- rowData(sce)[["gene_symbol"]]
+sce <- sce[markers_symbols, ]
+```
+
+## Load UMAP coordinates
+
+```{r load_umap, echo=FALSE}
+sce_umap <- readRDS(umap_file)
+sce_umap
+```
+
+```{r add_umap, echo=FALSE}
+reducedDim(sce, "UMAP") <- reducedDim(sce_umap, "UMAP")[colnames(sce), ]
+rm(sce_umap)
+sce
+```
+
+## Plots
+
+```{r plots, echo=FALSE, fig.height=6, fig.width=8}
+for (gene_idx in seq_len(nrow(sce))) {
+  gene_id <- rowData(sce)[["gene_ids"]][gene_idx]
+  gene_symbol <- rowData(sce)[["gene_symbol"]][gene_idx]
+  logcounts_data <- assay(sce, "logcounts")[gene_idx, ]
+  plot_data <- cbind(
+    reducedDim(sce, "UMAP"),
+    logcounts = logcounts_data
+  )
+  gg <- ggplot(data = plot_data) +
+    rasterise(
+      geom_point(
+        aes(
+          x = UMAP1,
+          y = UMAP2,
+          colour = logcounts
+        ),
+        size = 0.05
+      )
+    ) +
+    scale_colour_viridis_c() +
+    theme_bw() +
+    labs(
+      x = "UMAP1",
+      y = "UMAP2",
+      colour = "Log-counts",
+      subtitle = paste0(gene_id, " | ", gene_symbol)
+    )
+  print(gg)
+}
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
