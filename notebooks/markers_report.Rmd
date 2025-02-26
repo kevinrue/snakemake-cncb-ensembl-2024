@@ -1,0 +1,64 @@
+---
+title: "Markers"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(org.Dm.eg.db)
+library(S4Vectors)
+```
+
+```{r setup, include=FALSE}
+NA
+```
+
+```{r snakemake, include=FALSE}
+#rds_file <- snakemake@input[["rds"]]
+rds_file <- "results/fastmnn/markers.rds"
+```
+
+## Load findMarkers results
+
+```{r load_markers, echo=FALSE}
+markers <- readRDS(rds_file)
+markers
+```
+
+## Load gene annotations
+
+```{r load_gene_annotations, echo=FALSE}
+org_db <- org.Dm.eg.db
+org_db
+```
+
+## Results
+
+```{r markers_tables, echo=FALSE, results='asis'}
+top_n_markers <- 20
+for (cluster_id in names(markers)) {
+  cat("### Cluster ", cluster_id, "\n")
+  table_out <- markers[[cluster_id]][seq_len(top_n_markers), c("Top", "p.value", "FDR", "summary.logFC")]
+  table_out[["gene_id"]] <- rownames(table_out)
+  rownames(table_out) <- NULL
+  table_out[["gene_symbol"]] <- mapIds(
+    x = org_db,
+    keys = table_out[["gene_id"]],
+    column = "SYMBOL",
+    keytype = "FLYBASE",
+    multiVals = "first"
+  )
+  print(knitr::kable(table_out))
+}
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

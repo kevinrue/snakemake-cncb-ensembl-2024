@@ -156,3 +156,19 @@ rule clustering_report:
         runtime="20m",
     script:
         "../../notebooks/clustering_report.Rmd"
+
+rule markers_report:
+    input:
+        markers="results/fastmnn/markers.rds"
+    output:
+        "reports/markers_report.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="20m",
+    script:
+        "../../notebooks/markers_report.Rmd"
+
+
