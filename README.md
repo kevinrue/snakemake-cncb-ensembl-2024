@@ -15,7 +15,7 @@ If you use this workflow in a paper, don't forget to give credits to the authors
 
 Typical usage:
 
-```
+```bash
 # Cleanup
 mv sps-* .sps
 rm nohup.out
@@ -54,6 +54,14 @@ snakemake \
   | dot -Tsvg \
   > dag.svg
 ```
+
+## VSCode, Snakemake, Apptainer, Conda, and R
+
+This pipeline was developed using VSCode and extensions.
+
+In particular, VSCode was allowed to create an `renv` library for interactive testing.
+The `.Rprofile` file created by `renv` interfered the creation of new Conda environments by Snakemake.
+In those instances, the code in the `.Rprofile` file had to be temporarily disabled (commented out) during the Snakemake run creating the new Conda environment.
 
 # TODO
 

@@ -94,6 +94,20 @@ rule sce_after_emptydrops:
     script:
         "../../scripts/apply_emptydrops.R"
 
+rule scdblfinder:
+    input:
+        sce="results/emptyDrops/sce/{sample}.rds",
+    output:
+        sce="results/scdblfinder/result/{sample}.rds",
+    threads: 32
+    resources:
+        mem="64G",
+        runtime="30m",
+    conda:
+        "../../conda/conda-2.yaml"
+    script:
+        "../../scripts/scdblfinder.R"
+
 rule filter_mitochondria:
     input:
         sce="results/emptyDrops/sce/{sample}.rds",

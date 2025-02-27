@@ -33,6 +33,7 @@ rule all:
         "reports/markers_report.html",
         "reports/custom_markers_report.html",
         "reports/hvgs.html",
-        #"results/fastmnn/clusters.rds",
+        expand("results/scdblfinder/result/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
+        #"results/filter_mitochondria/_scdblfinder.rds",
         "results/fastmnn/markers.rds",
         "resources/gtf/duplicated_gene_models.tsv",
