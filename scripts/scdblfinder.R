@@ -19,7 +19,6 @@ message("SCE object size: ", format(object.size(sce), unit = "GB"))
 message("Running scDblFinder ...")
 sce <- scDblFinder(
   sce = sce,
-  clusters = TRUE,
   BPPARAM = MulticoreParam(workers = snakemake@threads)
 )
 message("Done.")
