@@ -16,8 +16,8 @@
         "results",
         "slurm"
     ],
-    "r.rterm.linux": "/package/R-base/4.4.2/bin/R",
-    "r.rpath.linux": "/package/R-base/4.4.2/bin/R",
+    "r.rterm.linux": "/package/R-base/4.3.3/bin/R",
+    "r.rpath.linux": "/package/R-base/4.3.3/bin/R",
     "r.useRenvLibPath": true,
     "editor.tabSize": 2
 }

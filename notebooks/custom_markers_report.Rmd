@@ -39,6 +39,8 @@ org_db
 
 ```{r markers, echo=FALSE}
 markers_symbols <- c(
+  # Neurons
+  "fne",
   # Cholinergic Neurons
   "ChAT",
   "VAChT",
