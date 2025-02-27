@@ -67,6 +67,9 @@ ggplot_data <- report_stats %>%
     cols = -sample,
     names_to = "fdr",
     values_to = "cells"
+  ) %>%
+  mutate(
+    fdr = factor(fdr, c("0.01", "0.001", "0.0001", "0.00001"))
   )
 ggplot(ggplot_data) +
   geom_col(

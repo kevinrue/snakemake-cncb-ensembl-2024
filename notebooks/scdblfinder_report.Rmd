@@ -1,0 +1,108 @@
+---
+title: "scDblFinder (sample)"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+```{r snakemake, include=FALSE}
+rds_file <- snakemake@input[["rds"]]
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Input file"), rds_file
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## Load scDblFinder results
+
+### Table
+
+```{r read_rds, echo=FALSE}
+#| message: false
+sce <- readRDS(rds_file)
+sce
+```
+
+### Metadata
+
+```{r metadata, echo=FALSE}
+scdblfinder_metadata <- metadata(sce)
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("scDblFinder.threshold"), format(scdblfinder_metadata[["scDblFinder.threshold"]])
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## Overall statistics
+
+```{r filter_stats_table, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Input (barcodes)"), format(length(sce$scDblFinder.class), big.mark = ","),
+    format_bold("Singlets (barcodes)"), format(sum(sce$scDblFinder.class == "singlet"), big.mark = ","),
+    format_bold("Doublets (barcodes)"), format(sum(sce$scDblFinder.class == "doublet"), big.mark = ",")
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## Plot
+
+```{r plot, echo=FALSE, fig.width=7, fig.height=5}
+ggplot_data <- colData(sce) %>% 
+  as.data.frame() %>% 
+  as_tibble()
+ggplot(ggplot_data) +
+  geom_histogram(
+    mapping = aes(x = scDblFinder.score),
+    binwidth = 0.01,
+    colour = "black", fill = "grey"
+  ) +
+  geom_vline(
+    xintercept = scdblfinder_metadata[["scDblFinder.threshold"]],
+    colour = "red", linetype = "dashed"
+  ) +
+  scale_x_continuous(limits = c(0, 1)) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Score (scDblFinder)"
+  )
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

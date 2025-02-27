@@ -58,7 +58,7 @@ rule emptydrop_sample_report:
     script:
         "../../notebooks/emptydrops_report.Rmd"
 
-rule emptydrop_all_report:
+rule emptydrops_all_report:
     input:
         expand("results/emptyDrops/result/{sample}.rds", sample=SAMPLES['sample_name'].unique()),
     output:
@@ -71,6 +71,20 @@ rule emptydrop_all_report:
         runtime="10m",
     script:
         "../../notebooks/emptydrops_all_report.Rmd"
+
+rule scdblfinder_sample_report:
+    input:
+        rds="results/scdblfinder/result/{sample}.rds",
+    output:
+        "reports/scdblfinder/{sample}.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/scdblfinder_report.Rmd"
 
 rule mitochondrial_sample_report:
     input:
