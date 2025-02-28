@@ -44,7 +44,7 @@ rule barcoderanks_report:
     script:
         "../../notebooks/barcoderanks_report.Rmd"
 
-rule emptydrop_sample_report:
+rule emptydrops_sample_report:
     input:
         rds="results/emptyDrops/result/{sample}.rds",
     output:
@@ -71,6 +71,21 @@ rule emptydrops_all_report:
         runtime="10m",
     script:
         "../../notebooks/emptydrops_all_report.Rmd"
+
+rule after_emptydrop_sample_report:
+    input:
+        sce="results/emptyDrops/sce/{sample}.rds",
+        mt="config/mitochondrial_genes.tsv",
+    output:
+        "reports/emptyDrops_sce/{sample}.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 12
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/after_emptydrops_sample_report.Rmd"
 
 rule scdblfinder_sample_report:
     input:

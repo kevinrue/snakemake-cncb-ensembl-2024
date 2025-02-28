@@ -1,0 +1,321 @@
+---
+title: "After emptyDrops (sample)"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(BiocParallel)
+library(bluster)
+library(scales)
+library(scater)
+library(scran)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+```{r snakemake, include=FALSE}
+sce_rds <- snakemake@input[["sce"]]
+mt_tsv <- snakemake@input[["mt"]]
+# sce_rds <- "../results/emptyDrops/sce/WPPm048hrs_rep1.rds"
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+sample_name <- fs::path_ext_remove(basename(sce_rds))
+df <- matrix(
+  data = c(
+    format_bold("Sample name"), sample_name,
+    format_bold("Input file"), sce_rds
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## Load SCE object
+
+```{r load_fry, echo=FALSE}
+sce <- readRDS(sce_rds)
+sce
+```
+
+## Load mitochondrial gene list
+
+```{r, echo=FALSE}
+mito_gene_ids <- readr::read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
+str(mito_gene_ids)
+```
+
+## Barcode statistics
+
+```{r compute_statistics, include=FALSE}
+barcode_stats <- tibble(
+  umi_sum = colSums(assay(sce, "counts")),
+  genes = colSums(assay(sce, "counts") > 0),
+  mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+) %>% 
+  filter(umi_sum > 0) %>% 
+  arrange(desc(umi_sum)) %>% 
+  mutate(rank_umi = row_number()) %>% 
+  arrange(desc(genes)) %>% 
+  mutate(rank_genes = row_number())
+barcode_stats
+```
+
+### Range of UMI per barcode
+
+```{r range_umi_sum, echo=FALSE}
+range(barcode_stats$umi_sum)
+```
+
+### Range of mitochondrial contents
+
+```{r range_mt_pct, echo=FALSE}
+range(barcode_stats$mt_pct)
+```
+
+### Barcode-Rank Plot
+
+- <span style="color:black">Black</span>: UMI count maximum.
+- <span style="color:red">Red</span>: Expected number of cells & UMI count.
+
+```{r barcode_rank_plot, echo=FALSE}
+top_stats <- barcode_stats %>%
+  slice_max(umi_sum, n = 1, with_ties = FALSE)
+bottom_stats <- barcode_stats %>%
+  slice_min(umi_sum, n = 1, with_ties = FALSE)
+ggplot() +
+  geom_line(
+    mapping = aes(
+      x = rank_umi,
+      y = umi_sum
+    ),
+    data = barcode_stats) +
+  geom_label(
+    aes(
+      x = rank_umi,
+      y = umi_sum,
+      label = format(umi_sum, big.mark = ",")
+    ),
+    data = top_stats,
+    alpha = 0.5,
+    hjust = 0
+  ) +
+  geom_label(
+    aes(
+      x = rank_umi,
+      y = umi_sum,
+      label = format(umi_sum, big.mark = ",")
+    ),
+    data = bottom_stats,
+    alpha = 0.5,
+    hjust = 1
+  ) +
+  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_y_log10(
+    limits = c(1, NA),
+    breaks = umi_breaks,
+    minor_breaks = umi_minor_breaks,
+    labels = label_number(scale_cut = cut_short_scale())
+  ) +
+  theme_bw() +
+  labs(
+    x = "Barcodes",
+    y = "UMI Counts",
+    title = paste0("Sample (", sample_name, ")"),
+    subtitle = paste0("Barcodes (", format(ncol(sce), big.mark = ","), ")")
+  )
+```
+
+### Features-Rank Plot
+
+- <span style="color:black">Black</span>: Detected genes maximum.
+- <span style="color:red">Red</span>: Expected number of cells & detected genes.
+
+```{r feature_rank_plot, echo=FALSE}
+top_stats <- barcode_stats %>%
+  slice_max(genes, n = 1, with_ties = FALSE)
+bottom_stats <- barcode_stats %>%
+  slice_min(genes, n = 1, with_ties = FALSE)
+ggplot() +
+  geom_line(aes(x = rank_genes, y = genes), barcode_stats) +
+  geom_label(
+    aes(
+      x = rank_genes,
+      y = genes,
+      label = format(genes, big.mark = ",")
+    ),
+    data = top_stats,
+    alpha = 0.5,
+    hjust = 0
+  ) +
+  geom_label(
+    aes(
+      x = rank_genes,
+      y = genes,
+      label = format(genes, big.mark = ",")
+    ),
+    data = bottom_stats,
+    alpha = 0.5,
+    hjust = 1
+  ) +
+  scale_x_log10(
+    breaks = barcode_breaks,
+    minor_breaks = barcode_minor_breaks,
+    labels = label_number(scale_cut = cut_short_scale())
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    labels = label_number(scale_cut = cut_short_scale())
+  ) +
+  theme_bw() +
+  labs(
+    x = "Barcodes",
+    y = "Genes detected",
+    title = paste0("Sample (", sample_name, ")"),
+    subtitle = paste0("Barcodes (", format(ncol(sce), big.mark = ","), ")")
+  )
+```
+
+## Mitochondrial content
+
+```{r mito_histogram, echo=FALSE}
+barcode_stats %>% 
+  ggplot(aes(x = mt_pct)) +
+  geom_histogram(binwidth = 0.01, colour = "black", fill = "grey", linewidth = 0.1) +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, NA)) +
+  scale_x_continuous(labels = label_percent()) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Proportion of mitochondrial counts",
+    title = paste0("Sample (", sample_name, ")"),
+    subtitle = paste0("Barcodes (", format(ncol(sce), big.mark = ","), ")")
+  )
+```
+
+## Log-normalise
+
+Necessary prior to HVGs.
+
+```{r, echo=FALSE}
+sce <- logNormCounts(
+  x = sce,
+  BPPARAM = MulticoreParam(workers = snakemake@threads)
+)
+sce
+```
+
+## HVGs
+
+Recommended for PCA.
+
+```{r, include=FALSE}
+dec <- modelGeneVar(
+  x = sce,
+  BPPARAM = MulticoreParam(workers = snakemake@threads)
+)
+dec
+```
+
+```{r, include=FALSE}
+hvgs <- getTopHVGs(dec, n = 500)
+length(hvgs)
+```
+
+```{r, echo=FALSE}
+dec[["selected"]] <- factor(rownames(dec) %in% hvgs, c(TRUE, FALSE))
+ggplot(dec) +
+  geom_point(aes(mean, total, colour = selected)) +
+  geom_point(aes(mean, tech), color = "black") +
+  scale_colour_manual(values = c("TRUE" = "deepskyblue", "FALSE" = "coral2")) +
+  theme_bw()
+```
+
+## PCA
+
+```{r, include=FALSE}
+sce <- fixedPCA(
+  x = sce,
+  subset.row = hvgs,
+  BPPARAM = MulticoreParam(workers = snakemake@threads)
+)
+sce
+```
+
+```{r, echo=FALSE}
+plot_data <- tibble(
+  percentVar = attr(reducedDim(sce, "PCA"), "percentVar")
+) %>% 
+  mutate(
+    PC = factor(row_number())
+  )
+ggplot(plot_data, aes(PC, percentVar)) +
+  geom_col(color = "black", fill = "grey", linewidth = 0.1) +
+  scale_y_continuous(limits = c(0, NA)) +
+  theme_bw()
+```
+
+## UMAP
+
+```{r, include=FALSE}
+sce <- runUMAP(
+  x = sce,
+  dimred = "PCA",
+  n_dimred = 20,
+  BPPARAM = MulticoreParam(workers = snakemake@threads)
+)
+sce
+```
+
+```{r, echo=FALSE, fig.height=6, fig.width=8}
+reducedDim(sce, "UMAP") %>% 
+  as_tibble() %>% 
+  ggplot(aes(UMAP1, UMAP2)) +
+  geom_point(size = 0.01) +
+  theme_bw()
+```
+
+## Clustering
+
+```{r, echo=FALSE}
+colData(sce)[["cluster"]] <- clusterRows(
+  x = reducedDim(sce, "UMAP"),
+  BLUSPARAM = DbscanParam(
+    min.pts = 500,
+    core.prop = 0.95
+  )
+)
+table(colData(sce)[["cluster"]])
+```
+
+```{r, echo=FALSE}
+reducedDim(sce, "UMAP") %>% 
+  as_tibble() %>% 
+  bind_cols(colData(sce) %>% as_tibble()) %>% 
+  ggplot(aes(UMAP1, UMAP2, colour = cluster)) +
+  geom_point(size = 0.01) +
+  theme_bw()
+```
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```

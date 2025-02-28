@@ -1,0 +1,28 @@
+---
+title: "Test scDblFinder"
+output: html_document
+date: "2025-02-28"
+---
+
+## Doublets
+
+```{r}
+sce_dbl <- scDblFinder(sce, clusters = "cluster", returnType = "sce", BPPARAM = MulticoreParam(workers = 2))
+sce_dbl
+```
+
+```{r}
+colData(sce_dbl) %>% 
+  ggplot(aes(scDblFinder.score)) +
+  geom_histogram(binwidth = 0.01, linewidth = 0.1, color = "black", fill = "grey") +
+  theme_bw()
+```
+
+```{r}
+reducedDim(sce_dbl, "UMAP") %>% 
+  as_tibble() %>% 
+  bind_cols(colData(sce_dbl) %>% as_tibble()) %>% 
+  ggplot(aes(UMAP1, UMAP2, colour = scDblFinder.class)) +
+  geom_point(size = 0.01) +
+  theme_bw()
+```
