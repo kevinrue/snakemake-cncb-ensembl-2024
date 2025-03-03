@@ -6,8 +6,13 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
+library(BiocSingular)
 library(BiocParallel)
 library(bluster)
+library(dplyr)
+library(htmltools)
+library(rmarkdown)
+library(rtracklayer)
 library(scales)
 library(scater)
 library(scran)
@@ -15,7 +20,7 @@ library(SingleCellExperiment)
 library(tidyverse)
 ```
 
-```{r setup, include=FALSE}
+```{r constants, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
@@ -23,9 +28,21 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r snakemake, include=FALSE}
-sce_rds <- snakemake@input[["sce"]]
-mt_tsv <- snakemake@input[["mt"]]
-# sce_rds <- "../results/emptyDrops/sce/WPPm048hrs_rep1.rds"
+if (interactive()) {
+  sce_rds <- "../results/emptyDrops/sce/WPPm048hrs_rep1.rds"
+  mt_tsv <- "../config/mitochondrial_genes.tsv"
+  gtf <- "../resources/genome/genome.gtf.gz"
+  n_top_hvgs <- 500
+  n_dimred_umap <- 10
+  notebook_threads <- 8
+} else {
+  sce_rds <- snakemake@input[["sce"]]
+  mt_tsv <- snakemake@input[["mt"]]
+  gtf <- snakemake@input[["gtf"]]
+  n_top_hvgs <- 500
+  n_dimred_umap <- snakemake@params[["n_dimred_umap"]]
+  notebook_threads <- snakemake@threads
+}
 ```
 
 ## Run parameters
@@ -36,7 +53,8 @@ sample_name <- fs::path_ext_remove(basename(sce_rds))
 df <- matrix(
   data = c(
     format_bold("Sample name"), sample_name,
-    format_bold("Input file"), sce_rds
+    format_bold("Input file"), sce_rds,
+    format_bold("threads"), snakemake@threads
   ),
   ncol = 2, byrow = TRUE
 )
@@ -53,8 +71,14 @@ sce
 ## Load mitochondrial gene list
 
 ```{r, echo=FALSE}
-mito_gene_ids <- readr::read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
+mito_gene_ids <- read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
 str(mito_gene_ids)
+```
+
+## Load gene metadata
+
+```{r}
+gtf_gene_data <- import.gff(gtf, feature.type = "gene") %>% as_tibble()
 ```
 
 ## Barcode statistics
@@ -64,11 +88,11 @@ barcode_stats <- tibble(
   umi_sum = colSums(assay(sce, "counts")),
   genes = colSums(assay(sce, "counts") > 0),
   mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
-) %>% 
-  filter(umi_sum > 0) %>% 
-  arrange(desc(umi_sum)) %>% 
-  mutate(rank_umi = row_number()) %>% 
-  arrange(desc(genes)) %>% 
+) %>%
+  filter(umi_sum > 0) %>%
+  arrange(desc(umi_sum)) %>%
+  mutate(rank_umi = row_number()) %>%
+  arrange(desc(genes)) %>%
   mutate(rank_genes = row_number())
 barcode_stats
 ```
@@ -87,9 +111,6 @@ range(barcode_stats$mt_pct)
 
 ### Barcode-Rank Plot
 
-- <span style="color:black">Black</span>: UMI count maximum.
-- <span style="color:red">Red</span>: Expected number of cells & UMI count.
-
 ```{r barcode_rank_plot, echo=FALSE}
 top_stats <- barcode_stats %>%
   slice_max(umi_sum, n = 1, with_ties = FALSE)
@@ -97,11 +118,12 @@ bottom_stats <- barcode_stats %>%
   slice_min(umi_sum, n = 1, with_ties = FALSE)
 ggplot() +
   geom_line(
-    mapping = aes(
+    aes(
       x = rank_umi,
       y = umi_sum
     ),
-    data = barcode_stats) +
+    data = barcode_stats
+  ) +
   geom_label(
     aes(
       x = rank_umi,
@@ -139,9 +161,6 @@ ggplot() +
 ```
 
 ### Features-Rank Plot
-
-- <span style="color:black">Black</span>: Detected genes maximum.
-- <span style="color:red">Red</span>: Expected number of cells & detected genes.
 
 ```{r feature_rank_plot, echo=FALSE}
 top_stats <- barcode_stats %>%
@@ -191,7 +210,7 @@ ggplot() +
 ## Mitochondrial content
 
 ```{r mito_histogram, echo=FALSE}
-barcode_stats %>% 
+barcode_stats %>%
   ggplot(aes(x = mt_pct)) +
   geom_histogram(binwidth = 0.01, colour = "black", fill = "grey", linewidth = 0.1) +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, NA)) +
@@ -213,7 +232,7 @@ Necessary prior to HVGs.
 ```{r, echo=FALSE}
 sce <- logNormCounts(
   x = sce,
-  BPPARAM = MulticoreParam(workers = snakemake@threads)
+  BPPARAM = MulticoreParam(workers = notebook_threads)
 )
 sce
 ```
@@ -222,24 +241,26 @@ sce
 
 Recommended for PCA.
 
+- Number of HVGs selected: `r n_top_hvgs`
+
 ```{r, include=FALSE}
 dec <- modelGeneVar(
   x = sce,
-  BPPARAM = MulticoreParam(workers = snakemake@threads)
+  BPPARAM = MulticoreParam(workers = notebook_threads)
 )
 dec
 ```
 
 ```{r, include=FALSE}
-hvgs <- getTopHVGs(dec, n = 500)
+hvgs <- getTopHVGs(dec, n = n_top_hvgs)
 length(hvgs)
 ```
 
 ```{r, echo=FALSE}
 dec[["selected"]] <- factor(rownames(dec) %in% hvgs, c(TRUE, FALSE))
 ggplot(dec) +
-  geom_point(aes(mean, total, colour = selected)) +
-  geom_point(aes(mean, tech), color = "black") +
+  geom_point(aes(mean, total, colour = selected), size = 0.1) +
+  geom_point(aes(mean, tech), color = "black", size = 0.1) +
   scale_colour_manual(values = c("TRUE" = "deepskyblue", "FALSE" = "coral2")) +
   theme_bw()
 ```
@@ -249,16 +270,17 @@ ggplot(dec) +
 ```{r, include=FALSE}
 sce <- fixedPCA(
   x = sce,
+  rank = 50,
   subset.row = hvgs,
-  BPPARAM = MulticoreParam(workers = snakemake@threads)
+  BPPARAM = MulticoreParam(workers = notebook_threads)
 )
 sce
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=6, fig.width=10}
 plot_data <- tibble(
   percentVar = attr(reducedDim(sce, "PCA"), "percentVar")
-) %>% 
+) %>%
   mutate(
     PC = factor(row_number())
   )
@@ -270,19 +292,22 @@ ggplot(plot_data, aes(PC, percentVar)) +
 
 ## UMAP
 
+- Input dimensionality reduction: `"PCA"`
+- Input dimensions: `r n_dimred_umap`
+
 ```{r, include=FALSE}
 sce <- runUMAP(
   x = sce,
   dimred = "PCA",
-  n_dimred = 20,
-  BPPARAM = MulticoreParam(workers = snakemake@threads)
+  n_dimred = n_dimred_umap,
+  BPPARAM = MulticoreParam(workers = notebook_threads)
 )
 sce
 ```
 
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
-reducedDim(sce, "UMAP") %>% 
-  as_tibble() %>% 
+reducedDim(sce, "UMAP") %>%
+  as_tibble() %>%
   ggplot(aes(UMAP1, UMAP2)) +
   geom_point(size = 0.01) +
   theme_bw()
@@ -302,12 +327,58 @@ table(colData(sce)[["cluster"]])
 ```
 
 ```{r, echo=FALSE}
-reducedDim(sce, "UMAP") %>% 
-  as_tibble() %>% 
-  bind_cols(colData(sce) %>% as_tibble()) %>% 
+reducedDim(sce, "UMAP") %>%
+  as_tibble() %>%
+  bind_cols(
+    colData(sce) %>% as_tibble()
+  ) %>%
   ggplot(aes(UMAP1, UMAP2, colour = cluster)) +
   geom_point(size = 0.01) +
   theme_bw()
+```
+
+## Custom markers
+
+```{r}
+markers_list <- list(
+  "Neurons" = c("fne"),
+  "Cholinergic" = c("ChAT", "VAChT"),
+  "Glutamatergic" = c("VGlut", "Gs2"),
+  "GABAergic" = c("Gad1", "VGAT"),
+  "Dopaminergic" = c("ple", "Ddc"),
+  "Serotonergic" = c("SerT"), # "Trhn"?
+  "Octopaminergic / Tyraminergic" = c("Tbh", "Tdc2")
+)
+```
+
+```{r, message=FALSE, results='asis', fig.height=6, fig.width=8}
+# plot_list <- list()
+for (cell_type in names(markers_list)) {
+  cat("### ", cell_type, "\n")
+  for (cell_marker_name in markers_list[[cell_type]]){
+    message(cell_marker_name)
+    cell_marker_id <- gtf_gene_data %>%
+      filter(gene_name == cell_marker_name) %>%
+      pull(gene_id)
+    stopifnot(length(cell_marker_id) == 1L)
+    stopifnot(cell_marker_id %in% rownames(sce))
+    plot_data <- reducedDim(sce, "UMAP") %>% 
+      as_tibble() %>% 
+      mutate(
+        logcounts = as.numeric(assay(sce, "logcounts")[cell_marker_id, ])
+      )
+    gg_plot <- ggplot(plot_data) +
+      geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
+      scale_colour_viridis_c() +
+      labs(
+        title = paste0(cell_marker_id, " | ", cell_marker_name, "(", cell_type, ")"),
+        subtitle = sample_name
+      ) +
+      theme_bw()
+    print(gg_plot)
+    # plot_list[[cell_marker_name]] <- gg_plot
+  }
+}
 ```
 
 ## Session info

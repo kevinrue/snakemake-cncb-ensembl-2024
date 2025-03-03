@@ -76,8 +76,11 @@ rule after_emptydrop_sample_report:
     input:
         sce="results/emptyDrops/sce/{sample}.rds",
         mt="config/mitochondrial_genes.tsv",
+        gtf="resources/genome/genome.gtf.gz",
     output:
         "reports/emptyDrops_sce/{sample}.html",
+    params:
+        n_dimred_umap=10,
     conda:
         "../../conda/conda.yaml"
     threads: 12
