@@ -13,7 +13,7 @@ library(scales)
 library(tidyverse)
 ```
 
-```{r setup, include=FALSE}
+```{r constants, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
@@ -74,30 +74,6 @@ filter_stats <- tibble(
     barcodes = vapply(fdr_thresholds, function(x) sum(emptydrops_results$FDR < x, na.rm = TRUE), integer(1))
 )
 knitr::kable(filter_stats)
-```
-
-```{r filter_stats_plot, echo=FALSE}
-ggplot_data <- emptydrops_results %>% 
-  as.data.frame() %>% 
-  as_tibble() %>% 
-  mutate(
-    FDR = replace_na(FDR, 1)
-  ) %>% 
-  arrange(FDR) %>% 
-  mutate(
-    rank = row_number()
-  ) %>%
-  filter(FDR > 0)
-ggplot() +
-  geom_line(aes(rank, FDR), ggplot_data) +
-  geom_label(aes(barcodes, threshold, label = format(barcodes, big.mark = ",")), filter_stats) +
-  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  scale_y_log10() +
-  theme_bw() +
-  labs(
-    y = "FDR",
-    x = "Barcodes"
-  )
 ```
 
 ## Plot
