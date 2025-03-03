@@ -341,27 +341,59 @@ reducedDim(sce, "UMAP") %>%
 
 ```{r}
 markers_list <- list(
-  "Neurons" = c("fne"),
-  "Cholinergic" = c("ChAT", "VAChT"),
-  "Glutamatergic" = c("VGlut", "Gs2"),
-  "GABAergic" = c("Gad1", "VGAT"),
-  "Dopaminergic" = c("ple", "Ddc"),
-  "Serotonergic" = c("SerT"), # "Trhn"?
-  "Octopaminergic / Tyraminergic" = c("Tbh", "Tdc2")
+  "Neurons" = c(
+    "fne" = "FBgn0086675"
+  ),
+  "Cholinergic" = c(
+    "ChAT" = "FBgn0000303",
+    "VAChT" = "FBgn0270928"
+  ),
+  "Glutamatergic" = c(
+    "VGlut" = "FBgn0031424",
+    "Gs2" = "FBgn0001145"
+  ),
+  "GABAergic" = c(
+    "Gad1" = "FBgn0004516",
+    "VGAT" = "FBgn0033911"
+  ),
+  "Dopaminergic" = c(
+    "ple" = "FBgn0005626",
+    "Ddc" = "FBgn0000422"
+  ),
+  "Serotonergic" = c(
+    "SerT" = "FBgn0010414",
+    "Trh" = "FBgn0035187"
+  ),
+  "Octopaminergic / Tyraminergic" = c(
+    "Tbh" = "FBgn0010329",
+    "Tdc2" = "FBgn0050446"
+  ),
+  "Male" = c(
+    #"dsx" = "FBgn0000504",
+    #"msl-2" = "FBgn0005616",
+    "fru" = "FBgn0004652"
+  ),
+  "Female" = c(
+    #"tra" = "FBgn0003741",
+    #"ovo" = "FBgn0003028",
+    #"Yp1" = "FBgn0004045",
+    #"Yp2" = "FBgn0005391",
+    #"Yp3" = "FBgn0004047",
+    #"fit" = "FBgn0038914"
+    #"yolkless" = "?",
+    "Sxl" = "FBgn0264270"
+  )
 )
 ```
 
-```{r, message=FALSE, results='asis', fig.height=6, fig.width=8}
-# plot_list <- list()
-for (cell_type in names(markers_list)) {
-  cat("### ", cell_type, "\n")
-  for (cell_marker_name in markers_list[[cell_type]]){
-    message(cell_marker_name)
-    cell_marker_id <- gtf_gene_data %>%
-      filter(gene_name == cell_marker_name) %>%
-      pull(gene_id)
-    stopifnot(length(cell_marker_id) == 1L)
+```{r, message=FALSE, fig.height=4, fig.width=6, message=FALSE}
+for (cell_type in names(markers_list)[8:9]) {
+  for (cell_marker_id in markers_list[[cell_type]]){
+    cell_marker_name <- gtf_gene_data %>%
+      filter(gene_id == cell_marker_id) %>%
+      pull(gene_name)
     stopifnot(cell_marker_id %in% rownames(sce))
+    stopifnot(cell_marker_name %in% names(markers_list[[cell_type]]))
     plot_data <- reducedDim(sce, "UMAP") %>% 
       as_tibble() %>% 
       mutate(
@@ -371,12 +403,11 @@ for (cell_type in names(markers_list)) {
       geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
       scale_colour_viridis_c() +
       labs(
-        title = paste0(cell_marker_id, " | ", cell_marker_name, "(", cell_type, ")"),
+        title = paste0(cell_marker_id, " | ", cell_marker_name, " (", cell_type, ")"),
         subtitle = sample_name
       ) +
       theme_bw()
     print(gg_plot)
-    # plot_list[[cell_marker_name]] <- gg_plot
   }
 }
 ```

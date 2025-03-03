@@ -86,7 +86,7 @@ rule after_emptydrop_sample_report:
     threads: 12
     resources:
         mem="16G",
-        runtime="10m",
+        runtime="20m",
     script:
         "../../notebooks/after_emptydrops_sample_report.Rmd"
 
