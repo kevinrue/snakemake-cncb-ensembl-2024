@@ -471,7 +471,6 @@ table(
   knitr::kable()
 ```
 
-
 ## Session info
 
 `r date()`
@@ -480,4 +479,8 @@ Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}
 sessionInfo()
+```
+
+```{r write_sce, include=FALSE}
+saveRDS(sce, gsub(".html$", ".rds", snakemake@output[[1]]))
 ```
