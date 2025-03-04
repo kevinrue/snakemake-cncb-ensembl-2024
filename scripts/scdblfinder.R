@@ -19,6 +19,8 @@ message("SCE object size: ", format(object.size(sce), unit = "GB"))
 message("Running scDblFinder ...")
 sce <- scDblFinder(
   sce = sce,
+  dbr.sd = 1, # disable doublet rate expectation
+  returnType = "full",
   BPPARAM = MulticoreParam(workers = snakemake@threads)
 )
 message("Done.")

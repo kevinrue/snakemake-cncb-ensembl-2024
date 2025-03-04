@@ -64,31 +64,31 @@ knitr::kable(x = df)
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Input (barcodes)"), format(length(sce$scDblFinder.class), big.mark = ","),
-    format_bold("Singlets (barcodes)"), format(sum(sce$scDblFinder.class == "singlet"), big.mark = ","),
-    format_bold("Doublets (barcodes)"), format(sum(sce$scDblFinder.class == "doublet"), big.mark = ",")
+    format_bold("Input barcodes"), format(sum(sce$src == "real"), big.mark = ","),
+    format_bold("Artificial doublets"), format(sum(sce$src == "artificial"), big.mark = ","),
+    format_bold("Predicted singlets"), format(sum(sce$type == "real" & sce$class == "singlet"), big.mark = ","),
+    format_bold("Predicted doublets"), format(sum(sce$type == "real" & sce$class == "doublet"), big.mark = ",")
   ),
   ncol = 2, byrow = TRUE
 )
 knitr::kable(x = df)
 ```
 
-## Plot
+## Histogram of scDblFinder scores
 
 ```{r plot, echo=FALSE, fig.width=7, fig.height=5}
 ggplot_data <- colData(sce) %>% 
   as.data.frame() %>% 
   as_tibble()
-ggplot(ggplot_data) +
+ggplot_data %>% 
+  filter(type == "real") %>% 
+  ggplot() +
   geom_histogram(
-    mapping = aes(x = scDblFinder.score),
-    binwidth = 0.01,
+    mapping = aes(x = score),
+    breaks = seq(0, 1, 0.01),
     colour = "black", fill = "grey"
   ) +
-  geom_vline(
-    xintercept = scdblfinder_metadata[["scDblFinder.threshold"]],
-    colour = "red", linetype = "dashed"
-  ) +
+  facet_wrap(~class, ncol = 1) +
   scale_x_continuous(limits = c(0, 1)) +
   theme_bw() +
   labs(
