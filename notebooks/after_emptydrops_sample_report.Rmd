@@ -464,7 +464,7 @@ for (cell_type in names(markers_list)) {
       labs(
         x ="Cluster",
         y = "Log-counts",
-        title = paste0(cell_marker_id, " | ", marker_gene_name, " (", cell_type, ")"),
+        title = paste0(cell_marker_id, " | ", cell_marker_name, " (", cell_type, ")"),
         subtitle = sample_name
       ) +
       theme_bw() +
