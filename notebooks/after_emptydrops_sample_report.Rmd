@@ -624,6 +624,60 @@ ggplot() +
   )
 ```
 
+### Cluster vs GABAergic (predicted)
+
+Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
+
+```{r}
+cell_type <- "GABAergic"
+marker_gene_name <- "Gad1"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+marker_cutoff <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  filter(logcounts > 0) %>%
+  pull(logcounts) %>%
+  quantile(0.01)
+sce$Gad1 <- factor(
+  x = ifelse(
+    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
+    yes = "positive",
+    no = "negative"
+  ),
+  levels = c("positive", "negative")
+)
+table(sce$Gad1)
+```
+
+```{r}
+cell_type <- "GABAergic"
+marker_gene_name <- "Gad1"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+plot_data <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  bind_cols(
+    colData(sce) %>% as_tibble()
+  )
+ggplot() +
+  geom_violin(
+    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
+    data = plot_data,
+    scale = "width",
+    draw_quantiles = 0.5) +
+  labs(
+    x ="Cluster",
+    y = "Log-counts",
+    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
+    subtitle = sample_name
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
 ## Session info
 
 `r date()`
