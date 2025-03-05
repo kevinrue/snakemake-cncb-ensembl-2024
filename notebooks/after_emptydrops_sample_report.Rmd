@@ -334,12 +334,20 @@ reducedDim(sce, "UMAP") %>%
 ## Clustering
 
 ```{r}
+set.seed(1010)
 colData(sce)[["cluster"]] <- clusterRows(
-  x = reducedDim(sce, "UMAP"),
-  BLUSPARAM = DbscanParam(
-    min.pts = 500,
-    core.prop = 0.95
-  )
+  x = reducedDim(sce, "PCA")[, 1:50],
+  BLUSPARAM = TwoStepParam(
+    first = KmeansParam(
+      centers = 1000,
+      iter.max = 100
+    ),
+    second = NNGraphParam(
+      shared = TRUE,
+      k = 5
+    )
+  ),
+  full = FALSE
 )
 table(colData(sce)[["cluster"]])
 ```
@@ -482,5 +490,5 @@ sessionInfo()
 ```
 
 ```{r write_sce, include=FALSE}
-saveRDS(sce, gsub(".html$", ".rds", snakemake@output[[1]]))
+saveRDS(sce, file.path("test-after-emptydrops", paste0(sample_name, ".rds")))
 ```
