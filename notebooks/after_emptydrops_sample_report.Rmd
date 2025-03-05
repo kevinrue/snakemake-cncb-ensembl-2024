@@ -314,6 +314,7 @@ ggplot(plot_data, aes(PC, percentVar)) +
 - Input dimensions: `r n_dimred_umap`
 
 ```{r, include=FALSE}
+set.seed(1010)
 sce <- runUMAP(
   x = sce,
   dimred = "PCA",
@@ -333,7 +334,7 @@ reducedDim(sce, "UMAP") %>%
 
 ## Clustering
 
-```{r}
+```{r, echo=FALSE}
 set.seed(1010)
 colData(sce)[["cluster"]] <- clusterRows(
   x = reducedDim(sce, "PCA")[, 1:50],
@@ -352,7 +353,7 @@ colData(sce)[["cluster"]] <- clusterRows(
 table(colData(sce)[["cluster"]])
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=6, fig.width=8}
 reducedDim(sce, "UMAP") %>%
   as_tibble() %>%
   bind_cols(
@@ -360,6 +361,9 @@ reducedDim(sce, "UMAP") %>%
   ) %>%
   ggplot(aes(UMAP1, UMAP2, colour = cluster)) +
   geom_point(size = 0.01) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 3))
+  ) +
   theme_bw()
 ```
 
@@ -450,33 +454,164 @@ for (cell_type in names(markers_list)) {
 
 ### Cluster vs Sex (predicted)
 
-Male predicted as expression of roX2 higher than the 1% quantile of log-normalised non-zero count values.
+Male predicted as expression of *roX2* / *FBgn0019660* higher than the 1% quantile of log-normalised non-zero count values.
 
-```{r cluster_vs_roX2_sex}
-roX2_cutoff <- tibble(
-  logcounts = assay(sce, "logcounts")["FBgn0019660",]
+```{r}
+cell_type <- "Male"
+marker_gene_name <- "lncRNA:roX2"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+marker_cutoff <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
   ) %>%
   filter(logcounts > 0) %>%
   pull(logcounts) %>%
   quantile(0.01)
 sce$roX2_sex <- factor(
   x = ifelse(
-    test = assay(sce, "logcounts")["FBgn0019660",] >= roX2_cutoff,
+    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
     yes = "male",
     no = "female"
   ),
   levels = c("female", "male")
 )
-table(
-  cluster=sce$cluster,
-  roX2_sex=sce$roX2_sex
-) %>% 
-  as_tibble() %>% 
-  pivot_wider(
-    names_from = roX2_sex,
-    values_from = n
-  ) %>% 
-  knitr::kable()
+table(sce$roX2_sex)
+```
+
+```{r}
+cell_type <- "Male"
+marker_gene_name <- "lncRNA:roX2"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+plot_data <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  bind_cols(
+    colData(sce) %>% as_tibble()
+  )
+ggplot() +
+  geom_violin(
+    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
+    data = plot_data,
+    scale = "width",
+    draw_quantiles = 0.5) +
+  labs(
+    x ="Cluster",
+    y = "Log-counts",
+    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
+    subtitle = sample_name
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+### Cluster vs Cholinergic (predicted)
+
+Neuronal predicted as expression of *ChAT* / *FBgn0000303* higher than the 1% quantile of log-normalised non-zero count values.
+
+```{r}
+cell_type <- "Cholinergic"
+marker_gene_name <- "ChAT"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+marker_cutoff <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  filter(logcounts > 0) %>%
+  pull(logcounts) %>%
+  quantile(0.01)
+sce$ChAT <- factor(
+  x = ifelse(
+    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
+    yes = "positive",
+    no = "negative"
+  ),
+  levels = c("positive", "negative")
+)
+table(sce$ChAT)
+```
+
+```{r}
+cell_type <- "Cholinergic"
+marker_gene_name <- "ChAT"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+plot_data <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  bind_cols(
+    colData(sce) %>% as_tibble()
+  )
+ggplot() +
+  geom_violin(
+    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
+    data = plot_data,
+    scale = "width",
+    draw_quantiles = 0.5) +
+  labs(
+    x ="Cluster",
+    y = "Log-counts",
+    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
+    subtitle = sample_name
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+### Cluster vs Glutamatergic (predicted)
+
+Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
+
+```{r}
+cell_type <- "Glutamatergic"
+marker_gene_name <- "VGlut"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+marker_cutoff <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  filter(logcounts > 0) %>%
+  pull(logcounts) %>%
+  quantile(0.01)
+sce$VGlut <- factor(
+  x = ifelse(
+    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
+    yes = "positive",
+    no = "negative"
+  ),
+  levels = c("positive", "negative")
+)
+table(sce$VGlut)
+```
+
+```{r}
+cell_type <- "Glutamatergic"
+marker_gene_name <- "VGlut"
+marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
+plot_data <- tibble(
+  logcounts = assay(sce, "logcounts")[marker_gene_id,]
+  ) %>%
+  bind_cols(
+    colData(sce) %>% as_tibble()
+  )
+ggplot() +
+  geom_violin(
+    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
+    data = plot_data,
+    scale = "width",
+    draw_quantiles = 0.5) +
+  labs(
+    x ="Cluster",
+    y = "Log-counts",
+    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
+    subtitle = sample_name
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
 ```
 
 ## Session info
