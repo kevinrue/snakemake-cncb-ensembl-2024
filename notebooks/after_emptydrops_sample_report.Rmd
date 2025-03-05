@@ -425,7 +425,7 @@ markers_list <- list(
 )
 ```
 
-```{r, echo=FALSE, fig.height=5, fig.width=12}
+```{r markers_plots, echo=FALSE, fig.height=10, fig.width=12}
 for (cell_type in names(markers_list)) {
   for (cell_marker_id in markers_list[[cell_type]]){
     cell_marker_name <- gtf_gene_data %>%
@@ -455,227 +455,29 @@ for (cell_type in names(markers_list)) {
         subtitle = sample_name
       ) +
       theme_bw()
-    print(cowplot::plot_grid(gg_scatter, gg_histogram))
+    gg_violin <- ggplot() +
+      geom_violin(
+        mapping = aes(x = cluster, y = logcounts), fill = "grey90",
+        data = plot_data,
+        scale = "width",
+        draw_quantiles = 0.5) +
+      labs(
+        x ="Cluster",
+        y = "Log-counts",
+        title = paste0(cell_marker_id, " | ", marker_gene_name, " (", cell_type, ")"),
+        subtitle = sample_name
+      ) +
+      theme_bw() +
+      theme(
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+      )
+    cowplot_row1 <- cowplot::plot_grid(gg_scatter, gg_histogram, nrow = 1)
+    cowplot_row2 <- gg_violin
+    cowplot_all <- cowplot::plot_grid(cowplot_row1, cowplot_row2, nrow = 2)
+    print(cowplot_all)
   }
 }
-```
-
-## Cross-tabulate cell counts
-
-### Cluster vs Sex (predicted)
-
-Male predicted as expression of *roX2* / *FBgn0019660* higher than the 1% quantile of log-normalised non-zero count values.
-
-```{r, echo=FALSE}
-cell_type <- "Male"
-marker_gene_name <- "lncRNA:roX2"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-marker_cutoff <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  filter(logcounts > 0) %>%
-  pull(logcounts) %>%
-  quantile(0.01)
-sce$roX2_sex <- factor(
-  x = ifelse(
-    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
-    yes = "male",
-    no = "female"
-  ),
-  levels = c("female", "male")
-)
-table(sce$roX2_sex)
-```
-
-```{r, echo=FALSE}
-cell_type <- "Male"
-marker_gene_name <- "lncRNA:roX2"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-plot_data <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  bind_cols(
-    colData(sce) %>% as_tibble()
-  )
-ggplot() +
-  geom_violin(
-    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
-    data = plot_data,
-    scale = "width",
-    draw_quantiles = 0.5) +
-  labs(
-    x ="Cluster",
-    y = "Log-counts",
-    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
-    subtitle = sample_name
-  ) +
-  theme_bw() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  )
-```
-
-### Cluster vs Cholinergic (predicted)
-
-Neuronal predicted as expression of *ChAT* / *FBgn0000303* higher than the 1% quantile of log-normalised non-zero count values.
-
-```{r, echo=FALSE}
-cell_type <- "Cholinergic"
-marker_gene_name <- "ChAT"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-marker_cutoff <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  filter(logcounts > 0) %>%
-  pull(logcounts) %>%
-  quantile(0.01)
-sce$ChAT <- factor(
-  x = ifelse(
-    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
-    yes = "positive",
-    no = "negative"
-  ),
-  levels = c("positive", "negative")
-)
-table(sce$ChAT)
-```
-
-```{r, echo=FALSE}
-cell_type <- "Cholinergic"
-marker_gene_name <- "ChAT"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-plot_data <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  bind_cols(
-    colData(sce) %>% as_tibble()
-  )
-ggplot() +
-  geom_violin(
-    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
-    data = plot_data,
-    scale = "width",
-    draw_quantiles = 0.5) +
-  labs(
-    x ="Cluster",
-    y = "Log-counts",
-    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
-    subtitle = sample_name
-  ) +
-  theme_bw() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  )
-```
-
-### Cluster vs Glutamatergic (predicted)
-
-Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
-
-```{r, echo=FALSE}
-cell_type <- "Glutamatergic"
-marker_gene_name <- "VGlut"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-marker_cutoff <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  filter(logcounts > 0) %>%
-  pull(logcounts) %>%
-  quantile(0.01)
-sce$VGlut <- factor(
-  x = ifelse(
-    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
-    yes = "positive",
-    no = "negative"
-  ),
-  levels = c("positive", "negative")
-)
-table(sce$VGlut)
-```
-
-```{r, echo=FALSE}
-cell_type <- "Glutamatergic"
-marker_gene_name <- "VGlut"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-plot_data <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  bind_cols(
-    colData(sce) %>% as_tibble()
-  )
-ggplot() +
-  geom_violin(
-    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
-    data = plot_data,
-    scale = "width",
-    draw_quantiles = 0.5) +
-  labs(
-    x ="Cluster",
-    y = "Log-counts",
-    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
-    subtitle = sample_name
-  ) +
-  theme_bw() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  )
-```
-
-### Cluster vs GABAergic (predicted)
-
-Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
-
-```{r, echo=FALSE}
-cell_type <- "GABAergic"
-marker_gene_name <- "Gad1"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-marker_cutoff <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  filter(logcounts > 0) %>%
-  pull(logcounts) %>%
-  quantile(0.01)
-sce$Gad1 <- factor(
-  x = ifelse(
-    test = assay(sce, "logcounts")[marker_gene_id,] >= marker_cutoff,
-    yes = "positive",
-    no = "negative"
-  ),
-  levels = c("positive", "negative")
-)
-table(sce$Gad1)
-```
-
-```{r, echo=FALSE}
-cell_type <- "GABAergic"
-marker_gene_name <- "Gad1"
-marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
-plot_data <- tibble(
-  logcounts = assay(sce, "logcounts")[marker_gene_id,]
-  ) %>%
-  bind_cols(
-    colData(sce) %>% as_tibble()
-  )
-ggplot() +
-  geom_violin(
-    mapping = aes(x = cluster, y = logcounts), fill = "grey90",
-    data = plot_data,
-    scale = "width",
-    draw_quantiles = 0.5) +
-  labs(
-    x ="Cluster",
-    y = "Log-counts",
-    title = paste0(marker_gene_id, " | ", marker_gene_name, " (", cell_type, ")"),
-    subtitle = sample_name
-  ) +
-  theme_bw() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank()
-  )
 ```
 
 ## Session info
