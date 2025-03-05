@@ -466,7 +466,7 @@ for (cell_type in names(markers_list)) {
 
 Male predicted as expression of *roX2* / *FBgn0019660* higher than the 1% quantile of log-normalised non-zero count values.
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Male"
 marker_gene_name <- "lncRNA:roX2"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -487,7 +487,7 @@ sce$roX2_sex <- factor(
 table(sce$roX2_sex)
 ```
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Male"
 marker_gene_name <- "lncRNA:roX2"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -520,7 +520,7 @@ ggplot() +
 
 Neuronal predicted as expression of *ChAT* / *FBgn0000303* higher than the 1% quantile of log-normalised non-zero count values.
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Cholinergic"
 marker_gene_name <- "ChAT"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -541,7 +541,7 @@ sce$ChAT <- factor(
 table(sce$ChAT)
 ```
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Cholinergic"
 marker_gene_name <- "ChAT"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -574,7 +574,7 @@ ggplot() +
 
 Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Glutamatergic"
 marker_gene_name <- "VGlut"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -595,7 +595,7 @@ sce$VGlut <- factor(
 table(sce$VGlut)
 ```
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "Glutamatergic"
 marker_gene_name <- "VGlut"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -628,7 +628,7 @@ ggplot() +
 
 Neuronal predicted as expression of *VGlut* / *FBgn0031424* higher than the 1% quantile of log-normalised non-zero count values.
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "GABAergic"
 marker_gene_name <- "Gad1"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
@@ -649,7 +649,7 @@ sce$Gad1 <- factor(
 table(sce$Gad1)
 ```
 
-```{r}
+```{r, echo=FALSE}
 cell_type <- "GABAergic"
 marker_gene_name <- "Gad1"
 marker_gene_id <- markers_list[[cell_type]][[marker_gene_name]]
