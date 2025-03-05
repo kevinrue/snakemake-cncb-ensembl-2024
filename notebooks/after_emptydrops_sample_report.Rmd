@@ -334,7 +334,7 @@ reducedDim(sce, "UMAP") %>%
 
 ## Clustering
 
-```{r, echo=FALSE}
+```{r cluster_barcodes, echo=FALSE}
 set.seed(1010)
 colData(sce)[["cluster"]] <- clusterRows(
   x = reducedDim(sce, "PCA")[, 1:50],
@@ -353,18 +353,27 @@ colData(sce)[["cluster"]] <- clusterRows(
 table(colData(sce)[["cluster"]])
 ```
 
-```{r, echo=FALSE, fig.height=6, fig.width=8}
-reducedDim(sce, "UMAP") %>%
-  as_tibble() %>%
-  bind_cols(
-    colData(sce) %>% as_tibble()
-  ) %>%
-  ggplot(aes(UMAP1, UMAP2, colour = cluster)) +
-  geom_point(size = 0.01) +
+```{r cluster_barcodes_umap, echo=FALSE, fig.height=6, fig.width=8}
+all_point_data <- reducedDim(sce, "UMAP") %>% 
+  as_tibble() %>% 
+  bind_cols(colData(sce) %>% as_tibble())
+cluster_label_data <- reducedDim(sce, "UMAP") %>% 
+  as_tibble() %>% 
+  bind_cols(colData(sce) %>% as_tibble()) %>% 
+  select(cluster, UMAP1, UMAP2) %>% 
+  group_by(cluster) %>% 
+  summarise(across(.cols = c(UMAP1, UMAP2), .fns = mean))
+ggplot() +
+  rasterise(geom_point(
+    mapping = aes(x = UMAP1, y = UMAP2, colour = cluster),
+    data = all_point_data,
+    size = 0.001
+  ), dpi = 300) +
+  geom_text(mapping = aes(x = UMAP1, y = UMAP2, label = cluster), data = cluster_label_data) +
+  theme_bw() +
   guides(
     colour = guide_legend(override.aes = list(size = 3))
-  ) +
-  theme_bw()
+  )
 ```
 
 ## Custom markers
