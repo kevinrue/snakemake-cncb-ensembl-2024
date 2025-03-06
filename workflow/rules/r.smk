@@ -158,7 +158,7 @@ rule simpleaf_counts_all_rds:
 
 rule simpleaf_counts_hdf5:
     input:
-        sce="results/filter_mitochondria/_all.rds"
+        sce="results/filter_mitochondria/_all.rds",
     output:
         sce=directory("results/filter_mitochondria/hdf5"),
     resources:
@@ -171,7 +171,7 @@ rule simpleaf_counts_hdf5:
 
 rule scuttle_lognormcounts:
     input:
-        sce="results/filter_mitochondria/_all.rds"
+        sce="results/filter_mitochondria/_all.rds",
     output:
         sce="results/filter_mitochondria/_logcounts.rds",
     resources:

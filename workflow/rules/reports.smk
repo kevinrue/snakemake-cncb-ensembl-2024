@@ -104,20 +104,6 @@ rule scdblfinder_sample_report:
     script:
         "../../notebooks/scdblfinder_report.Rmd"
 
-rule mitochondrial_sample_report:
-    input:
-        rds="results/emptyDrops/sce/{sample}.rds",
-    output:
-        "reports/mitochondria/{sample}.html",
-    conda:
-        "../../conda/conda.yaml"
-    threads: 2
-    resources:
-        mem="16G",
-        runtime="10m",
-    script:
-        "../../notebooks/mitochondrial_report.Rmd"
-
 rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
