@@ -26,7 +26,6 @@ rule all:
         expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/emptyDrops_sce/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        expand("reports/mitochondria/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "reports/emptyDrops.html",
         "reports/umap.html",
         "reports/fastmnn.html",
