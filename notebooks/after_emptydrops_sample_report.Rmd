@@ -419,6 +419,9 @@ markers_list <- list(
     "Tbh" = "FBgn0010329",
     "Tdc2" = "FBgn0050446"
   ),
+  "Glial" = c(
+    "nrv2" = "FBgn0015777"
+  ),
   "Male" = c(
     "fru" = "FBgn0004652",
     "lncRNA:roX1" = "FBgn0019661",
