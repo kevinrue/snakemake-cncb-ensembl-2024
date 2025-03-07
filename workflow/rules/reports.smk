@@ -78,17 +78,17 @@ rule after_emptydrop_sample_report:
         mt="config/mitochondrial_genes.tsv",
         gtf="resources/genome/genome.gtf.gz",
     output:
-        "reports/emptyDrops_sce/{sample}.html",
+        "reports/after_emptyDrops/{sample}.html",
     params:
-        n_dimred_umap=10,
+        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
     conda:
         "../../conda/conda.yaml"
     threads: 12
     resources:
-        mem="16G",
-        runtime="20m",
+        mem="32G",
+        runtime="30m",
     script:
-        "../../notebooks/after_emptydrops_sample_report.Rmd"
+        "../../notebooks/sample_report.Rmd"
 
 rule scdblfinder_sample_report:
     input:

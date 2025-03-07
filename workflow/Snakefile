@@ -24,7 +24,7 @@ rule all:
         expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
-        expand("reports/emptyDrops_sce/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/after_emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "reports/emptyDrops.html",
         "reports/umap.html",

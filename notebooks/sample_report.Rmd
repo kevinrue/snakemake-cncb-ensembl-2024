@@ -6,9 +6,11 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
-library(BiocSingular)
+library(BiocNeighbors)
 library(BiocParallel)
+library(BiocSingular)
 library(bluster)
+library(cowplot)
 library(dplyr)
 library(ggrastr)
 library(htmltools)
@@ -41,7 +43,7 @@ if (interactive()) {
   mt_tsv <- snakemake@input[["mt"]]
   gtf <- snakemake@input[["gtf"]]
   n_top_hvgs <- 500
-  n_dimred_umap <- snakemake@params[["n_dimred_umap"]]
+  n_dimred_umap <- snakemake@params[["n_pcs_umap"]]
   notebook_threads <- snakemake@threads
 }
 sample_name <- fs::path_ext_remove(basename(sce_rds))
@@ -55,7 +57,7 @@ df <- matrix(
   data = c(
     format_bold("Sample name"), sample_name,
     format_bold("Input file"), sce_rds,
-    format_bold("threads"), snakemake@threads
+    format_bold("threads"), notebook_threads
   ),
   ncol = 2, byrow = TRUE
 )
@@ -64,7 +66,7 @@ knitr::kable(x = df)
 
 ## Load SCE object
 
-```{r load_fry, echo=FALSE}
+```{r load_sce, echo=FALSE}
 sce <- readRDS(sce_rds)
 sce
 ```
@@ -73,7 +75,7 @@ sce
 
 The character vector of gene identifiers is imported here for later use.
 
-```{r, echo=FALSE}
+```{r mito_gene_ids, echo=FALSE}
 mito_gene_ids <- read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
 str(mito_gene_ids)
 ```
@@ -82,11 +84,11 @@ str(mito_gene_ids)
 
 The metadata loaded from the GTF file is used to *replace* the `rowData` slot.
 
-```{r}
+```{r gtf_gene_data, echo=FALSE}
 gtf_gene_data <- import.gff(gtf, feature.type = "gene")
 ```
 
-```{r}
+```{r add_rowdata, echo=FALSE}
 new_rowdata <- gtf_gene_data %>% as_tibble() %>% as("DataFrame")
 rownames(new_rowdata) <- new_rowdata[["gene_id"]]
 rowData(sce) <- new_rowdata[rownames(sce), ]
@@ -95,7 +97,7 @@ colnames(rowData(sce))
 
 ## Barcode statistics
 
-```{r compute_statistics, include=FALSE}
+```{r barcode_statistics, include=FALSE}
 barcode_stats <- tibble(
   umi_sum = colSums(assay(sce, "counts")),
   genes = colSums(assay(sce, "counts") > 0),
@@ -107,18 +109,6 @@ barcode_stats <- tibble(
   arrange(desc(genes)) %>%
   mutate(rank_genes = row_number())
 barcode_stats
-```
-
-### Range of UMI per barcode
-
-```{r range_umi_sum, echo=FALSE}
-range(barcode_stats$umi_sum)
-```
-
-### Range of mitochondrial contents
-
-```{r range_mt_pct, echo=FALSE}
-range(barcode_stats$mt_pct)
 ```
 
 ### Barcode-Rank Plot
@@ -221,6 +211,11 @@ ggplot() +
 
 ## Mitochondrial content
 
+TODO:
+
+* Compute 95% quantile of mitochondrial content and display as a vertical line and label,
+  to guide the choice of a threshold.
+
 ```{r mito_histogram, echo=FALSE}
 barcode_stats %>%
   ggplot(aes(x = mt_pct)) +
@@ -255,12 +250,21 @@ Recommended for PCA.
 
 - Number of HVGs selected: `r n_top_hvgs`
 
+The plots below illustrate the result of the selection strategy.
+
+
+
 ```{r, echo=FALSE}
 dec <- modelGeneVar(
   x = sce,
   BPPARAM = MulticoreParam(workers = notebook_threads)
 )
 ```
+
+The first plot ranks genes by decreasing biological variance,
+and indicates the number of HVGs selected by a vertical red dashed line.
+Ideally, we want to select a sufficient number of genes with positive biological variance,
+without going too far into the plateau near zero.
 
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
 dec %>% 
@@ -274,17 +278,21 @@ dec %>%
   geom_vline(xintercept = n_top_hvgs, colour = "red", linetype = "dashed") +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   labs(
+    subtitle = sample_name,
     x = "Rank (genes)",
-    y = "Biological variance",
-    subtitle = sample_name
+    y = "Biological variance"    
   ) +
   theme_bw()
 ```
 
 ```{r, include=FALSE}
 hvgs <- getTopHVGs(dec, n = n_top_hvgs)
-length(hvgs)
 ```
+
+The second plot below highlights the selected HVGs (blue) in a scatter plot showing total variance and mean expression.
+Ideally, we want to select a sufficient number of genes,
+across the full range of mean expression values,
+without picking genes too close to the estimated technical variance (black).
 
 ```{r, echo=FALSE}
 dec[["selected"]] <- factor(rownames(dec) %in% hvgs, c(TRUE, FALSE))
@@ -292,12 +300,21 @@ ggplot(dec) +
   geom_point(aes(mean, total, colour = selected), size = 0.1) +
   geom_point(aes(mean, tech), color = "black", size = 0.1) +
   scale_colour_manual(values = c("TRUE" = "deepskyblue", "FALSE" = "coral2")) +
+  labs(
+    title = "Highly variable genes",
+    subtitle = sample_name,
+    x = "Mean expression",
+    y = "Total variance"
+  ) +
   theme_bw()
 ```
 
 ## PCA
 
+- Number of HVGs selected: `r 50`
+
 ```{r, include=FALSE}
+set.seed(1010)
 sce <- fixedPCA(
   x = sce,
   rank = 50,
@@ -306,6 +323,11 @@ sce <- fixedPCA(
 )
 sce
 ```
+
+The plot below displays the percentage of variance explained by each of the principal components computed.
+It is intended to guide the choice of the number of principal components used in downstream analyses (e.g., clustering, UMAP).
+Ideally, we want to use a sufficient number of principal components to capture most of the variance in the data set,
+while reducing the dimensionality of the data set to minimise noise and reduce memory requirements for downstream analyses.
 
 ```{r, echo=FALSE, fig.height=6, fig.width=10}
 plot_data <- tibble(
@@ -317,6 +339,11 @@ plot_data <- tibble(
 ggplot(plot_data, aes(PC, percentVar)) +
   geom_col(color = "black", fill = "grey", linewidth = 0.1) +
   scale_y_continuous(limits = c(0, NA)) +
+  labs(
+    subtitle = sample_name,
+    x = "Principal component",
+    y = "Percentage variance explained"
+  ) +
   theme_bw()
 ```
 
@@ -341,51 +368,72 @@ reducedDim(sce, "UMAP") %>%
   as_tibble() %>%
   ggplot(aes(UMAP1, UMAP2)) +
   geom_point(size = 0.01) +
+  labs(
+    subtitle = sample_name,
+    x = "UMAP1",
+    y = "UMAP2"
+  ) +
   theme_bw()
 ```
 
 ## Clustering
 
-```{r cluster_barcodes, echo=FALSE}
+```{r cluster_louvain, echo=FALSE}
 set.seed(1010)
-colData(sce)[["cluster"]] <- clusterRows(
-  x = reducedDim(sce, "PCA")[, 1:50],
-  BLUSPARAM = TwoStepParam(
-    first = KmeansParam(
-      centers = 1000,
-      iter.max = 100
+for (resolution in seq(from = 0.5, to = 1.5, by = 0.1)) {
+  cluster_coldata_name <- paste0("cluster_louvain_res", resolution)
+  colData(sce)[[cluster_coldata_name]] <- clusterRows(
+    x = reducedDim(sce, "PCA")[, 1:50],
+    BLUSPARAM = TwoStepParam(
+      first = KmeansParam(
+        centers = 1000,
+        iter.max = 100
+      ),
+      second = NNGraphParam(
+        shared = TRUE,
+        k = 5,
+        BNPARAM = KmknnParam(
+          distance = "Euclidean"
+        ),
+        BPPARAM = MulticoreParam(workers = notebook_threads),
+        cluster.fun = "louvain",
+        cluster.args = list(
+          resolution = resolution
+        )
+      )
     ),
-    second = NNGraphParam(
-      shared = TRUE,
-      k = 5
-    )
-  ),
-  full = FALSE
-)
-table(colData(sce)[["cluster"]])
+    full = FALSE
+  )
+}
 ```
 
-```{r cluster_barcodes_umap, echo=FALSE, fig.height=6, fig.width=8}
-all_point_data <- reducedDim(sce, "UMAP") %>% 
-  as_tibble() %>% 
-  bind_cols(colData(sce) %>% as_tibble())
-cluster_label_data <- reducedDim(sce, "UMAP") %>% 
-  as_tibble() %>% 
-  bind_cols(colData(sce) %>% as_tibble()) %>% 
-  select(cluster, UMAP1, UMAP2) %>% 
-  group_by(cluster) %>% 
-  summarise(across(.cols = c(UMAP1, UMAP2), .fns = mean))
-ggplot() +
-  rasterise(geom_point(
-    mapping = aes(x = UMAP1, y = UMAP2, colour = cluster),
-    data = all_point_data,
-    size = 0.001
-  ), dpi = 300) +
-  geom_text(mapping = aes(x = UMAP1, y = UMAP2, label = cluster), data = cluster_label_data) +
-  theme_bw() +
-  guides(
-    colour = guide_legend(override.aes = list(size = 3))
-  )
+```{r cluster_walktrap, echo=FALSE}
+set.seed(1010)
+for (steps in 4 * 2^seq(from = 0, to = 2, by = 1)) {
+  cluster_coldata_name <- paste0("cluster_walktrap_steps", steps)
+  colData(sce)[[cluster_coldata_name]] <- clusterRows(
+      x = reducedDim(sce, "PCA")[, 1:50],
+      BLUSPARAM = TwoStepParam(
+        first = KmeansParam(
+          centers = 1000,
+          iter.max = 100
+        ),
+        second = NNGraphParam(
+          shared = TRUE,
+          k = 5,
+          BNPARAM = KmknnParam(
+            distance = "Euclidean"
+          ),
+          BPPARAM = MulticoreParam(workers = notebook_threads),
+          cluster.fun = "walktrap",
+          cluster.args = list(
+            steps = steps
+          )
+        )
+      ),
+      full = FALSE
+    )
+}
 ```
 
 ## Custom markers
@@ -439,7 +487,7 @@ markers_list <- list(
 )
 ```
 
-```{r markers_plots, echo=FALSE, fig.height=10, fig.width=12}
+```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12}
 for (cell_type in names(markers_list)) {
   for (cell_marker_id in markers_list[[cell_type]]){
     cell_marker_name <- gtf_gene_data %>%
@@ -473,26 +521,7 @@ for (cell_type in names(markers_list)) {
         subtitle = sample_name
       ) +
       theme_bw()
-    gg_violin <- ggplot() +
-      geom_violin(
-        mapping = aes(x = cluster, y = logcounts), fill = "grey90",
-        data = plot_data,
-        scale = "width",
-        draw_quantiles = 0.5) +
-      labs(
-        x ="Cluster",
-        y = "Log-counts",
-        title = paste0(cell_marker_id, " | ", cell_marker_name, " (", cell_type, ")"),
-        subtitle = sample_name
-      ) +
-      theme_bw() +
-      theme(
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank()
-      )
-    cowplot_row1 <- cowplot::plot_grid(gg_scatter, gg_histogram, nrow = 1)
-    cowplot_row2 <- gg_violin
-    cowplot_all <- cowplot::plot_grid(cowplot_row1, cowplot_row2, nrow = 2)
+    cowplot_all <- plot_grid(gg_scatter, gg_histogram, nrow = 1)
     print(cowplot_all)
   }
 }
