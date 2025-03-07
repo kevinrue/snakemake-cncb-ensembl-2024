@@ -41,6 +41,10 @@ message("Importing mitochondrial genes from RDS file ...")
 mito_gene_ids <- read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
 message("Done.")
 
+message("Adding mitochondrial annotations to SCE object ...")
+rowData(sce)[["mt"]] <- rownames(sce) %in% mito_gene_ids
+message("Done.")
+
 message("Importing gene annotations from GTF file ...")
 gtf_gene_data <- import.gff(gtf, feature.type = "gene")
 message("Done.")
@@ -50,7 +54,7 @@ new_rowdata <- gtf_gene_data %>%
   as_tibble() %>%
   as("DataFrame")
 rownames(new_rowdata) <- new_rowdata[["gene_id"]]
-rowData(sce) <- new_rowdata[rownames(sce), ]
+rowData(sce) <- cbind(rowData(sce), new_rowdata[rownames(sce), ])
 message("Done.")
 
 message("Running logNormCounts ...")
@@ -65,6 +69,7 @@ dec <- modelGeneVar(
   x = sce,
   BPPARAM = MulticoreParam(workers = threads)
 )
+rowData(sce)[["modelGeneVar"]] <- dec
 message("Done.")
 
 message("Running getTopHVGs ...")
