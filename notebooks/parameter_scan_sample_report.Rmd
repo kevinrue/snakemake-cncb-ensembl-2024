@@ -10,6 +10,7 @@ library(BiocNeighbors)
 library(BiocParallel)
 library(BiocSingular)
 library(bluster)
+library(clustree)
 library(cowplot)
 library(dplyr)
 library(ggrastr)
@@ -301,6 +302,20 @@ reducedDim(sce, "UMAP") %>%
 ```
 
 ## Clustering
+
+The plot below summarises the clustering results for various resolution using the Louvain method.
+
+```{r clustree, fig.height=7, fig.width=7}
+clustree(sce, prefix = "cluster_louvain_res")
+```
+
+The plot below summarises the clustering results for various resolution using the Louvain method.
+
+```{r clustree, fig.height=3, fig.width=7}
+clustree(sce, prefix = "cluster_walktrap_steps")
+```
+
+Below are UMAP plots coloured by each set of clustering results.
 
 ```{r cluster_umap_plot, echo=FALSE, fig.height=5, fig.width=7}
 for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE)) {

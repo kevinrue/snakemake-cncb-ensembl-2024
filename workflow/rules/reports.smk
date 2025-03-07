@@ -110,7 +110,7 @@ rule before_scdblfinder_sample_report:
     output:
         "reports/before_scdblfinder/{sample}.html",
     conda:
-        "../../conda/conda.yaml"
+        "../../conda/conda-2.yaml"
     threads: 2
     resources:
         mem="16G",
