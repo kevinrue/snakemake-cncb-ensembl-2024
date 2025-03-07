@@ -309,6 +309,9 @@ for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE))
     mutate(
       cluster = colData(sce)[[cluster_coldata]]
     )
+  label_data <- plot_data %>% 
+    group_by(cluster) %>% 
+    summarise(across(c(UMAP1, UMAP2), mean))
   gg_plot <- ggplot() +
     rasterise(
       geom_point(
@@ -317,6 +320,10 @@ for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE))
         size = 0.01
       ),
       dpi = 300
+    ) +
+    geom_text(
+      mapping = aes(x = UMAP1, y = UMAP2, label = cluster),
+      data = label_data
     ) +
     labs(
       title = cluster_coldata,

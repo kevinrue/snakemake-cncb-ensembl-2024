@@ -101,7 +101,7 @@ sce <- runUMAP(
 message("Done.")
 
 message("Running clusterRows (louvain) ...")
-for (resolution in seq(from = 0.5, to = 1.5, by = 0.1)) {
+for (resolution in seq(from = 0.2, to = 2, by = 0.2)) {
   cluster_coldata_name <- paste0("cluster_louvain_res", resolution)
   set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
