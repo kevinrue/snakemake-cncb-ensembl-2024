@@ -86,7 +86,7 @@ rule emptydrops_all_report:
     script:
         "../../notebooks/emptydrops_all_report.Rmd"
 
-rule after_emptydrop_sample_report:
+rule after_emptydrops_sample_report:
     input:
         sce="results/emptyDrops/sce/{sample}.rds",
         mt="config/mitochondrial_genes.tsv",
@@ -103,6 +103,20 @@ rule after_emptydrop_sample_report:
         runtime="30m",
     script:
         "../../notebooks/sample_report.Rmd"
+
+rule before_scdblfinder_sample_report:
+    input:
+        sce="results/before_scdblfinder/{sample}.rds",
+    output:
+        "reports/before_scdblfinder/{sample}.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="16G",
+        runtime="10m",
+    script:
+        "../../notebooks/parameter_scan_sample_report.Rmd"
 
 rule scdblfinder_sample_report:
     input:
