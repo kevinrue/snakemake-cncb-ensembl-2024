@@ -1,3 +1,17 @@
+rule packages_report:
+    input:
+        conda="conda/conda.yaml",
+    output:
+        "reports/packages.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 1
+    resources:
+        mem="2G",
+        runtime="5m",
+    script:
+        "../../notebooks/packages_report.Rmd"
+
 rule fishpond_sample_report:
     input:
         sce="results/fishpond/{sample}.rds",

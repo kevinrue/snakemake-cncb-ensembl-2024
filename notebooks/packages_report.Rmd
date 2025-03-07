@@ -1,0 +1,17 @@
+---
+title: "Package versions"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+```{r}
+installed.packages() %>%
+  as_tibble() %>%
+  select(Package, Version, License) %>%
+  knitr::kable()
+```
