@@ -110,6 +110,25 @@ rule filter_mitochondria:
     script:
         "../../scripts/filter_mitochondria.R"
 
+rule scan_parameters_before_scdblfinder:
+    input:
+        sce="results/filter_mitochondria/{sample}.rds",
+        mt="config/mitochondrial_genes.tsv",
+        gtf="resources/genome/genome.gtf.gz",
+    output:
+        sce="results/before_scdblfinder/{sample}.rds",
+    params:
+        n_top_hvgs=500,
+        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
+    threads: 16
+    resources:
+        mem="32G",
+        runtime="30m",
+    conda:
+        "../../conda/conda.yaml"
+    script:
+        "../../scripts/parameter_scan_sample.R"
+
 rule scdblfinder:
     input:
         sce="results/filter_mitochondria/{sample}.rds",

@@ -252,8 +252,6 @@ Recommended for PCA.
 
 The plots below illustrate the result of the selection strategy.
 
-
-
 ```{r, echo=FALSE}
 dec <- modelGeneVar(
   x = sce,
@@ -379,9 +377,9 @@ reducedDim(sce, "UMAP") %>%
 ## Clustering
 
 ```{r cluster_louvain, echo=FALSE}
-set.seed(1010)
 for (resolution in seq(from = 0.5, to = 1.5, by = 0.1)) {
   cluster_coldata_name <- paste0("cluster_louvain_res", resolution)
+  set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
     x = reducedDim(sce, "PCA")[, 1:50],
     BLUSPARAM = TwoStepParam(
@@ -408,31 +406,31 @@ for (resolution in seq(from = 0.5, to = 1.5, by = 0.1)) {
 ```
 
 ```{r cluster_walktrap, echo=FALSE}
-set.seed(1010)
 for (steps in 4 * 2^seq(from = 0, to = 2, by = 1)) {
   cluster_coldata_name <- paste0("cluster_walktrap_steps", steps)
+  set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
-      x = reducedDim(sce, "PCA")[, 1:50],
-      BLUSPARAM = TwoStepParam(
-        first = KmeansParam(
-          centers = 1000,
-          iter.max = 100
-        ),
-        second = NNGraphParam(
-          shared = TRUE,
-          k = 5,
-          BNPARAM = KmknnParam(
-            distance = "Euclidean"
-          ),
-          BPPARAM = MulticoreParam(workers = notebook_threads),
-          cluster.fun = "walktrap",
-          cluster.args = list(
-            steps = steps
-          )
-        )
+    x = reducedDim(sce, "PCA")[, 1:50],
+    BLUSPARAM = TwoStepParam(
+      first = KmeansParam(
+        centers = 1000,
+        iter.max = 100
       ),
-      full = FALSE
-    )
+      second = NNGraphParam(
+        shared = TRUE,
+        k = 5,
+        BNPARAM = KmknnParam(
+          distance = "Euclidean"
+        ),
+        BPPARAM = MulticoreParam(workers = notebook_threads),
+        cluster.fun = "walktrap",
+        cluster.args = list(
+          steps = steps
+        )
+      )
+    ),
+    full = FALSE
+  )
 }
 ```
 
