@@ -20,7 +20,7 @@ sce_rds <- snakemake@input[["sce"]]
 mt_tsv <- snakemake@input[["mt"]]
 gtf <- snakemake@input[["gtf"]]
 n_top_hvgs <- snakemake@params[["n_top_hvgs"]]
-n_pcs_umap <- snakemake@params[["n_pcs_umap"]]
+n_pcs <- snakemake@params[["n_pcs"]]
 threads <- snakemake@threads
 
 message("Job configuration")
@@ -28,7 +28,7 @@ message("- sce_rds: ", sce_rds)
 message("- mt_tsv: ", mt_tsv)
 message("- gtf: ", gtf)
 message("- n_top_hvgs: ", n_top_hvgs)
-message("- n_pcs_umap: ", n_pcs_umap)
+message("- n_pcs: ", n_pcs)
 message("- threads: ", threads)
 
 message("Importing SCE from RDS file ...")
@@ -95,7 +95,7 @@ set.seed(1010)
 sce <- runUMAP(
   x = sce,
   dimred = "PCA",
-  n_dimred = n_pcs_umap,
+  n_dimred = n_pcs,
   BPPARAM = MulticoreParam(workers = threads)
 )
 message("Done.")
@@ -105,7 +105,7 @@ for (resolution in seq(from = 0.2, to = 2, by = 0.2)) {
   cluster_coldata_name <- paste0("cluster_louvain_res", resolution)
   set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
-    x = reducedDim(sce, "PCA")[, 1:50],
+    x = reducedDim(sce, "PCA")[, seq_len(n_pcs)],
     BLUSPARAM = TwoStepParam(
       first = KmeansParam(
         centers = 1000,

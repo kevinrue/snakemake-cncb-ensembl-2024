@@ -119,7 +119,7 @@ rule scan_parameters_before_scdblfinder:
         sce="results/before_scdblfinder/{sample}.rds",
     params:
         n_top_hvgs=500,
-        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
+        n_pcs=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
     threads: 16
     resources:
         mem="32G",
