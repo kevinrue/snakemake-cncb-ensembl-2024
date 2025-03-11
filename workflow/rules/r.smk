@@ -131,9 +131,11 @@ rule scan_parameters_before_scdblfinder:
 
 rule scdblfinder:
     input:
-        sce="results/filter_mitochondria/{sample}.rds",
+        sce="results/before_scdblfinder/{sample}.rds",
     output:
         sce="results/scdblfinder/result/{sample}.rds",
+    params:
+        clusters=lambda wildcards, input: SAMPLES['scdblfinder_clusters'][wildcards.sample],
     threads: 32
     resources:
         mem="64G",

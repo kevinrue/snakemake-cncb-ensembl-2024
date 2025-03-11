@@ -305,13 +305,13 @@ reducedDim(sce, "UMAP") %>%
 
 The plot below summarises the clustering results for various resolution using the Louvain method.
 
-```{r clustree, fig.height=7, fig.width=7}
+```{r clustree_louvain, fig.height=7, fig.width=7}
 clustree(sce, prefix = "cluster_louvain_res")
 ```
 
 The plot below summarises the clustering results for various resolution using the Louvain method.
 
-```{r clustree, fig.height=3, fig.width=7}
+```{r clustree_walktrap, fig.height=3, fig.width=7}
 clustree(sce, prefix = "cluster_walktrap_steps")
 ```
 
@@ -453,8 +453,4 @@ Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}
 sessionInfo()
-```
-
-```{r write_sce, include=FALSE}
-saveRDS(sce, file.path("test-after-emptydrops", paste0(sample_name, ".rds")))
 ```

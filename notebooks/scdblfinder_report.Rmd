@@ -6,11 +6,12 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
+library(ggrastr)
 library(SingleCellExperiment)
 library(tidyverse)
 ```
 
-```{r setup, include=FALSE}
+```{r constants, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
@@ -18,7 +19,13 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r snakemake, include=FALSE}
-rds_file <- snakemake@input[["rds"]]
+if (interactive()) {
+  rds_sce_dbl <- "../results/scdblfinder/result/WPPp000hrs_rep2.rds"
+  rds_sce <- "../results/before_scdblfinder/WPPp000hrs_rep2.rds"
+} else {
+  rds_sce_dbl <- snakemake@input[["scdblfinder"]]
+  rds_sce <- snakemake@input[["sce"]]
+}
 ```
 
 ## Run parameters
@@ -27,7 +34,8 @@ rds_file <- snakemake@input[["rds"]]
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Input file"), rds_file
+    format_bold("SCE (doublets"), rds_sce_dbl,
+    format_bold("SCE (before)"), rds_sce
   ),
   ncol = 2, byrow = TRUE
 )
@@ -38,16 +46,15 @@ knitr::kable(x = df)
 
 ### Table
 
-```{r read_rds, echo=FALSE}
-#| message: false
-sce <- readRDS(rds_file)
-sce
+```{r load_scdblfinder, echo=FALSE}
+sce_dbl <- readRDS(rds_sce_dbl)
+sce_dbl
 ```
 
 ### Metadata
 
 ```{r metadata, echo=FALSE}
-scdblfinder_metadata <- metadata(sce)
+scdblfinder_metadata <- metadata(sce_dbl)
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
@@ -64,10 +71,10 @@ knitr::kable(x = df)
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Input barcodes"), format(sum(sce$src == "real"), big.mark = ","),
-    format_bold("Artificial doublets"), format(sum(sce$src == "artificial"), big.mark = ","),
-    format_bold("Predicted singlets"), format(sum(sce$type == "real" & sce$class == "singlet"), big.mark = ","),
-    format_bold("Predicted doublets"), format(sum(sce$type == "real" & sce$class == "doublet"), big.mark = ",")
+    format_bold("Input barcodes"), format(sum(sce_dbl$src == "real"), big.mark = ","),
+    format_bold("Artificial doublets"), format(sum(sce_dbl$src == "artificial"), big.mark = ","),
+    format_bold("Predicted singlets"), format(sum(sce_dbl$type == "real" & sce_dbl$class == "singlet"), big.mark = ","),
+    format_bold("Predicted doublets"), format(sum(sce_dbl$type == "real" & sce_dbl$class == "doublet"), big.mark = ",")
   ),
   ncol = 2, byrow = TRUE
 )
@@ -77,7 +84,7 @@ knitr::kable(x = df)
 ## Histogram of scDblFinder scores
 
 ```{r plot, echo=FALSE, fig.width=7, fig.height=5}
-ggplot_data <- colData(sce) %>% 
+ggplot_data <- colData(sce_dbl) %>% 
   as.data.frame() %>% 
   as_tibble()
 ggplot_data %>% 
@@ -96,6 +103,69 @@ ggplot_data %>%
     x = "Score (scDblFinder)"
   )
 ```
+
+## Overlay predicted doublets on UMAP layout
+
+### Inport UMAP layout
+
+```{r load_sce, echo=FALSE}
+sce <- readRDS(rds_sce)
+sce
+```
+
+### Plot
+
+```{r umap_overlaid, echo=FALSE, fig.width=7, fig.height=5}
+plot_data <- reducedDim(sce, "UMAP") %>% as("DataFrame")
+plot_data <- cbind(plot_data, colData(sce_dbl)[rownames(plot_data), ])
+ggplot() +
+  rasterise(
+    geom_point(
+      mapping = aes(x = UMAP1, y = UMAP2),
+      data = plot_data %>% as_tibble() %>% filter(class == "singlet"),
+      size = 0.01, colour = "cyan3"
+    ),
+    dpi = 300
+  ) +
+  rasterise(
+    geom_point(
+      mapping = aes(x = UMAP1, y = UMAP2),
+      data = plot_data %>% as_tibble() %>% filter(class == "doublet"),
+      size = 0.01, colour = "brown1"
+    ),
+    dpi = 300
+  ) +
+  labs(
+    x = "UMAP1",
+    y = "UMAP2"
+  ) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 5))
+  ) +
+  theme_bw()
+```
+
+```{r umap_facet, fig.width=12, fig.height=5}
+ggplot() +
+  rasterise(
+    geom_point(
+      mapping = aes(x = UMAP1, y = UMAP2, colour = class),
+      data = plot_data %>% as_tibble() %>% slice_sample(prop = 1),
+      size = 0.01
+    ),
+    dpi = 300
+  ) +
+  facet_wrap(~ class) +
+  labs(
+    x = "UMAP1",
+    y = "UMAP2"
+  ) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 5))
+  ) +
+  theme_bw()
+```
+
 
 ## Session info
 

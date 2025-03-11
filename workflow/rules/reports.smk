@@ -120,7 +120,8 @@ rule before_scdblfinder_sample_report:
 
 rule scdblfinder_sample_report:
     input:
-        rds="results/scdblfinder/result/{sample}.rds",
+        scdblfinder="results/scdblfinder/result/{sample}.rds",
+        sce="results/before_scdblfinder/{sample}.rds",
     output:
         "reports/scdblfinder/{sample}.html",
     conda:
