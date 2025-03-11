@@ -8,7 +8,6 @@ dependencies:
   - bioconductor-biocsingular
   - bioconductor-bluster
   - bioconductor-clusterprofiler
-  - bioconductor-clustree
   - bioconductor-dropletutils
   - bioconductor-hdf5array
   - bioconductor-fishpond
@@ -30,6 +29,7 @@ dependencies:
   - picard
   - piscem
   - r-biocmanager
+  - r-clustree
   - r-cowplot
   - r-ggplot2
   - r-ggrastr
