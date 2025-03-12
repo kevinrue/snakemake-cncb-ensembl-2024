@@ -26,6 +26,7 @@ if (interactive()) {
   rds_sce_dbl <- snakemake@input[["scdblfinder"]]
   rds_sce <- snakemake@input[["sce"]]
 }
+sample_name <- fs::path_ext_remove(basename(rds_sce_dbl))
 ```
 
 ## Run parameters
@@ -34,7 +35,8 @@ if (interactive()) {
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("SCE (doublets"), rds_sce_dbl,
+    format_bold("Sample"), sample_name,
+    format_bold("SCE (doublets)"), rds_sce_dbl,
     format_bold("SCE (before)"), rds_sce
   ),
   ncol = 2, byrow = TRUE
@@ -42,18 +44,20 @@ df <- matrix(
 knitr::kable(x = df)
 ```
 
-## Load scDblFinder results
+## scDblFinder results
 
-### Table
+### SCE
 
 ```{r load_scdblfinder, echo=FALSE}
 sce_dbl <- readRDS(rds_sce_dbl)
 sce_dbl
 ```
 
-### Metadata
+### scDblFinder metadata
 
-```{r metadata, echo=FALSE}
+None.
+
+```{r metadata, include=FALSE}
 scdblfinder_metadata <- metadata(sce_dbl)
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
@@ -104,18 +108,27 @@ ggplot_data %>%
   )
 ```
 
-## Overlay predicted doublets on UMAP layout
+## Predicted class on UMAP layout
 
-### Inport UMAP layout
+### Import preprocessed sample
+
+The sample preprocessed before scDblFinder contains a UMAP layout that can be reused in this report to cross-reference predicted doublets with cluster computed during that same preprocessing.
 
 ```{r load_sce, echo=FALSE}
 sce <- readRDS(rds_sce)
 sce
 ```
 
-### Plot
+### Coloured UMAP
 
-```{r umap_overlaid, echo=FALSE, fig.width=7, fig.height=5}
+The plot below re-uses the UMAP layout computed before `scDblFinder`
+and colours barcodes by the class predicted by `scDblFinder`.
+
+Note that, due to the imbalance of numbers between singlets (majority) and doublets (minority), singlets are plotted first, and doublets are plotted on top of singlets, to facilitate the visualisation of doublets in dense areas.
+This can easily lead to a visual over-estimation of doublets in certain areas of the UMAP.
+Refer to the next plot further below to visualise singlets and doublets in a plot faceted by class, to offer an alternative view of the same information.
+
+```{r umap_class_colour, echo=FALSE, fig.width=7, fig.height=5}
 plot_data <- reducedDim(sce, "UMAP") %>% as("DataFrame")
 plot_data <- cbind(plot_data, colData(sce_dbl)[rownames(plot_data), ])
 ggplot() +
@@ -136,6 +149,8 @@ ggplot() +
     dpi = 300
   ) +
   labs(
+    title = "scDblFinder predicted class",,
+    subtitle = sample_name,
     x = "UMAP1",
     y = "UMAP2"
   ) +
@@ -145,7 +160,9 @@ ggplot() +
   theme_bw()
 ```
 
-```{r umap_facet, fig.width=12, fig.height=5}
+This next plot adds faceting to clearly show the location of both singlets and doublets, avoiding any favouring that may result of over-plotting or ordering of plot layers.
+
+```{r umap_class_facet, echo=FALSE, fig.width=12, fig.height=5}
 ggplot() +
   rasterise(
     geom_point(
