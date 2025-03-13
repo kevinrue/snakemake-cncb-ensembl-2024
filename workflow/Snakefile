@@ -21,7 +21,7 @@ include: "rules/simpleaf.smk"
 rule all:
     input:
         "reports/index.html",
-        "reports/packages.html",
+        "reports/packages_r.html",
         "reports/fishpond.html",
         expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),

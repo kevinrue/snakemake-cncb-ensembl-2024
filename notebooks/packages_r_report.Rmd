@@ -9,7 +9,7 @@ date: "`r Sys.Date()`"
 library(tidyverse)
 ```
 
-```{r}
+```{r, echo=FALSE}
 installed.packages() %>%
   as_tibble() %>%
   select(Package, Version, License) %>%

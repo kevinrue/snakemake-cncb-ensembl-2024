@@ -2,7 +2,7 @@ rule packages_report:
     input:
         conda="conda/conda.yaml",
     output:
-        "reports/packages.html",
+        "reports/packages_r.html",
     conda:
         "../../conda/conda.yaml"
     threads: 1
@@ -10,7 +10,7 @@ rule packages_report:
         mem="2G",
         runtime="5m",
     script:
-        "../../notebooks/packages_report.Rmd"
+        "../../notebooks/packages_r_report.Rmd"
 
 rule fishpond_sample_report:
     input:
@@ -235,6 +235,7 @@ rule custom_markers_report:
 
 rule index_report:
     input:
+        "reports/packages_r.html",
         "reports/fishpond.html",
         expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),

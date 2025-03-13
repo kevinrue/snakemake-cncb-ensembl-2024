@@ -49,7 +49,7 @@ Notes:
 Export reports to the Datashare directory for sharing:
 
 ```bash
-rsync -a reports ../../datashare/albrecht/reports
+rsync -a reports ../../datashare/albrecht/
 ```
 
 ## Visualisation

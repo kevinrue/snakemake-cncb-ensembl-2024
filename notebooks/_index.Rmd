@@ -12,7 +12,7 @@ library(tidyverse)
 ```{r snakemake, include=FALSE}
 if (interactive()) {
   report_paths <- c(
-    "reports/fishpond.html",
+    "reports/packages_r.html",
     file.path("reports/fishpond", list.files("../reports/fishpond/"))
   )
 } else {
@@ -21,7 +21,16 @@ if (interactive()) {
 report_paths <- str_remove(report_paths, "reports/")
 ```
 
+## Software environment
+
+```{r, echo=FALSE, results='asis'}
+packages_r <- grep("packages_r.html", report_paths, value = TRUE)
+cat(sprintf("- [R packages](%s)", packages_r), sep = "\n")
+```
+
 ## fishpond
+
+The [fishpond](https://www.bioconductor.org/packages/release/bioc/html/fishpond.html) Bioconductor package was used to import the quantification files produced by [simpleaf](https://simpleaf.readthedocs.io/en/latest/).
 
 #### All samples
 
