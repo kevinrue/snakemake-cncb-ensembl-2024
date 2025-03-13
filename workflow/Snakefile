@@ -20,6 +20,7 @@ include: "rules/simpleaf.smk"
 ##### main rule #####
 rule all:
     input:
+        "reports/index.html",
         "reports/packages.html",
         "reports/fishpond.html",
         expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),

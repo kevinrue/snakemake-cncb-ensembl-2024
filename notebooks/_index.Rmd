@@ -1,0 +1,39 @@
+---
+title: "Index page"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r libraries, include=FALSE}
+library(tidyverse)
+```
+
+```{r snakemake, include=FALSE}
+if (interactive()) {
+  report_paths <- c(
+    "reports/fishpond.html",
+    file.path("reports/fishpond", list.files("../reports/fishpond/"))
+  )
+} else {
+  report_paths <- snakemake@input
+}
+report_paths <- str_remove(report_paths, "reports/")
+```
+
+## fishpond
+
+#### All samples
+
+```{r, echo=FALSE, results='asis'}
+fishpond_global <- grep("fishpond.html", report_paths, value = TRUE)
+cat(sprintf("- [All samples](%s)", fishpond_global), sep = "\n")
+```
+
+#### Individual samples
+
+```{r, echo=FALSE, results='asis'}
+fishpond_samples <- grep("fishpond/", report_paths, value = TRUE)
+names(fishpond_samples) <- fs::path_ext_remove(basename(fishpond_samples))
+cat(sprintf("- [%s](%s)", names(fishpond_samples), fishpond_samples), sep = "\n")
+```

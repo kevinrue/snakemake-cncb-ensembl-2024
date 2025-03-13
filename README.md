@@ -44,6 +44,14 @@ Notes:
 
 - `--bind /var/scratch` binds the directory where Slurm jobs are given a private folder
 
+## Reporting
+
+Export reports to the Datashare directory for sharing:
+
+```bash
+rsync -a reports ../../datashare/albrecht/reports
+```
+
 ## Visualisation
 
 ```bash

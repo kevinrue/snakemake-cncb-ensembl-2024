@@ -233,4 +233,18 @@ rule custom_markers_report:
     script:
         "../../notebooks/custom_markers_report.Rmd"
 
-
+rule index_report:
+    input:
+        "reports/fishpond.html",
+        expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+    output:
+        "reports/index.html",
+    conda:
+        "../../conda/conda.yaml"
+    threads: 2
+    resources:
+        mem="8G",
+        runtime="5m",
+    script:
+        "../../notebooks/_index.Rmd"
