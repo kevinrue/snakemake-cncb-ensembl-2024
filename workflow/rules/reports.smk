@@ -244,6 +244,13 @@ rule index_report:
         expand("reports/after_emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/before_scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "reports/umap.html",
+        "reports/hvgs.html",
+        "reports/fastmnn.html",
+        "reports/umap_after_integration.html",
+        "reports/clustering_report.html",
+        "reports/markers_report.html",
+        "reports/custom_markers_report.html",
     output:
         "reports/index.html",
     conda:

@@ -10,15 +10,8 @@ library(tidyverse)
 ```
 
 ```{r snakemake, include=FALSE}
-if (interactive()) {
-  report_paths <- c(
-    "reports/packages_r.html",
-    file.path("reports/fishpond", list.files("../reports/fishpond/"))
-  )
-} else {
-  report_paths <- snakemake@input
-}
-report_paths <- str_remove(report_paths, "reports/")
+report_paths <- snakemake@input %>%
+  str_remove("reports/")
 ```
 
 ## fishpond
@@ -29,7 +22,7 @@ A joint report was produced to compare the results of all samples.
 
 ```{r, echo=FALSE, results='asis'}
 path_all <- grep("fishpond.html", report_paths, value = TRUE)
-cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
+cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
 ```
 
 <details>
@@ -66,7 +59,7 @@ A joint report was produced to compare the results of all samples.
 
 ```{r, echo=FALSE, results='asis'}
 path_all <- grep("emptyDrops.html", report_paths, value = TRUE)
-cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
+cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
 ```
 
 <details>
@@ -123,6 +116,34 @@ names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
 </details>
+
+## Without integration
+
+This section reports on a standard analysis of the data merged without any integration of the samples.
+
+```{r, echo=FALSE, results='asis'}
+path_all <- grep("umap.html", report_paths, value = TRUE)
+cat(sprintf("- [UMAP without integration](%s)", path_all), sep = "\n")
+```
+
+## Integration
+
+This section reports on the integration of the samples using the `fastMNN()` function of the [batchelor](https://bioconductor.org/packages/release/bioc/html/batchelor.html) Bioconductor package.
+
+```{r, echo=FALSE, results='asis'}
+path_all <- grep("^hvgs.html", report_paths, value = TRUE)
+cat(sprintf("- [Highly variable genes used for PCA and integration](%s)", path_all), sep = "\n")
+path_all <- grep("^fastmnn.html", report_paths, value = TRUE)
+cat(sprintf("- [fastMNN](%s)", path_all), sep = "\n")
+path_all <- grep("^umap_after_integration.html", report_paths, value = TRUE)
+cat(sprintf("- [UMAP after integration](%s)", path_all), sep = "\n")
+path_all <- grep("^clustering_report.html", report_paths, value = TRUE)
+cat(sprintf("- [Clustering after integration](%s)", path_all), sep = "\n")
+path_all <- grep("^markers_report.html", report_paths, value = TRUE)
+cat(sprintf("- [Cluster markers after integration](%s)", path_all), sep = "\n")
+path_all <- grep("^custom_markers_report.html", report_paths, value = TRUE)
+cat(sprintf("- [Custom markers on UMAP after integration](%s)", path_all), sep = "\n")
+```
 
 ## Software environment
 
