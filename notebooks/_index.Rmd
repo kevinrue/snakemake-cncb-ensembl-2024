@@ -19,13 +19,7 @@ if (interactive()) {
   report_paths <- snakemake@input
 }
 report_paths <- str_remove(report_paths, "reports/")
-```
-
-## Software environment
-
-```{r, echo=FALSE, results='asis'}
-path_all <- grep("packages_r.html", report_paths, value = TRUE)
-cat(sprintf("- [R packages](%s)", path_all), sep = "\n")
+print(report_paths)
 ```
 
 ## fishpond
@@ -42,7 +36,7 @@ cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
 <details>
   <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
-path_samples <- grep("fishpond/", report_paths, value = TRUE)
+path_samples <- grep("^fishpond/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
@@ -57,7 +51,7 @@ This section reports on the results of this function, to confirm that reasonable
 <details>
   <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
-path_samples <- grep("barcodeRanks/", report_paths, value = TRUE)
+path_samples <- grep("^barcodeRanks/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
@@ -67,7 +61,7 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 
 The `emptyDrops()` function of the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) Bioconductor package was used to predict empty droplets for each sample.
 
-This section reports on the results of this function, to guide the choice of an appropriate FDR threshold.
+This section reports on the results of this function, to guide the decision of droplets to exclude from downstream analysis.
 
 A joint report was produced to compare the results of all samples.
 
@@ -79,7 +73,7 @@ cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
 <details>
   <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
-path_samples <- grep("emptyDrops/", report_paths, value = TRUE)
+path_samples <- grep("^emptyDrops/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
@@ -92,7 +86,7 @@ This section describes the barcodes remaining after filtering out empty droplets
 <details>
   <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
-path_samples <- grep("after_emptyDrops/", report_paths, value = TRUE)
+path_samples <- grep("^after_emptyDrops/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
@@ -108,8 +102,32 @@ Consequently, these reports explore the parameter space of clustering algorithms
 <details>
   <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
-path_samples <- grep("before_scdblfinder/", report_paths, value = TRUE)
+path_samples <- grep("^before_scdblfinder/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
 </details>
+
+## scDblFinder
+
+The `scDblFinder()` function of the [scDblFinder](https://bioconductor.org/packages/release/bioc/html/scDblFinder.html) Bioconductor package was used to predict doublets in each sample.
+
+This section reports on the results of this function, to guide the decision of droplets to exclude from downstream analysis.
+
+**NOTE:** At present, the results are not satisfactory, and none of the predicted doublets were excluded from downstream analysis.
+
+<details>
+  <summary>Individual sample reports</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("^scdblfinder/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
+
+## Software environment
+
+```{r, echo=FALSE, results='asis'}
+path_all <- grep("packages_r.html", report_paths, value = TRUE)
+cat(sprintf("- [R packages](%s)", path_all), sep = "\n")
+```
