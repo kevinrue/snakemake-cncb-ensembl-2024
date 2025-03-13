@@ -1,4 +1,4 @@
-rule alevin_build_reference_index:
+rule simpleaf_build_reference_index:
     input:
         genome="resources/genome/genome.fa.gz",
         gtf="resources/genome/genome.gtf.gz",
@@ -28,8 +28,8 @@ rule alevin_build_reference_index:
         " --use-piscem"
         " > $jobdir/{log.out} 2> $jobdir/{log.err}"
 
-# Function used by rule: alevin_quant
-def get_alevin_quant_input_fastqs(wildcards):
+# Function used by rule: simpleaf_quant
+def get_simpleaf_quant_input_fastqs(wildcards):
     sample_fastqs_info=SCRNASEQ[SCRNASEQ['sample_name'] == wildcards.sample].filter(items=['directory', 'R1', 'R2'])
     fq1=[os.path.join(os.path.realpath(sample_fastqs_info['directory'][i]), sample_fastqs_info['R1'][i]) for i in sample_fastqs_info.index]
     fq2=[os.path.join(os.path.realpath(sample_fastqs_info['directory'][i]), sample_fastqs_info['R2'][i]) for i in sample_fastqs_info.index]
@@ -40,7 +40,7 @@ def get_alevin_quant_input_fastqs(wildcards):
 
 rule simpleaf_quant:
     input:
-        unpack(get_alevin_quant_input_fastqs),
+        unpack(get_simpleaf_quant_input_fastqs),
         index="resources/genome/index/alevin",
     output:
         directory("results/simpleaf/quant/{sample}"),
@@ -63,7 +63,7 @@ rule simpleaf_quant:
         " --reads1 {params.reads1}"
         " --reads2 {params.reads2}"
         " --index $jobdir/{input.index}/index"
-        " --chemistry 10xv4-3p --resolution cr-like --expected-ori fw --unfiltered-pl" # from tutorial, to be confirmed
+        " --chemistry 10xv4-3p --resolution cr-like --expected-ori fw --unfiltered-pl"
         " --t2g-map $jobdir/{input.index}/index/t2g_3col.tsv"
         " --threads {threads}"
         " --output alevin_quant_{wildcards.sample}"
