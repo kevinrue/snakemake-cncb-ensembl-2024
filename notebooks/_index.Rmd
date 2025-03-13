@@ -24,25 +24,35 @@ report_paths <- str_remove(report_paths, "reports/")
 ## Software environment
 
 ```{r, echo=FALSE, results='asis'}
-packages_r <- grep("packages_r.html", report_paths, value = TRUE)
-cat(sprintf("- [R packages](%s)", packages_r), sep = "\n")
+path_all <- grep("packages_r.html", report_paths, value = TRUE)
+cat(sprintf("- [R packages](%s)", path_all), sep = "\n")
 ```
 
 ## fishpond
 
 The [fishpond](https://www.bioconductor.org/packages/release/bioc/html/fishpond.html) Bioconductor package was used to import the quantification files produced by [simpleaf](https://simpleaf.readthedocs.io/en/latest/).
 
-#### All samples
-
 ```{r, echo=FALSE, results='asis'}
-fishpond_global <- grep("fishpond.html", report_paths, value = TRUE)
-cat(sprintf("- [All samples](%s)", fishpond_global), sep = "\n")
+path_all <- grep("fishpond.html", report_paths, value = TRUE)
+cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
 ```
 
-#### Individual samples
-
+<details>
+  <summary>Individual samples</summary>
 ```{r, echo=FALSE, results='asis'}
-fishpond_samples <- grep("fishpond/", report_paths, value = TRUE)
-names(fishpond_samples) <- fs::path_ext_remove(basename(fishpond_samples))
-cat(sprintf("- [%s](%s)", names(fishpond_samples), fishpond_samples), sep = "\n")
+path_samples <- grep("fishpond/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
+</details>
+
+## Barcode ranks
+
+<details>
+  <summary>Individual samples</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("barcodeRanks/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
