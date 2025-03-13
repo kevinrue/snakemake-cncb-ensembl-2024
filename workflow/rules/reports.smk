@@ -236,9 +236,12 @@ rule custom_markers_report:
 rule index_report:
     input:
         "reports/packages_r.html",
-        "reports/fishpond.html",
         expand("reports/fishpond/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "reports/fishpond.html",
         expand("reports/barcodeRanks/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        "reports/emptyDrops.html",
+        expand("reports/after_emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
     output:
         "reports/index.html",
     conda:

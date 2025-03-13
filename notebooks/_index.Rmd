@@ -30,7 +30,9 @@ cat(sprintf("- [R packages](%s)", path_all), sep = "\n")
 
 ## fishpond
 
-The [fishpond](https://www.bioconductor.org/packages/release/bioc/html/fishpond.html) Bioconductor package was used to import the quantification files produced by [simpleaf](https://simpleaf.readthedocs.io/en/latest/).
+The [fishpond](https://www.bioconductor.org/packages/release/bioc/html/fishpond.html) Bioconductor package was used to import the quantification files produced by [simpleaf](https://simpleaf.readthedocs.io/en/latest/) into R.
+
+A joint report was produced to compare the results of all samples.
 
 ```{r, echo=FALSE, results='asis'}
 path_all <- grep("fishpond.html", report_paths, value = TRUE)
@@ -46,12 +48,47 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
 </details>
 
-## Barcode ranks
+## barcodeRanks
+
+The `barcodeRanks()` function of the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) Bioconductor package was used to dentify the knee and inflection points of the barcode rank curve for each sample.
 
 <details>
   <summary>Individual samples</summary>
 ```{r, echo=FALSE, results='asis'}
 path_samples <- grep("barcodeRanks/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
+
+## emptyDrops
+
+The `emptyDrops()` function of the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) Bioconductor package was used to predict empty droplets for each sample.
+
+A joint report was produced to compare the results of all samples.
+
+```{r, echo=FALSE, results='asis'}
+path_all <- grep("emptyDrops.html", report_paths, value = TRUE)
+cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
+```
+
+<details>
+  <summary>Individual samples</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("emptyDrops/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
+
+## After emptyDrops
+
+This section reports on the barcodes remaining after filtering out empty droplets.
+
+<details>
+  <summary>Individual samples</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("after_emptyDrops/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
