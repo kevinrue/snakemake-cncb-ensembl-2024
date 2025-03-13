@@ -357,68 +357,35 @@ for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE))
 ## Custom markers
 
 ```{r, echo=FALSE}
-markers_list <- list(
-  "Neurons" = c(
-    "fne" = "FBgn0086675"
-  ),
-  "Cholinergic" = c(
-    "ChAT" = "FBgn0000303",
-    "VAChT" = "FBgn0270928"
-  ),
-  "Glutamatergic" = c(
-    "VGlut" = "FBgn0031424",
-    "Gs2" = "FBgn0001145"
-  ),
-  "GABAergic" = c(
-    "Gad1" = "FBgn0004516",
-    "VGAT" = "FBgn0033911"
-  ),
-  "Dopaminergic" = c(
-    "ple" = "FBgn0005626",
-    "Ddc" = "FBgn0000422"
-  ),
-  "Serotonergic" = c(
-    "SerT" = "FBgn0010414",
-    "Trh" = "FBgn0035187"
-  ),
-  "Octopaminergic / Tyraminergic" = c(
-    "Tbh" = "FBgn0010329",
-    "Tdc2" = "FBgn0050446"
-  ),
-  "Glial" = c(
-    "nrv2" = "FBgn0015777"
-  ),
-  "Male" = c(
-    "fru" = "FBgn0004652",
-    "lncRNA:roX1" = "FBgn0019661",
-    "lncRNA:roX2" = "FBgn0019660"
-  ),
-  "Female" = c(
-    "Sxl" = "FBgn0264270"
-  ),
-  "Early/Late" = c(
-    "Imp" = "FBgn0285926",
-    "dati" = "FBgn0262636",
-    "pdm3" = "FBgn0261588",
-    "br" = "FBgn0283451"
-  )
-)
+gmt_data <- readLines("config/custom_markers.gmt") %>%
+  str_split("\t")
+markers_list <- list()
+for (i in seq_len(length(gmt_data))) {
+  markers_list[[gmt_data[[i]][1]]] <- gmt_data[[i]][3:length(gmt_data[[i]])]
+}
 ```
 
-```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12}
-for (cell_type in names(markers_list)) {
-  for (cell_marker_id in markers_list[[cell_type]]){
-    cell_marker_name <- rowData(sce) %>%
+```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12, result='asis'}
+for (marker_group in names(markers_list)) {
+  for (marker_name in markers_list[[marker_group]]){
+    if (!marker_name %in% rowData(sce)[["gene_name"]]) {
+      cat(marker_name, " is not present. Skipping.", "\n", sep = "")
+      next
+    }
+    marker_id <- rowData(sce) %>%
       as_tibble() %>% 
-      filter(gene_id == cell_marker_id) %>%
-      pull(gene_name)
-    stopifnot(cell_marker_id %in% rownames(sce))
-    stopifnot(cell_marker_name %in% names(markers_list[[cell_type]]))
-    plot_data <- reducedDim(sce, "UMAP") %>% 
-      as_tibble() %>% 
+      filter(gene_name == marker_name) %>%
+      pull(gene_id)
+    if (length(marker_id) > 1) {
+      cat(marker_name, " matched more than one gene ID. Skipping.", "\n", sep = "")
+      next
+    }
+    cat(marker_name, "(", marker_id, ")", "\n", sep = "")
+    plot_data <- reducedDim(sce, "UMAP") %>%
+      as_tibble() %>%
       mutate(
-        logcounts = as.numeric(assay(sce, "logcounts")[cell_marker_id, ])
-      ) %>% 
+        logcounts = as.numeric(assay(sce, "logcounts")[marker_id, ])
+      ) %>%
       bind_cols(
         colData(sce) %>% as_tibble()
       )
@@ -426,16 +393,16 @@ for (cell_type in names(markers_list)) {
       geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
       scale_colour_viridis_c() +
       labs(
-        title = paste0(cell_marker_id, " | ", cell_marker_name, " (", cell_type, ")"),
+        title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
         subtitle = sample_name
       ) +
       theme_bw()
-    nonzero_q01 <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.001)
+    nonzero_q01 <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.05)
     gg_histogram <- ggplot(plot_data) +
       geom_histogram(aes(x = logcounts), colour = "black", fill = "grey", binwidth = 0.1) +
       geom_vline(xintercept = nonzero_q01) +
       labs(
-        title = paste0(cell_marker_id, " | ", cell_marker_name, " (", cell_type, ")"),
+        title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
         subtitle = sample_name
       ) +
       theme_bw()

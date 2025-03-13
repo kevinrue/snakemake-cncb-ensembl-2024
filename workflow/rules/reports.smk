@@ -113,7 +113,7 @@ rule before_scdblfinder_sample_report:
         "../../conda/conda-2.yaml"
     threads: 2
     resources:
-        mem="16G",
+        mem="8G",
         runtime="10m",
     script:
         "../../notebooks/parameter_scan_sample_report.Rmd"

@@ -1,0 +1,42 @@
+Male	Higher in male	fru	lncRNA:roX1	lncRNA:roX2
+Female	Higher in female	Sxl
+Early/Late born	Developmental birth	Imp	dati	pdm3	br
+Neuron	the thinky bits	nSyb	brp	elav	fne	onecut	Syt1	Snap25	cpx	para	CadN	CG40439
+Cholinergic	cells that produce and release the fast acting neurotransmitter acetylcholine	VAChT	ChAT	CG31221	CG14762	ChT
+Glutamatergic	cells that produce and release the fast acting neurotransmitter glutamate	VGlut	CG46448
+GABAergic	cells that produce and release the fast acting neurotransmitter GABA	Gad1	VGAT	CG14989
+Monoaminergic	cells that produce and release monamine neurotransmitters	Vmat	ple	SerT	Trh	Tbh	Tdc2	Hdc
+Dopaminergic	cells that produce and release dopamine, subset of Monoaminergic	ple	DAT	Ddc
+Serotonergic	cells that produce and release serotonin, subset of Monoaminergic	SerT	Trh
+Oct_Tyr	cells that produce and release octopamine or tyramine, subset of Monoaminergic	Tdc2	Tbh
+Histaminergic	cells that produce and release histamine, subset of Monoaminergic	Hdc
+Motor_neurons	comment to come later	twit	Proc	rhea	VGlut
+Neuroendocrine	cells that mass release peptidergic hormones, these cells are not co-positive for fast acting neurotransmitters	dimm	amon	svr	Pal2	Phm	CG13248	CG1275	CG4577
+IPC	insulin producing cells, subset of MNC	Ilp2	Ilp3	Ilp5
+Clock_neurons_1	comment to come later	tim	vri	Clk	cry
+Photoreceptors	comment to come later	ninaA	ninaC	ninaE	trp	trpl
+Kenyon_cell	comment to come later	ey	Pka-R2	Dop1R2	Hr51	CG34402	Gdap2	prt	CG1129	cora
+KC_a/b	alpha and beta lobe subset of kenyon cells	lbm	crb	Cks85A	Tsp42En	Eip93F
+KC_ap/bp	alpha' and beta' lobe subset of kenyon cells	CG8641	Gr77a	Lac	CG42322
+KC_y	gamma lobe subset of kenyon cells	CG13055	Lgr3	GstD11	CAH2	CG32204	ab
+PAM_DAN	comment to come later	DAT	Fer2	ple
+Glia	the bits that help out the thinky bits	repo	gem	fabp	nrv2	Gs2
+Astrocyte_glia	comment to come later	alrm	Gat	e	Eaat1	wun2
+Ensheathing_glia	comment to come later	trol	zyd
+Surface_glia	comment to come later	Tret1-1	moody	Mdr65
+Cortex_glia	comment to come later	zyd	MFS9	wrapper
+Midline_glia	larval specific glial sub-type located at the vnc midline commisures	sli	wrapper
+NB_INP	neuroblasts and intermediate neural progenitor	dpn	CycE	klu	mira
+GMC	ganglion mother cell	dap	tap	insb
+imNeuro	immature neurons	Hey	E(spl)m6-BFM
+NeuEpi	neuro-epithelium	Ocho	Tom	Brd	E(spl)m4-BFM	E(spl)m5-HLH
+Stressed_cells	heat shock protein coding genes up-regulated during cellular stress	Hsp70Ab	Hsp70Aa	Hsp70Bbb	Hsp70Bb	Hsp70Bc	Hsp70Ba	Hsp68	Hsp22	Hsp23	Hsp27	Hsp26
+Muscle	... muscle cells ..., unlikey to be contamination in scRNA-Seq but are possible in snRNA-Seq	Mhc
+Fat_cells	fat or adipose cells, possible contaminant of brain dissections, note: they will likely co-cluster with glia	AkhR	CG14990	CG43109	CG9616	arg	CG8539
+Oenocyte	cells that generate and secrete curticular hydorcarbons located in the abdomen of insects	CG9458	FASN3
+Hemocyte	phagocytes of insects, circulate in the hemolymph	Hml	Karl	Ppn	NtR
+Trachea	... trachea cells ..., unlikey to be contamination in scRNA-Seq but are possible in snRNA-Seq	btl	trh
+Epithelia	comment to come later	grh
+Salivary_gland	comment to come later	CG34212	CG45080	CG16826	whe	CG43679	lcs	CG33109	CG43680	CG44142	Ag5r	LysP	CG30371
+Sperm_testis	comment to come later	CG31226	CG17376	CG15219	Mst77F	CG12699	Mst84Db	Mst84Dc	CG9920	ocn	S-Lap4	CG31820	CG46059
+unknown_dev	cell type in (a)fca head data, not sure what it is ...	osk	dhd	gnu	CycB	wisp	yl	CycA	pgc
