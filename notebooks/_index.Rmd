@@ -19,7 +19,6 @@ if (interactive()) {
   report_paths <- snakemake@input
 }
 report_paths <- str_remove(report_paths, "reports/")
-print(report_paths)
 ```
 
 ## fishpond
