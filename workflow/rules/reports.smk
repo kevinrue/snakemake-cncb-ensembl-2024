@@ -242,6 +242,7 @@ rule index_report:
         expand("reports/emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "reports/emptyDrops.html",
         expand("reports/after_emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/before_scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
     output:
         "reports/index.html",
     conda:

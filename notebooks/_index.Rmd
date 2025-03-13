@@ -36,11 +36,11 @@ A joint report was produced to compare the results of all samples.
 
 ```{r, echo=FALSE, results='asis'}
 path_all <- grep("fishpond.html", report_paths, value = TRUE)
-cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
+cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
 ```
 
 <details>
-  <summary>Individual samples</summary>
+  <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
 path_samples <- grep("fishpond/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
@@ -52,8 +52,10 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 
 The `barcodeRanks()` function of the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) Bioconductor package was used to dentify the knee and inflection points of the barcode rank curve for each sample.
 
+This section reports on the results of this function, to confirm that reasonable values were obtained.
+
 <details>
-  <summary>Individual samples</summary>
+  <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
 path_samples <- grep("barcodeRanks/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
@@ -65,15 +67,17 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 
 The `emptyDrops()` function of the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) Bioconductor package was used to predict empty droplets for each sample.
 
+This section reports on the results of this function, to guide the choice of an appropriate FDR threshold.
+
 A joint report was produced to compare the results of all samples.
 
 ```{r, echo=FALSE, results='asis'}
 path_all <- grep("emptyDrops.html", report_paths, value = TRUE)
-cat(sprintf("- [All samples](%s)", path_all), sep = "\n")
+cat(sprintf("- [Joint report](%s)", path_all), sep = "\n")
 ```
 
 <details>
-  <summary>Individual samples</summary>
+  <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
 path_samples <- grep("emptyDrops/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
@@ -83,12 +87,28 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 
 ## After emptyDrops
 
-This section reports on the barcodes remaining after filtering out empty droplets.
+This section describes the barcodes remaining after filtering out empty droplets, but before removing droplets with high mitochondrial content.
 
 <details>
-  <summary>Individual samples</summary>
+  <summary>Individual sample reports</summary>
 ```{r, echo=FALSE, results='asis'}
 path_samples <- grep("after_emptyDrops/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
+
+## Before scDblFinder
+
+This section describes the barcodes remaining after removing droplets with high mitochondrial content, but before running scDblFinder.
+
+In particular, `scDblFinder()` works best when clustering information is available, to produce artificial doublets made of cells from different clusters.
+Consequently, these reports explore the parameter space of clustering algorithms to guide the decision of which clustering results to use as input for `scDblFinder()`.
+
+<details>
+  <summary>Individual sample reports</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("before_scdblfinder/", report_paths, value = TRUE)
 names(path_samples) <- fs::path_ext_remove(basename(path_samples))
 cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
