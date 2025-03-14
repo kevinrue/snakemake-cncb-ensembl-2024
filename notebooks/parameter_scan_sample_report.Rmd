@@ -189,7 +189,7 @@ ggplot() +
     colour = "black", fill = "grey"
   ) +
   geom_vline(
-    xintercept = quantile_95,
+    xintercept = quantile_mt,
     colour = "red", linetype = "dashed", linewidth = 0.1
   ) +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, NA)) +
@@ -203,7 +203,7 @@ ggplot() +
     subtitle = sprintf(
       "Barcodes (%s) | Quantile 99%% (%s)",
       format(ncol(sce), big.mark = ","),
-      format(quantile_95, digits = 2)
+      format(quantile_mt, digits = 2)
     )
   )
 ```
