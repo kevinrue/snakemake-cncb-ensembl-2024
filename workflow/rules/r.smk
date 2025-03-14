@@ -98,6 +98,7 @@ rule sce_after_emptydrops:
 rule filter_mitochondria:
     input:
         sce="results/emptyDrops/sce/{sample}.rds",
+        mt="config/mitochondrial_genes.tsv",
     output:
         sce="results/filter_mitochondria/{sample}.rds",
     params:

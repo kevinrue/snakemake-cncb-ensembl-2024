@@ -30,6 +30,7 @@ NB_INP	neuroblasts and intermediate neural progenitor	dpn	CycE	klu	mira
 GMC	ganglion mother cell	dap	tap	insb
 imNeuro	immature neurons	Hey	E(spl)m6-BFM
 NeuEpi	neuro-epithelium	Ocho	Tom	Brd	E(spl)m4-BFM	E(spl)m5-HLH
+Optic lobe	Optic lobe	scro
 Stressed_cells	heat shock protein coding genes up-regulated during cellular stress	Hsp70Ab	Hsp70Aa	Hsp70Bbb	Hsp70Bb	Hsp70Bc	Hsp70Ba	Hsp68	Hsp22	Hsp23	Hsp27	Hsp26
 Muscle	... muscle cells ..., unlikey to be contamination in scRNA-Seq but are possible in snRNA-Seq	Mhc
 Fat_cells	fat or adipose cells, possible contaminant of brain dissections, note: they will likely co-cluster with glia	AkhR	CG14990	CG43109	CG9616	arg	CG8539

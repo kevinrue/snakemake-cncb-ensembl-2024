@@ -31,21 +31,12 @@ barcode_minor_breaks <- 10^rep(-1:10)
 ```
 
 ```{r snakemake, include=FALSE}
-if (interactive()) {
-  sce_rds <- "../results/emptyDrops/sce/WPPp120hrs_rep2.rds"
-  mt_tsv <- "../config/mitochondrial_genes.tsv"
-  gtf <- "../resources/genome/genome.gtf.gz"
-  n_top_hvgs <- 500
-  n_dimred_umap <- 10
-  notebook_threads <- 8
-} else {
-  sce_rds <- snakemake@input[["sce"]]
-  mt_tsv <- snakemake@input[["mt"]]
-  gtf <- snakemake@input[["gtf"]]
-  n_top_hvgs <- 500
-  n_dimred_umap <- snakemake@params[["n_pcs_umap"]]
-  notebook_threads <- snakemake@threads
-}
+sce_rds <- snakemake@input[["sce"]]
+mt_tsv <- snakemake@input[["mt"]]
+gtf <- snakemake@input[["gtf"]]
+n_top_hvgs <- 500
+n_dimred_umap <- snakemake@params[["n_pcs_umap"]]
+notebook_threads <- snakemake@threads
 sample_name <- fs::path_ext_remove(basename(sce_rds))
 ```
 

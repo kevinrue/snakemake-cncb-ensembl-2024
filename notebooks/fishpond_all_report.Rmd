@@ -15,7 +15,7 @@ library(stringr)
 library(tidyverse)
 ```
 
-```{r setup, include=FALSE}
+```{r constants, include=FALSE}
 umi_breaks <- 10^(-1:10)
 umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
 barcode_breaks <- 10^(-1:10)
@@ -24,6 +24,7 @@ barcode_minor_breaks <- 10^rep(-1:10)
 
 ```{r snakemake, include=FALSE}
 rds_file <- snakemake@input[["rds"]]
+mt_tsv <- snakemake@input[["mt"]]
 ```
 
 ## Run parameters
@@ -49,7 +50,7 @@ sce
 ## Load mitochondrial gene list
 
 ```{r mito_gene_ids, echo=FALSE}
-mito_gene_ids <- read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+mito_gene_ids <- read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
 str(mito_gene_ids)
 ```
 

@@ -22,6 +22,7 @@ barcode_minor_breaks <- 10^rep(-1:10)
 
 ```{r snakemake, include=FALSE}
 sce_rds <- snakemake@input[["sce"]]
+mt_tsv <- snakemake@input[["mt"]]
 expect_cells <- snakemake@params[["expect_cells"]]
 ```
 
@@ -51,7 +52,7 @@ sce
 ## Load mitochondrial gene list
 
 ```{r, echo=FALSE}
-mito_gene_ids <- readr::read_tsv("config/mitochdondrial_genes.tsv", show_col_types = FALSE)[["gene_id"]]
+mito_gene_ids <- readr::read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
 str(mito_gene_ids)
 ```
 

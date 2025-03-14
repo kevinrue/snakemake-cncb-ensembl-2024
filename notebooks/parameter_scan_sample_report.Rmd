@@ -410,12 +410,18 @@ for (marker_group in names(markers_list)) {
       theme_bw()
     nonzero_quantile <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.01)
     n_cells_over_quantile <- plot_data %>% filter(logcounts > nonzero_quantile) %>% nrow()
+    fraction_cells_over_quantile <- n_cells_over_quantile / ncol(sce)
     gg_histogram <- ggplot() +
       geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1) +
       geom_vline(xintercept = nonzero_quantile) +
       labs(
         title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
-        subtitle = sprintf("%s, (%s cells positive)", sample_name, format(n_cells_over_quantile, big.mark = ","))
+        subtitle = sprintf(
+          "%s, (%s cells positive - %s%%)",
+          sample_name,
+          format(n_cells_over_quantile, big.mark = ","),
+          format(fraction_cells_over_quantile, digits = 1)
+        )
       ) +
       theme_bw()
     cowplot_all <- plot_grid(gg_scatter, gg_histogram, nrow = 1)

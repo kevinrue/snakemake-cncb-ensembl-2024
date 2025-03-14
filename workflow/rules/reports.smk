@@ -15,6 +15,7 @@ rule packages_report:
 rule fishpond_sample_report:
     input:
         sce="results/fishpond/{sample}.rds",
+        mt="config/mitochondrial_genes.tsv",
     output:
         "reports/fishpond/{sample}.html",
     params:
@@ -31,6 +32,7 @@ rule fishpond_sample_report:
 rule fishpond_all_report:
     input:
         rds="results/fishpond/_all.rds",
+        mt="config/mitochondrial_genes.tsv",
     output:
         "reports/fishpond.html",
     conda:
