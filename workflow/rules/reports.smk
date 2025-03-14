@@ -232,8 +232,8 @@ rule custom_markers_report:
         "../../conda/conda.yaml"
     threads: 2
     resources:
-        mem="32G",
-        runtime="20m",
+        mem="64G",
+        runtime="30m",
     script:
         "../../notebooks/custom_markers_report.Rmd"
 
