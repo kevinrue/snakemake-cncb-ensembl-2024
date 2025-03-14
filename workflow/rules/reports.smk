@@ -109,6 +109,8 @@ rule before_scdblfinder_sample_report:
         sce="results/before_scdblfinder/{sample}.rds",
     output:
         "reports/before_scdblfinder/{sample}.html",
+    params:
+        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
     conda:
         "../../conda/conda-2.yaml"
     threads: 2

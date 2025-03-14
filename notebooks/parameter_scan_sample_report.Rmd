@@ -36,6 +36,7 @@ if (interactive()) {
   sce_rds <- "../results/before_scdblfinder/WPPp120hrs_rep2.rds"
 } else {
   sce_rds <- snakemake@input[["sce"]]
+  n_pcs_umap <- snakemake@params[["n_pcs_umap"]]
 }
 sample_name <- fs::path_ext_remove(basename(sce_rds))
 ```
@@ -178,15 +179,19 @@ ggplot() +
 
 ## Mitochondrial content
 
-TODO:
-
-* Compute 95% quantile of mitochondrial content and display as a vertical line and label,
-  to guide the choice of a threshold.
-
 ```{r mito_histogram, echo=FALSE}
-barcode_stats %>%
-  ggplot(aes(x = mt_pct)) +
-  geom_histogram(binwidth = 0.01, colour = "black", fill = "grey", linewidth = 0.1) +
+quantile_mt <- quantile(barcode_stats[["mt_pct"]], 0.99)
+ggplot() +
+  geom_histogram(
+    mapping = aes(x = mt_pct),
+    data = barcode_stats,
+    binwidth = 0.01, linewidth = 0.1,
+    colour = "black", fill = "grey"
+  ) +
+  geom_vline(
+    xintercept = quantile_95,
+    colour = "red", linetype = "dashed", linewidth = 0.1
+  ) +
   coord_cartesian(xlim = c(0, 1), ylim = c(0, NA)) +
   scale_x_continuous(labels = label_percent()) +
   scale_y_continuous(labels = label_comma()) +
@@ -195,7 +200,11 @@ barcode_stats %>%
     y = "Barcodes",
     x = "Proportion of mitochondrial counts",
     title = paste0("Sample (", sample_name, ")"),
-    subtitle = paste0("Barcodes (", format(ncol(sce), big.mark = ","), ")")
+    subtitle = sprintf(
+      "Barcodes (%s) | Quantile 99%% (%s)",
+      format(ncol(sce), big.mark = ","),
+      format(quantile_95, digits = 2)
+    )
   )
 ```
 
@@ -286,7 +295,7 @@ ggplot(plot_data, aes(PC, percentVar)) +
 ## UMAP
 
 - Input dimensionality reduction: `"PCA"`
-- Input dimensions: `r "NA"`
+- Input dimensions: `r n_pcs_umap`
 
 ```{r, echo=FALSE, fig.height=6, fig.width=8}
 reducedDim(sce, "UMAP") %>%
@@ -309,7 +318,7 @@ The plot below summarises the clustering results for various resolution using th
 clustree(sce, prefix = "cluster_louvain_res")
 ```
 
-The plot below summarises the clustering results for various resolution using the Louvain method.
+The plot below summarises the clustering results for various step numbers using the Walktrap method.
 
 ```{r clustree_walktrap, fig.height=3, fig.width=7}
 clustree(sce, prefix = "cluster_walktrap_steps")
@@ -356,6 +365,8 @@ for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE))
 
 ## Custom markers
 
+For qualitative quality control purposes, in this section, cells were declared positive for a marker if they had an expression level above the 1% quantile after removing cells with 0 UMI count for that marker.
+
 ```{r, echo=FALSE}
 gmt_data <- readLines("config/custom_markers.gmt") %>%
   str_split("\t")
@@ -365,11 +376,11 @@ for (i in seq_len(length(gmt_data))) {
 }
 ```
 
-```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12, result='asis'}
+```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12, results='asis'}
 for (marker_group in names(markers_list)) {
   for (marker_name in markers_list[[marker_group]]){
     if (!marker_name %in% rowData(sce)[["gene_name"]]) {
-      cat(marker_name, " is not present. Skipping.", "\n", sep = "")
+      cat("Skipping: ", marker_name, " is not present.", "\n", sep = "")
       next
     }
     marker_id <- rowData(sce) %>%
@@ -377,10 +388,10 @@ for (marker_group in names(markers_list)) {
       filter(gene_name == marker_name) %>%
       pull(gene_id)
     if (length(marker_id) > 1) {
-      cat(marker_name, " matched more than one gene ID. Skipping.", "\n", sep = "")
+      cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
       next
     }
-    cat(marker_name, "(", marker_id, ")", "\n", sep = "")
+    cat(sprintf("#### %s (%s) - %s\n", marker_name, marker_id, marker_group))
     plot_data <- reducedDim(sce, "UMAP") %>%
       as_tibble() %>%
       mutate(
@@ -397,13 +408,14 @@ for (marker_group in names(markers_list)) {
         subtitle = sample_name
       ) +
       theme_bw()
-    nonzero_q01 <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.05)
-    gg_histogram <- ggplot(plot_data) +
-      geom_histogram(aes(x = logcounts), colour = "black", fill = "grey", binwidth = 0.1) +
-      geom_vline(xintercept = nonzero_q01) +
+    nonzero_quantile <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.01)
+    n_cells_over_quantile <- plot_data %>% filter(logcounts > nonzero_quantile) %>% nrow()
+    gg_histogram <- ggplot() +
+      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1) +
+      geom_vline(xintercept = nonzero_quantile) +
       labs(
-        title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
-        subtitle = sample_name
+        title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
+        subtitle = sprintf("%s, (%s cells positive)", sample_name, format(n_cells_over_quantile, big.mark = ","))
       ) +
       theme_bw()
     cowplot_all <- plot_grid(gg_scatter, gg_histogram, nrow = 1)
