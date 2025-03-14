@@ -122,6 +122,7 @@ rule scan_parameters_before_scdblfinder:
     params:
         n_top_hvgs=500,
         n_pcs=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
+        exclude_hvgs=config["variable_genes"]["exclude"],
     threads: 16
     resources:
         mem="32G",

@@ -45,6 +45,7 @@ filters:
 variable_genes:
   block: sample
   proportion: 0.1
+  exclude: config/hvgs_exclude.tsv
 
 fastmnn:
   batch: timepoint

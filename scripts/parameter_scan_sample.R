@@ -21,6 +21,7 @@ mt_tsv <- snakemake@input[["mt"]]
 gtf <- snakemake@input[["gtf"]]
 n_top_hvgs <- snakemake@params[["n_top_hvgs"]]
 n_pcs <- snakemake@params[["n_pcs"]]
+exclude_hvgs_tsv <- snakemake@params[["exclude_hvgs"]]
 threads <- snakemake@threads
 
 message("Job configuration")
@@ -29,6 +30,7 @@ message("- mt_tsv: ", mt_tsv)
 message("- gtf: ", gtf)
 message("- n_top_hvgs: ", n_top_hvgs)
 message("- n_pcs: ", n_pcs)
+message("- exclude_hvgs_tsv: ", exclude_hvgs_tsv)
 message("- threads: ", threads)
 
 message("Importing SCE from RDS file ...")
@@ -73,8 +75,18 @@ rowData(sce)[["modelGeneVar"]] <- dec
 message("Done.")
 
 message("Running getTopHVGs ...")
-hvgs <- getTopHVGs(dec, n = n_top_hvgs)
+hvgs <- getTopHVGs(
+  stats = dec,
+  n = n_top_hvgs
+)
 message("Done.")
+
+message("Removing curated genes from hvgs ...")
+exclude_hvgs <- read_tsv(exclude_hvgs_tsv)[["gene_id"]]
+hvgs <- setdiff(hvgs, exclude_hvgs)
+message("Done.")
+
+message("Remaining HVGs: ", length(hvgs))
 
 message("Adding HVG information to SCE ...")
 rowData(sce)[["hvg"]] <- rownames(sce) %in% hvgs
