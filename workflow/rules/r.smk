@@ -1,6 +1,7 @@
 rule simpleaf_quant_rds:
     input:
-        simpleaf="results/simpleaf/quant/{sample}"
+        simpleaf="results/simpleaf/quant/{sample}",
+        gtf="resources/genome/genome.gtf.gz",
     output:
         sce="results/fishpond/{sample}.rds"
     threads: 2

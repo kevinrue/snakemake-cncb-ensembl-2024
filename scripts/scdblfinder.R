@@ -20,10 +20,10 @@ sce <- readRDS(sce_rds)
 message("Done.")
 
 ## Better solution is to fix the parameter scan script to add this information as rowRanges instead of rowData
-message("Temporarily remove conflicting columns of mcols() ...")
-mcols_backup <- mcols(sce)
-mcols(sce) <- NULL
-message("Done.")
+#message("Temporarily remove conflicting columns of mcols() ...")
+#mcols_backup <- mcols(sce)
+#mcols(sce) <- NULL
+#message("Done.")
 
 message("SCE object size: ", format(object.size(sce), unit = "GB"))
 
@@ -31,7 +31,7 @@ message("Running scDblFinder ...")
 sce <- scDblFinder(
   sce = sce,
   clusters = scdblfinder_clusters,
-  dbr.sd = 1, # disable doublet rate expectation
+  dbr.sd = 1,
   returnType = "full",
   BPPARAM = MulticoreParam(workers = threads)
 )
