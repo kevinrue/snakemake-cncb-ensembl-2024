@@ -1,0 +1,69 @@
+---
+title: "rox1:rox2 coexpression"
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(SummarizedExperiment)
+library(tidyverse)
+```
+
+
+```{r}
+sce <- readRDS("results/before_scdblfinder/WPPp120hrs_rep1.rds")
+sce
+```
+
+```{r}
+rox1_name <- "lncRNA:roX1"
+rox2_name <- "lncRNA:roX2"
+```
+
+```{r}
+rox1_id <- rowData(sce) %>% 
+  as_tibble() %>% 
+  filter(gene_name == rox1_name) %>% 
+  pull(gene_id)
+rox2_id <- rowData(sce) %>% 
+  as_tibble() %>% 
+  filter(gene_name == rox2_name) %>% 
+  pull(gene_id)
+```
+
+First, look at log-normalised counts, as those are meant to, well, normalise, between cells.
+
+```{r scatter_logcounts}
+gg_data <- tibble(
+  rox1 = assay(sce, "logcounts")[rox1_id, ],
+  rox2 = assay(sce, "logcounts")[rox2_id, ],
+)
+ggplot() +
+  geom_point(
+    mapping = aes(x = rox1, y = rox2),
+    data = gg_data
+  ) +
+  theme_bw()
+```
+
+Then, look at raw counts, as we are comparing the two genes within each cell, so:
+
+* normalisation does not change the relative expression of the two genes within each cell
+* we are not comparing between cell
+* we get a clearer picture of the actual value observed for each gene in each cell
+
+```{r scatter_counts, warning=FALSE}
+gg_data <- tibble(
+  rox1 = assay(sce, "counts")[rox1_id, ],
+  rox2 = assay(sce, "counts")[rox2_id, ],
+)
+ggplot() +
+  geom_point(
+    mapping = aes(x = rox1, y = rox2),
+    data = gg_data
+  ) +
+  scale_x_log10() + scale_y_log10() +
+  theme_bw()
+```
+
