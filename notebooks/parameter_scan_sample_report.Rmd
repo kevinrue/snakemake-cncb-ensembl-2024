@@ -391,7 +391,7 @@ for (marker_group in names(markers_list)) {
       cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
       next
     }
-    cat(sprintf("#### %s (%s) - %s\n", marker_name, marker_id, marker_group))
+    cat(sprintf("%s (%s) - %s\n", marker_name, marker_id, marker_group))
     plot_data <- reducedDim(sce, "UMAP") %>%
       as_tibble() %>%
       mutate(
