@@ -137,7 +137,11 @@ ggplot() +
     alpha = 0.5,
     hjust = 1
   ) +
-  scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
+  scale_x_log10(
+    breaks = barcode_breaks,
+    minor_breaks = barcode_minor_breaks,
+    labels = label_number(scale_cut = cut_short_scale())
+  ) +
   scale_y_log10(
     limits = c(1, NA),
     breaks = umi_breaks,
@@ -524,8 +528,4 @@ Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}
 sessionInfo()
-```
-
-```{r write_sce, include=FALSE}
-saveRDS(sce, file.path("test-after-emptydrops", paste0(sample_name, ".rds")))
 ```
