@@ -229,11 +229,11 @@ rule custom_markers_report:
     output:
         "reports/custom_markers_report.html",
     conda:
-        "../../conda/conda.yaml"
+        "../../conda/conda-3.yaml"
     threads: 2
     resources:
         mem="64G",
-        runtime="30m",
+        runtime="20m",
     script:
         "../../notebooks/custom_markers_report.Rmd"
 

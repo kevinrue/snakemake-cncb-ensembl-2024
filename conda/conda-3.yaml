@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-ggrastr
+  - r-tidyverse
+  - r-biocmanager
+  - bioconductor-biocsingular
+  - bioconductor-isee

@@ -7,6 +7,7 @@ date: "`r Sys.Date()`"
 
 ```{r libraries, include=FALSE}
 library(ggrastr)
+library(iSEE)
 library(SingleCellExperiment)
 library(tidyverse)
 ```
@@ -29,21 +30,20 @@ sce <- readRDS(logcounts_file)
 sce
 ```
 
-## Load gene annotations
+## Load gene sets
 
-```{r, echo=FALSE}
+```{r load_gmt, echo=FALSE}
 gmt_data <- readLines("config/custom_markers.gmt") %>%
   str_split("\t")
 markers_list <- list()
 for (i in seq_len(length(gmt_data))) {
   markers_list[[gmt_data[[i]][1]]] <- gmt_data[[i]][3:length(gmt_data[[i]])]
 }
+lengths(markers_list)
 ```
 
-```{r markers, eval=FALSE}
+```{r subset_sce, echo=FALSE}
 sce <- sce[rowData(sce)[["gene_name"]] %in% unlist(markers_list), ]
-rownames(sce) <- rowData(sce)[["gene_name"]]
-sce <- sce[markers_symbols, ]
 ```
 
 ## Load UMAP coordinates
@@ -61,35 +61,49 @@ sce
 
 ## Plots
 
-```{r plots, echo=FALSE, fig.height=6, fig.width=8}
-for (gene_idx in seq_len(nrow(sce))) {
-  gene_id <- rowData(sce)[["gene_id"]][gene_idx]
-  gene_symbol <- rowData(sce)[["gene_name"]][gene_idx]
-  logcounts_data <- assay(sce, "logcounts")[gene_idx, ]
-  plot_data <- cbind(
-    reducedDim(sce, "UMAP"),
-    logcounts = logcounts_data
-  )
-  gg <- ggplot(data = plot_data) +
-    rasterise(
-      geom_point(
-        aes(
-          x = UMAP1,
-          y = UMAP2,
-          colour = logcounts
-        ),
-        size = 0.05
+```{r, echo=FALSE}
+keep <- subsetPointsByGrid(X = reducedDim(sce, "UMAP")[, 1], Y = reducedDim(sce, "UMAP")[, 2], resolution = 300)
+sce <- sce[, keep]
+```
+
+Plots below were visually downsampled to `r format(nrow(sce), big.mark = ",")` data points to speed up plotting.
+
+This was achieved using the `iSEE::subsetPointsByGrid()` function with a resolution value of `300`.
+
+```{r plots, echo=FALSE, fig.height=5, fig.width=7, results='asis'}
+for (marker_group in names(markers_list)) {
+  for (marker_name in markers_list[[marker_group]]){
+    if (!marker_name %in% rowData(sce)[["gene_name"]]) {
+      cat("Skipping: ", marker_name, " not in rowData.", "\n", sep = "")
+      next
+    }
+    marker_id <- rowData(sce) %>%
+      as_tibble() %>%
+      filter(gene_name == marker_name) %>%
+      pull(gene_id)
+    if (length(marker_id) > 1) {
+      cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
+      next
+    }
+    cat(sprintf("\n%s (%s) - %s\n", marker_name, marker_id, marker_group))
+    plot_data <- reducedDim(sce, "UMAP") %>%
+      as_tibble() %>%
+      mutate(
+        logcounts = as.numeric(assay(sce, "logcounts")[marker_id, ])
+      ) %>%
+      bind_cols(
+        colData(sce) %>% as_tibble()
       )
-    ) +
-    scale_colour_viridis_c() +
-    theme_bw() +
-    labs(
-      x = "UMAP1",
-      y = "UMAP2",
-      colour = "Log-counts",
-      subtitle = paste0(gene_id, " | ", gene_symbol)
-    )
-  print(gg)
+    gg_scatter <- ggplot(plot_data) +
+      geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
+      scale_colour_viridis_c() +
+      labs(
+        title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
+        subtitle = "Integrated data"
+      ) +
+      theme_bw()
+    print(gg_scatter)
+  }
 }
 ```
 
