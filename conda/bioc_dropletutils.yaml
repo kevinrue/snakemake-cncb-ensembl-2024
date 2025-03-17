@@ -1,9 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - r-tidyverse
-  - bioconductor-biocparallel
-  - bioconductor-dropletutils
-  - bioconductor-fishpond
-  - bioconductor-singlecellexperiment

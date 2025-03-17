@@ -2,6 +2,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - r-cowplot
   - r-ggrastr
   - r-tidyverse
   - r-biocmanager

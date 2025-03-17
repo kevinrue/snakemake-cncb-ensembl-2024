@@ -50,7 +50,7 @@ variable_genes:
 fastmnn:
   batch: timepoint
   k: 20
-  d: 50
+  d: 200
   cluster:
     kmeans:
       centers: 2000
@@ -60,7 +60,7 @@ fastmnn:
     block: sample
     lfc: 1
   umap:
-    n_pcs: 50
+    n_pcs: 200
 
 fixed_pca:
   rank: 100

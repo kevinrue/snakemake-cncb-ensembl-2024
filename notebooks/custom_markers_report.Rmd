@@ -6,6 +6,7 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r libraries, include=FALSE}
+library(cowplot)
 library(ggrastr)
 library(iSEE)
 library(SingleCellExperiment)
@@ -62,13 +63,13 @@ sce
 ## Plots
 
 ```{r, echo=FALSE}
-keep <- subsetPointsByGrid(X = reducedDim(sce, "UMAP")[, 1], Y = reducedDim(sce, "UMAP")[, 2], resolution = 300)
+keep <- subsetPointsByGrid(X = reducedDim(sce, "UMAP")[, 1], Y = reducedDim(sce, "UMAP")[, 2], resolution = 400)
 sce <- sce[, keep]
 ```
 
-Plots below were visually downsampled to `r format(nrow(sce), big.mark = ",")` data points to speed up plotting.
+<!-- Plots below were visually downsampled to `r format(nrow(sce), big.mark = ",")` data points to speed up plotting. -->
 
-This was achieved using the `iSEE::subsetPointsByGrid()` function with a resolution value of `300`.
+<!-- This was achieved using the `iSEE::subsetPointsByGrid()` function with a resolution value of `300`. -->
 
 ```{r plots, echo=FALSE, fig.height=5, fig.width=7, results='asis'}
 for (marker_group in names(markers_list)) {
@@ -85,7 +86,7 @@ for (marker_group in names(markers_list)) {
       cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
       next
     }
-    cat(sprintf("\n%s (%s) - %s\n", marker_name, marker_id, marker_group))
+    cat(sprintf("%s (%s) - %s\n", marker_name, marker_id, marker_group))
     plot_data <- reducedDim(sce, "UMAP") %>%
       as_tibble() %>%
       mutate(
@@ -102,7 +103,8 @@ for (marker_group in names(markers_list)) {
         subtitle = "Integrated data"
       ) +
       theme_bw()
-    print(gg_scatter)
+    cowplot_all <- plot_grid(gg_scatter, nrow = 1)
+    print(cowplot_all)
   }
 }
 ```

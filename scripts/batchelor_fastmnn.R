@@ -45,7 +45,7 @@ sce <- fastMNN(
     k = snakemake_params_k,
     d = snakemake_params_d,
     get.variance = TRUE,
-    auto.merge = TRUE,
+    auto.merge = FALSE,
     subset.row = hvgs,
     correct.all = TRUE,
     assay.type = "logcounts",
