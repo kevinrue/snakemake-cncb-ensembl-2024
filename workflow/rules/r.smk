@@ -300,9 +300,9 @@ rule markers_after_integration:
         block=config["fastmnn"]["markers"]["block"],
         lfc=config["fastmnn"]["markers"]["lfc"],
     resources:
-        mem="32G",
+        mem="64G",
         runtime="30m",
-    threads: 32
+    threads: 16
     conda:
         "../../conda/conda.yaml"
     script:
