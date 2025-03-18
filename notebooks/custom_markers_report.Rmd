@@ -9,6 +9,7 @@ date: "`r Sys.Date()`"
 library(cowplot)
 library(ggrastr)
 library(iSEE)
+library(scales)
 library(SingleCellExperiment)
 library(tidyverse)
 ```
@@ -71,7 +72,7 @@ sce <- sce[, keep]
 
 <!-- This was achieved using the `iSEE::subsetPointsByGrid()` function with a resolution value of `300`. -->
 
-```{r plots, echo=FALSE, fig.height=5, fig.width=7, results='asis'}
+```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12, results='asis'}
 for (marker_group in names(markers_list)) {
   for (marker_name in markers_list[[marker_group]]){
     if (!marker_name %in% rowData(sce)[["gene_name"]]) {
@@ -95,15 +96,24 @@ for (marker_group in names(markers_list)) {
       bind_cols(
         colData(sce) %>% as_tibble()
       )
+    nonzero_quantile_cap <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.99)
     gg_scatter <- ggplot(plot_data) +
-      geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
-      scale_colour_viridis_c() +
+      geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.001) +
+      scale_colour_viridis_c(limits = c(0, nonzero_quantile_cap), oob = squish) +
       labs(
         title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
-        subtitle = "Integrated data"
+        subtitle = sprintf("Integrated data (logcount cap: %.1f)", nonzero_quantile_cap)
       ) +
       theme_bw()
-    cowplot_all <- plot_grid(gg_scatter, nrow = 1)
+    gg_histogram <- ggplot() +
+      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1) +
+      geom_vline(xintercept = nonzero_quantile_cap, colour = "red", linewidth = 0.1, linetype = "dashed") +
+      labs(
+        title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
+        subtitle = sprintf("Integrated data (99% non-zero quantile: %.1f)", nonzero_quantile_cap)
+      ) +
+      theme_bw()
+    cowplot_all <- plot_grid(gg_scatter, gg_histogram, nrow = 1)
     print(cowplot_all)
   }
 }
