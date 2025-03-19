@@ -49,9 +49,9 @@ sce
 
 ## Load mitochondrial gene list
 
-```{r mito_gene_ids, echo=FALSE}
+```{r mito_gene_ids, echo=FALSE ,results='asis'}
 mito_gene_ids <- read_tsv(mt_tsv, show_col_types = FALSE)[["gene_id"]]
-str(mito_gene_ids)
+cat("Mitochondrial genes loaded: ", length(mito_gene_ids), "\n")
 ```
 
 ## Barcode statistics
@@ -80,6 +80,7 @@ barcode_stats <- tibble(
 - **genes:** Total genes detected
 - **rank_umi:** Ranking by decreasing UMI detected
 - **rank_genes:** Ranking by decreasing genes detected
+- **mt_pct:** Proportion of UMIs mapping to mitochondrial genes
 
 ```{r compute_statistics, echo=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
@@ -112,11 +113,11 @@ ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum)) +
   facet_wrap(~sample) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  theme_bw() +
   labs(
     y = "UMI Counts",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 ```
 
 ```{r umi_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
@@ -124,21 +125,27 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
-  theme_bw() +
+  guides(
+    colour = guide_legend(override.aes = list(linewidth = 3))
+  ) +
   labs(
     y = "UMI Counts",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 gg2 <- ggplot(barcode_stats, aes(x = rank_umi, y = umi_sum, colour = sample)) +
   geom_line() +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_log10(breaks = umi_breaks, minor_breaks = umi_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   coord_cartesian(ylim = c(1, 10E3), xlim = c(10E3, NA)) +
-  theme_bw() +
+  guides(
+    colour = guide_legend(override.aes = list(linewidth = 3))
+  ) +
   labs(
     y = "UMI Counts",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
 ```
@@ -151,11 +158,14 @@ ggplot(barcode_stats, aes(x = rank_genes, y = genes)) +
   facet_wrap(~sample) +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
-  theme_bw() +
+  guides(
+    colour = guide_legend(override.aes = list(linewidth = 3))
+  ) +
   labs(
     y = "Genes",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 ```
 
 ```{r genes_rank_colour_sample, fig.width=12, fig.height=5, echo=FALSE}
@@ -163,21 +173,27 @@ gg1 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
-  theme_bw() +
+  guides(
+    colour = guide_legend(override.aes = list(linewidth = 3))
+  ) +
   labs(
     y = "Genes",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 gg2 <- ggplot(barcode_stats, aes(x = rank_genes, y = genes, colour = sample)) +
   geom_line() +
   scale_x_log10(breaks = barcode_breaks, minor_breaks = barcode_minor_breaks, labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_comma()) +
   coord_cartesian(ylim = c(0, 2E3), xlim = c(10E3, NA)) +
-  theme_bw() +
+  guides(
+    colour = guide_legend(override.aes = list(linewidth = 3))
+  ) +
   labs(
     y = "Genes",
     x = "Barcodes"
-  )
+  ) +
+  theme_bw()
 plot_grid(gg1, gg2)
 rm(gg1, gg2)
 ```
