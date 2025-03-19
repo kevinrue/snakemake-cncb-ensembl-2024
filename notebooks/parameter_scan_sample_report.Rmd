@@ -318,7 +318,7 @@ reducedDim(sce, "UMAP") %>%
 
 The plot below summarises the clustering results for various resolution using the Louvain method.
 
-```{r clustree_louvain, fig.height=11, fig.width=9}
+```{r clustree_louvain, fig.height=10, fig.width=9}
 clustree(sce, prefix = "cluster_louvain_res")
 ```
 
