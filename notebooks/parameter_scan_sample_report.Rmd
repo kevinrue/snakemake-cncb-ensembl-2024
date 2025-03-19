@@ -324,7 +324,7 @@ clustree(sce, prefix = "cluster_louvain_res")
 
 The plot below summarises the clustering results for various step numbers using the Walktrap method.
 
-```{r clustree_walktrap, fig.height=37, fig.width=9}
+```{r clustree_walktrap, fig.height=7, fig.width=9}
 clustree(sce, prefix = "cluster_walktrap_steps")
 ```
 
