@@ -72,6 +72,27 @@ barcode_stats <- tibble(
   )
 ```
 
+```{r compute_statistics, echo=FALSE}
+barcode_stats <- barcode_stats %>% 
+  mutate(
+    umi_sum = colSums(assay(sce, "counts")),
+    genes = colSums(assay(sce, "counts") > 0),
+    mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+  )
+barcode_stats <- barcode_stats %>%
+  arrange(desc(umi_sum)) %>%
+  group_by(sample) %>%
+  mutate(rank_umi = row_number()) %>%
+  ungroup()
+barcode_stats <- barcode_stats %>%
+  arrange(desc(genes)) %>%
+  group_by(sample) %>%
+  mutate(rank_genes = row_number()) %>%
+  ungroup()
+barcode_stats
+rm(sce)
+```
+
 - **barcode:** Barcode
 - **sample:** Sample name
 - **timepoint:** Developmental time point
@@ -81,28 +102,6 @@ barcode_stats <- tibble(
 - **rank_umi:** Ranking by decreasing UMI detected
 - **rank_genes:** Ranking by decreasing genes detected
 - **mt_pct:** Proportion of UMIs mapping to mitochondrial genes
-
-```{r compute_statistics, echo=FALSE}
-barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
-barcode_stats$genes <- colSums(assay(sce, "counts") > 0)
-mt_sum <- colSums(assay(sce, "counts")[mito_gene_ids, ])
-barcode_stats <- barcode_stats %>% 
-  arrange(desc(umi_sum)) %>% 
-  group_by(sample) %>% 
-  mutate(rank_umi = row_number()) %>% 
-  ungroup()
-barcode_stats <- barcode_stats %>% 
-  arrange(desc(genes)) %>% 
-  group_by(sample) %>% 
-  mutate(rank_genes = row_number()) %>% 
-  ungroup()
-barcode_stats <- barcode_stats %>% 
-  mutate(
-    mt_pct = mt_sum / umi_sum
-  )
-barcode_stats
-rm(sce)
-```
 
 ## Plots
 
@@ -203,7 +202,7 @@ rm(gg1, gg2)
 
 Note: Filtering droplets with more than 5,000 UMI counts and 1,000 genes detected.
 
-```{r, fig.height=5, fig.width=9}
+```{r mt_density, echo=FALSE, fig.height=5, fig.width=9}
 barcode_stats %>%
   filter(umi_sum > 5E3 & genes > 1E3) %>%
   ggplot() +
@@ -218,7 +217,7 @@ barcode_stats %>%
   )
 ```
 
-```{r, fig.height=5, fig.width=8}
+```{r mt_scatter_umi, echo=FALSE, fig.height=5, fig.width=8}
 barcode_stats %>%
   filter(umi_sum > 5E3 & genes > 1E3) %>%
   ggplot() +
