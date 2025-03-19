@@ -391,7 +391,7 @@ for (marker_group in names(markers_list)) {
       cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
       next
     }
-    cat(sprintf("%s (%s) - %s\n", marker_name, marker_id, marker_group))
+    cat(sprintf("%s | %s (%s)\n", marker_id, marker_name, marker_group))
     plot_data <- reducedDim(sce, "UMAP") %>%
       as_tibble() %>%
       mutate(
@@ -400,20 +400,26 @@ for (marker_group in names(markers_list)) {
       bind_cols(
         colData(sce) %>% as_tibble()
       )
+    # minimum expression to call a cell 'positive'
+    nonzero_quantile_min <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.01)
+    # maximum expression on the colour scale
+    nonzero_quantile_cap <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.99)
+    # cells above the minimum expression
+    n_cells_over_quantile <- plot_data %>% filter(logcounts > nonzero_quantile_min) %>% nrow()
+    fraction_cells_over_quantile <- n_cells_over_quantile / ncol(sce)
+    # plots
     gg_scatter <- ggplot(plot_data) +
       geom_point(aes(UMAP1, UMAP2, colour = logcounts), size = 0.01) +
-      scale_colour_viridis_c() +
+      scale_colour_viridis_c(limits = c(0, nonzero_quantile_cap), oob = squish) +
       labs(
         title = paste0(marker_id, " | ", marker_name, " (", marker_group, ")"),
-        subtitle = sample_name
+        subtitle = sprintf("%s (logcount cap: %.1f)", sample_name, nonzero_quantile_cap)
       ) +
       theme_bw()
-    nonzero_quantile <- plot_data %>% filter(logcounts > 0) %>% pull(logcounts) %>% quantile(0.01)
-    n_cells_over_quantile <- plot_data %>% filter(logcounts > nonzero_quantile) %>% nrow()
-    fraction_cells_over_quantile <- n_cells_over_quantile / ncol(sce)
     gg_histogram <- ggplot() +
-      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1) +
-      geom_vline(xintercept = nonzero_quantile) +
+      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1, linewidth = 0.1) +
+      geom_vline(xintercept = nonzero_quantile_min, colour = "black", linewidth = 0.5, linetype = "dashed") +
+      geom_vline(xintercept = nonzero_quantile_cap, colour = "black", linewidth = 0.5, linetype = "dashed") +
       labs(
         title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
         subtitle = sprintf(

@@ -87,7 +87,7 @@ for (marker_group in names(markers_list)) {
       cat("Skipping: ", marker_name, " matched more than one gene ID.", "\n", sep = "")
       next
     }
-    cat(sprintf("%s (%s) - %s\n", marker_name, marker_id, marker_group))
+    cat(sprintf("%s | %s (%s)\n", marker_id, marker_name, marker_group))
     plot_data <- reducedDim(sce, "UMAP") %>%
       as_tibble() %>%
       mutate(
@@ -106,8 +106,8 @@ for (marker_group in names(markers_list)) {
       ) +
       theme_bw()
     gg_histogram <- ggplot() +
-      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1) +
-      geom_vline(xintercept = nonzero_quantile_cap, colour = "red", linewidth = 0.1, linetype = "dashed") +
+      geom_histogram(aes(x = logcounts), data = plot_data, colour = "black", fill = "grey", binwidth = 0.1, linewidth = 0.1) +
+      geom_vline(xintercept = nonzero_quantile_cap, colour = "black", linewidth = 0.5, linetype = "dashed") +
       labs(
         title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
         subtitle = sprintf("Integrated data (99%% non-zero quantile: %.1f)", nonzero_quantile_cap)
