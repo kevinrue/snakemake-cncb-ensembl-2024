@@ -154,6 +154,35 @@ for (i_resolution in cluster_louvain_resolutions) {
 }
 message("Done.")
 
+message("Running clusterRows (walktrap) ...")
+for (i_steps in cluster_walktrap_steps) {
+  cluster_coldata_name <- paste0("cluster_walktrap_steps", i_steps)
+  set.seed(1010)
+  colData(sce)[[cluster_coldata_name]] <- clusterRows(
+    x = reducedDim(sce, "PCA")[, 1:50],
+    BLUSPARAM = TwoStepParam(
+      first = KmeansParam(
+        centers = 1000,
+        iter.max = 100
+      ),
+      second = NNGraphParam(
+        shared = TRUE,
+        k = 5,
+        BNPARAM = KmknnParam(
+          distance = "Euclidean"
+        ),
+        BPPARAM = MulticoreParam(workers = threads),
+        cluster.fun = "walktrap",
+        cluster.args = list(
+          steps = i_steps
+        )
+      )
+    ),
+    full = FALSE
+  )
+}
+message("Done.")
+
 message("Saving results to RDS file ...")
 saveRDS(sce, snakemake@output[["sce"]])
 message("Done.")
