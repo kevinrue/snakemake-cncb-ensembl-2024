@@ -318,13 +318,13 @@ reducedDim(sce, "UMAP") %>%
 
 The plot below summarises the clustering results for various resolution using the Louvain method.
 
-```{r clustree_louvain, fig.height=7, fig.width=7}
+```{r clustree_louvain, fig.height=12, fig.width=9}
 clustree(sce, prefix = "cluster_louvain_res")
 ```
 
 The plot below summarises the clustering results for various step numbers using the Walktrap method.
 
-```{r clustree_walktrap, fig.height=3, fig.width=7}
+```{r clustree_walktrap, fig.height=37, fig.width=9}
 clustree(sce, prefix = "cluster_walktrap_steps")
 ```
 
