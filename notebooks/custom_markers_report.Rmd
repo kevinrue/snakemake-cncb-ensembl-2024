@@ -110,7 +110,7 @@ for (marker_group in names(markers_list)) {
       geom_vline(xintercept = nonzero_quantile_cap, colour = "red", linewidth = 0.1, linetype = "dashed") +
       labs(
         title = sprintf("%s | %s (%s)", marker_id, marker_name, marker_group),
-        subtitle = sprintf("Integrated data (99% non-zero quantile: %.1f)", nonzero_quantile_cap)
+        subtitle = sprintf("Integrated data (99%% non-zero quantile: %.1f)", nonzero_quantile_cap)
       ) +
       theme_bw()
     cowplot_all <- plot_grid(gg_scatter, gg_histogram, nrow = 1)
