@@ -330,7 +330,7 @@ clustree(sce, prefix = "cluster_walktrap_steps")
 
 Below are UMAP plots coloured by each set of clustering results.
 
-```{r cluster_umap_plot, echo=FALSE, fig.height=5, fig.width=7}
+```{r cluster_umap_plot, echo=FALSE, fig.height=7, fig.width=9}
 for (cluster_coldata in grep("^cluster_", colnames(colData(sce)), value = TRUE)) {
   plot_data <- reducedDim(sce, "UMAP") %>% 
     as_tibble() %>% 
@@ -380,7 +380,7 @@ for (i in seq_len(length(gmt_data))) {
 }
 ```
 
-```{r markers_plots, echo=FALSE, fig.height=5, fig.width=12, results='asis'}
+```{r markers_plots, echo=FALSE, fig.height=7, fig.width=12, results='asis'}
 for (marker_group in names(markers_list)) {
   for (marker_name in markers_list[[marker_group]]){
     if (!marker_name %in% rowData(sce)[["gene_name"]]) {
