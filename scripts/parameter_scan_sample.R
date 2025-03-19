@@ -19,18 +19,31 @@ suppressPackageStartupMessages(library(tidyverse))
 sce_rds <- snakemake@input[["sce"]]
 mt_tsv <- snakemake@input[["mt"]]
 gtf <- snakemake@input[["gtf"]]
-n_top_hvgs <- snakemake@params[["n_top_hvgs"]]
-n_pcs <- snakemake@params[["n_pcs"]]
+
+n_hvgs <- snakemake@params[["n_hvgs"]]
 exclude_hvgs_tsv <- snakemake@params[["exclude_hvgs"]]
+n_pcs <- snakemake@params[["n_pcs"]]
+cluster_kmeans_centers <- snakemake@params[["cluster_kmeans_centers"]]
+cluster_kmeans_iter_max <- snakemake@params[["cluster_kmeans_iter_max"]]
+cluster_louvain_resolutions <- snakemake@params[["cluster_louvain_resolutions"]]
+cluster_walktrap_steps <- snakemake@params[["cluster_walktrap_steps"]]
+
 threads <- snakemake@threads
 
 message("Job configuration")
+
 message("- sce_rds: ", sce_rds)
 message("- mt_tsv: ", mt_tsv)
 message("- gtf: ", gtf)
-message("- n_top_hvgs: ", n_top_hvgs)
-message("- n_pcs: ", n_pcs)
+
+message("- n_hvgs: ", format(n_hvgs, big.mark = ","))
 message("- exclude_hvgs_tsv: ", exclude_hvgs_tsv)
+message("- n_pcs: ", format(n_pcs, big.mark = ","))
+message("- cluster_kmeans_centers: ", format(cluster_kmeans_centers, big.mark = ","))
+message("- cluster_kmeans_iter_max: ", format(cluster_kmeans_iter_max, big.mark = ","))
+message("- cluster_louvain_resolutions: ", paste0(cluster_louvain_resolutions, collapse = ", "))
+message("- cluster_walktrap_steps: ", paste0(cluster_walktrap_steps, collapse = ", "))
+
 message("- threads: ", threads)
 
 message("Importing SCE from RDS file ...")
@@ -77,7 +90,7 @@ message("Done.")
 message("Running getTopHVGs ...")
 hvgs <- getTopHVGs(
   stats = dec,
-  n = n_top_hvgs
+  n = n_hvgs
 )
 message("Done.")
 
@@ -96,7 +109,7 @@ message("Running fixedPCA ...")
 set.seed(1010)
 sce <- fixedPCA(
   x = sce,
-  rank = 50, # TODO: parameterise
+  rank = n_pcs,
   subset.row = hvgs,
   BPPARAM = MulticoreParam(workers = threads)
 )
@@ -113,15 +126,15 @@ sce <- runUMAP(
 message("Done.")
 
 message("Running clusterRows (louvain) ...")
-for (resolution in seq(from = 0.2, to = 2, by = 0.2)) {
-  cluster_coldata_name <- paste0("cluster_louvain_res", resolution)
+for (i_resolution in cluster_louvain_resolutions) {
+  cluster_coldata_name <- paste0("cluster_louvain_res", i_resolution)
   set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
-    x = reducedDim(sce, "PCA")[, seq_len(n_pcs)],
+    x = reducedDim(sce, "PCA"),
     BLUSPARAM = TwoStepParam(
       first = KmeansParam(
-        centers = 1000,
-        iter.max = 100
+        centers = cluster_kmeans_centers,
+        iter.max = cluster_kmeans_iter_max
       ),
       second = NNGraphParam(
         shared = TRUE,
@@ -132,7 +145,7 @@ for (resolution in seq(from = 0.2, to = 2, by = 0.2)) {
         BPPARAM = MulticoreParam(workers = threads),
         cluster.fun = "louvain",
         cluster.args = list(
-          resolution = resolution
+          resolution = i_resolution
         )
       )
     ),
@@ -140,36 +153,6 @@ for (resolution in seq(from = 0.2, to = 2, by = 0.2)) {
   )
 }
 message("Done.")
-
-message("Running clusterRows (walktrap) ...")
-for (steps in 4 * 2^seq(from = 0, to = 2, by = 1)) {
-  cluster_coldata_name <- paste0("cluster_walktrap_steps", steps)
-  set.seed(1010)
-  colData(sce)[[cluster_coldata_name]] <- clusterRows(
-    x = reducedDim(sce, "PCA")[, 1:50],
-    BLUSPARAM = TwoStepParam(
-      first = KmeansParam(
-        centers = 1000,
-        iter.max = 100
-      ),
-      second = NNGraphParam(
-        shared = TRUE,
-        k = 5,
-        BNPARAM = KmknnParam(
-          distance = "Euclidean"
-        ),
-        BPPARAM = MulticoreParam(workers = threads),
-        cluster.fun = "walktrap",
-        cluster.args = list(
-          steps = steps
-        )
-      )
-    ),
-    full = FALSE
-  )
-}
-message("Done.")
-
 
 message("Saving results to RDS file ...")
 saveRDS(sce, snakemake@output[["sce"]])

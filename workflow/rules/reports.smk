@@ -96,7 +96,7 @@ rule after_emptydrops_sample_report:
     output:
         "reports/after_emptyDrops/{sample}.html",
     params:
-        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
+        n_pcs_umap=20,
     conda:
         "../../conda/conda.yaml"
     threads: 12
@@ -112,7 +112,7 @@ rule before_scdblfinder_sample_report:
     output:
         "reports/before_scdblfinder/{sample}.html",
     params:
-        n_pcs_umap=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
+        n_pcs_umap=lambda wildcards, input: SAMPLES['scdblfinder_npcs'][wildcards.sample],
     conda:
         "../../conda/conda-2.yaml"
     threads: 2

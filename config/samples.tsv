@@ -1,4 +1,4 @@
-sample_name	timepoint	replicate	expect_cells	npcs	scdblfinder_clusters
+sample_name	timepoint	replicate	expect_cells	scdblfinder_npcs	scdblfinder_clusters
 WPPm048hrs_rep1	m048hrs	1	30000	20	cluster_louvain_res0.2
 WPPm048hrs_rep2	m048hrs	2	30000	20	cluster_louvain_res0.2
 WPPm024hrs_rep1	m024hrs	1	30000	20	cluster_louvain_res0.2

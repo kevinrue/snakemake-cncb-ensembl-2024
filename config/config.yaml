@@ -38,13 +38,33 @@ emptydrops:
 filters:
   barcodes:
     mt_pct_max: 0.25
-    expected: 30000
-    min_umis: 3000
-    min_genes: 1000
+
+scdblfinder:
+  variable_genes:
+    n: 1000
+    exclude: config/hvgs_exclude.tsv
+  cluster:
+    kmeans:
+      centers: 1000
+      iter_max: 100
+    louvain:
+      resolutions:
+        - 0.1
+        - 0.2
+        - 0.5
+        - 1
+        - 2
+        - 5
+        - 10
+    walktrap:
+      steps:
+        - 4
+        - 8
+        - 16
 
 variable_genes:
   block: sample
-  proportion: 0.1
+  proportion: 0.1 # TODO: remove
   exclude: config/hvgs_exclude.tsv
 
 fastmnn:

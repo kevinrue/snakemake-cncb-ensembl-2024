@@ -120,9 +120,13 @@ rule scan_parameters_before_scdblfinder:
     output:
         sce="results/before_scdblfinder/{sample}.rds",
     params:
-        n_top_hvgs=500,
-        n_pcs=lambda wildcards, input: SAMPLES['npcs'][wildcards.sample],
-        exclude_hvgs=config["variable_genes"]["exclude"],
+        n_hvgs=config["scdblfinder"]["variable_genes"]["n"],
+        exclude_hvgs=config["scdblfinder"]["variable_genes"]["exclude"],
+        n_pcs=lambda wildcards, input: SAMPLES['scdblfinder_npcs'][wildcards.sample],
+        cluster_kmeans_centers=config["scdblfinder"]["cluster"]["kmeans"]["centers"],
+        cluster_kmeans_iter_max=config["scdblfinder"]["cluster"]["kmeans"]["iter_max"],
+        cluster_louvain_resolutions=config["scdblfinder"]["cluster"]["louvain"]["resolutions"],
+        cluster_walktrap_steps=config["scdblfinder"]["cluster"]["walktrap"]["steps"],
     threads: 16
     resources:
         mem="32G",
