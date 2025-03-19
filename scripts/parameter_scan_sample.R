@@ -95,7 +95,7 @@ hvgs <- getTopHVGs(
 message("Done.")
 
 message("Removing curated genes from hvgs ...")
-exclude_hvgs <- read_tsv(exclude_hvgs_tsv)[["gene_id"]]
+exclude_hvgs <- read_tsv(exclude_hvgs_tsv, show_col_types = FALSE)[["gene_id"]]
 hvgs <- setdiff(hvgs, exclude_hvgs)
 message("Done.")
 
@@ -159,11 +159,11 @@ for (i_steps in cluster_walktrap_steps) {
   cluster_coldata_name <- paste0("cluster_walktrap_steps", i_steps)
   set.seed(1010)
   colData(sce)[[cluster_coldata_name]] <- clusterRows(
-    x = reducedDim(sce, "PCA")[, 1:50],
+    x = reducedDim(sce, "PCA"),
     BLUSPARAM = TwoStepParam(
       first = KmeansParam(
-        centers = 1000,
-        iter.max = 100
+        centers = cluster_kmeans_centers,
+        iter.max = cluster_kmeans_iter_max
       ),
       second = NNGraphParam(
         shared = TRUE,
