@@ -21,8 +21,6 @@ NA
 ```{r snakemake, include=FALSE}
 logcounts_file <- snakemake@input[["logcounts"]]
 umap_file <- snakemake@input[["umap"]]
-#logcounts_file <- "results/filter_mitochondria/_logcounts.rds"
-#umap_file <- "results/fastmnn/umap.rds"
 ```
 
 ## Load log-normalised counts
