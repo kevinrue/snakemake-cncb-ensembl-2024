@@ -85,6 +85,7 @@ barcode_stats <- tibble(
 ```{r compute_statistics, echo=FALSE}
 barcode_stats$umi_sum <- colSums(assay(sce, "counts"))
 barcode_stats$genes <- colSums(assay(sce, "counts") > 0)
+mt_sum <- colSums(assay(sce, "counts")[mito_gene_ids, ])
 barcode_stats <- barcode_stats %>% 
   arrange(desc(umi_sum)) %>% 
   group_by(sample) %>% 
@@ -97,7 +98,7 @@ barcode_stats <- barcode_stats %>%
   ungroup()
 barcode_stats <- barcode_stats %>% 
   mutate(
-    mt_pct = colSums(assay(sce, "counts")[mito_gene_ids, ]) / umi_sum
+    mt_pct = mt_sum / umi_sum
   )
 barcode_stats
 rm(sce)
@@ -200,6 +201,41 @@ rm(gg1, gg2)
 
 ### Mitochondrial content
 
+Note: Filtering droplets with more than 5,000 UMI counts and 1,000 genes detected.
+
+```{r, fig.height=5, fig.width=9}
+barcode_stats %>%
+  filter(umi_sum > 5E3 & genes > 1E3) %>%
+  ggplot() +
+  geom_density(aes(x = mt_pct, colour = sample)) +
+  coord_cartesian(xlim = c(0, 1)) +
+  scale_x_continuous(labels = label_percent()) +
+  # scale_y_continuous(labels = label_comma()) +
+  theme_bw() +
+  labs(
+    y = "Barcodes",
+    x = "Proportion of mitochondrial counts"
+  )
+```
+
+```{r, fig.height=5, fig.width=8}
+barcode_stats %>%
+  filter(umi_sum > 5E3 & genes > 1E3) %>%
+  ggplot() +
+  rasterise(
+    geom_point(
+      aes(x = umi_sum, y = mt_pct),
+      size = 0.001
+    ),
+    dpi = 300
+  ) +
+  theme_bw() +
+  labs(
+    y = "MT %",
+    x = "UMI"
+  )
+```
+
 To do:
 
 - overlaid density plot of mitochondrial content
@@ -208,9 +244,17 @@ To do:
 ### Total UMI and genes detected
 
 ```{r umi_genes_scatterplot_colour_sample, fig.width=9, fig.height=6, echo=FALSE}
-ggplot(barcode_stats %>% filter(umi_sum < 20E3 & genes < 5E3), aes(x = umi_sum, y = genes)) +
+barcode_stats %>%
+  filter(umi_sum < 20E3 & genes < 5E3) %>%
+  ggplot() +
   facet_wrap(~sample) +
-  geom_point_rast(size = 0.1) +
+  rasterise(
+    geom_point(
+      mapping = aes(x = umi_sum, y = genes),
+      size = 0.1
+    ),
+    dpi = 300
+  ) +
   scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   theme_bw() +
