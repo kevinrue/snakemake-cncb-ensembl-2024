@@ -15,7 +15,7 @@ Neuroendocrine	cells that mass release peptidergic hormones, these cells are not
 IPC	insulin producing cells, subset of MNC	Ilp2	Ilp3	Ilp5
 Clock_neurons_1	comment to come later	tim	vri	Clk	cry
 Photoreceptors	comment to come later	ninaA	ninaC	ninaE	trp	trpl
-Kenyon_cell	comment to come later	ey	Pka-R2	Dop1R2	Hr51	CG34402	Gdap2	prt	CG1129	cora
+Kenyon_cell	comment to come later	ey	Pka-R2	Dop1R2	Hr51	Gdap2	prt	CG1129	cora
 KC_a/b	alpha and beta lobe subset of kenyon cells	lbm	crb	Cks85A	Tsp42En	Eip93F
 KC_ap/bp	alpha' and beta' lobe subset of kenyon cells	CG8641	Gr77a	Lac	CG42322
 KC_y	gamma lobe subset of kenyon cells	CG13055	Lgr3	GstD11	CAH2	CG32204	ab
