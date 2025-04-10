@@ -1,0 +1,56 @@
+---
+title: "Expression of identical gene models"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(ggrastr)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r snakemake, include=FALSE}
+if (exists("snakemake")) {
+  rds_file <- snakemake@input[["rds"]]
+} else {
+  rds_file <- "../results/filter_mitochondria/_logcounts.rds"
+}
+```
+
+```{r}
+sce <- readRDS(rds_file)
+```
+
+```{r}
+# gene names are for human readability only
+sets <- list(
+  c("ovm" = "FBgn0051976", "CG31975" = "FBgn0051975")
+)
+for (set in sets) {
+  plot_data <- assay(sce, "logcounts")[set, ] %>% 
+    as.matrix() %>% 
+    t() %>% 
+    as_tibble() %>% 
+    bind_cols(
+      colData(sce) %>% as_tibble()
+    ) %>% 
+    pivot_longer(cols = as.vector(set), names_to = "gene_id", values_to = "logcounts") %>% 
+    mutate(
+      gene_label = paste0(gene_id, " | ", rowData(sce)[gene_id, "gene_name"])
+    )
+  gg <- ggplot() +
+    rasterise(
+      geom_point(mapping = aes(x = gene_label, y = logcounts), data = plot_data),
+      dpi = 300
+    ) +
+    theme_bw() +
+    labs(
+      x = "Duplicated gene models",
+      y = "Log-normalised counts"
+    )
+  print(gg)
+}
+```
+
