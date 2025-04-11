@@ -152,6 +152,22 @@ rule scdblfinder:
     script:
         "../../scripts/scdblfinder.R"
 
+rule doubletfinder:
+    input:
+        sce="results/before_scdblfinder/{sample}.rds",
+    output:
+        sce="results/doubletfinder/result/{sample}.rds",
+    params:
+        clusters=lambda wildcards, input: SAMPLES['scdblfinder_clusters'][wildcards.sample],
+    threads: 2
+    resources:
+        mem="4G",
+        runtime="10m",
+    conda:
+        "../../conda/doubletfinder.yaml"
+    script:
+        "../../scripts/doubletfinder.R"
+
 rule scran_hvgs_sample:
     input:
         sce="results/filter_mitochondria/{sample}.rds",
