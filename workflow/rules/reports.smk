@@ -137,6 +137,21 @@ rule scdblfinder_sample_report:
     script:
         "../../notebooks/scdblfinder_report.Rmd"
 
+rule doubletfinder_sample_report:
+    input:
+        doubletfinder="results/doubletfinder/result/{sample}.rds",
+    output:
+        "reports/doubletfinder/{sample}.html",
+    conda:
+        "../../conda/doubletfinder.yaml"
+    threads: 2
+    resources:
+        mem="4G",
+        runtime="10m",
+    script:
+        "../../notebooks/doubletfinder_report.Rmd"
+
+
 rule enrichgo_hvgs_report:
     input:
         rds="results/enrichgo/hvgs.rds",
@@ -248,6 +263,7 @@ rule index_report:
         expand("reports/after_emptyDrops/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/before_scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         expand("reports/scdblfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
+        expand("reports/doubletfinder/{sample}.html", sample=SAMPLES['sample_name'].unique()),
         "reports/umap.html",
         "reports/hvgs.html",
         "reports/fastmnn.html",

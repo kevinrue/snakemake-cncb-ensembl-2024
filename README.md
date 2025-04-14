@@ -69,6 +69,11 @@ In particular, VSCode was allowed to create an `renv` library for interactive te
 The `.Rprofile` file created by `renv` interfered the creation of new Conda environments by Snakemake.
 In those instances, the code in the `.Rprofile` file had to be temporarily disabled (commented out) during the Snakemake run creating the new Conda environment.
 
+## Experiment
+
+The 10x v4-3prime technology states a doublet rate of 0.4% per 1,000 cells (<https://www.10xgenomics.com/blog/the-next-generation-of-single-cell-rna-seq-an-introduction-to-gem-x-technology>).
+For 30,000 cells, that is 12%, which is 3,600 cells.
+
 # TODO
 
 - Generalise script for computing UMAP to receive input dimred as a rule parameter.

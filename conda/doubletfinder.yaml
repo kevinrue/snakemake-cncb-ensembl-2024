@@ -2,4 +2,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - bioconductor-singlecellexperiment
   - paul.martin-2::r-doubletfinder
+  - r-seurat
+  - r-rmarkdown

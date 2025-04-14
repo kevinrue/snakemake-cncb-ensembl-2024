@@ -161,8 +161,8 @@ rule doubletfinder:
         clusters=lambda wildcards, input: SAMPLES['scdblfinder_clusters'][wildcards.sample],
     threads: 2
     resources:
-        mem="4G",
-        runtime="10m",
+        mem="64G",
+        runtime="30m",
     conda:
         "../../conda/doubletfinder.yaml"
     script:
