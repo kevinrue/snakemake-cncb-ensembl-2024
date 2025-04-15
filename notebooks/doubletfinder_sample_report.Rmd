@@ -1,5 +1,5 @@
 ---
-title: "scDblFinder (sample)"
+title: "DoubletFinder (sample)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"
@@ -7,7 +7,7 @@ date: "`r Sys.Date()`"
 
 ```{r libraries, include=FALSE}
 library(ggrastr)
-library(SingleCellExperiment)
+library(Seurat)
 library(tidyverse)
 ```
 
@@ -20,13 +20,13 @@ barcode_minor_breaks <- 10^rep(-1:10)
 
 ```{r snakemake, include=FALSE}
 if (interactive()) {
-  rds_sce_dbl <- "../results/scdblfinder/result/WPPp000hrs_rep2.rds"
-  rds_sce <- "../results/before_scdblfinder/WPPp000hrs_rep2.rds"
+  rds_seu_dbl <- "../results/doubletfinder/result/WPPp120hrs_rep2.rds"
+  rds_sce <- "../results/before_scdblfinder/WPPp120hrs_rep2.rds"
 } else {
-  rds_sce_dbl <- snakemake@input[["scdblfinder"]]
+  rds_seu_dbl <- snakemake@input[["doubletfinder"]]
   rds_sce <- snakemake@input[["sce"]]
 }
-sample_name <- fs::path_ext_remove(basename(rds_sce_dbl))
+sample_name <- fs::path_ext_remove(basename(rds_seu_dbl))
 ```
 
 ## Run parameters
@@ -36,7 +36,7 @@ format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
     format_bold("Sample"), sample_name,
-    format_bold("SCE (doublets)"), rds_sce_dbl,
+    format_bold("Seurat (doublets)"), rds_seu_dbl,
     format_bold("SCE (before)"), rds_sce
   ),
   ncol = 2, byrow = TRUE
@@ -44,29 +44,25 @@ df <- matrix(
 knitr::kable(x = df)
 ```
 
-## scDblFinder results
+Note that at the latest iteration, the following values were hard-coded in the analysis script:
 
-### SCE
+- pN: 0.25 (default value)
+- pK: 0.003 (equates to approximately 100 neighbours for a data set of 30,000 droplets + 25% artificial doublets).
+- PCs: 20
+- Expected doublet rate: 12% (0.4% per 1,000 cells for 30,000 cells)
+
+## DoubletFinder results
+
+### Seurat
 
 ```{r load_scdblfinder, echo=FALSE}
-sce_dbl <- readRDS(rds_sce_dbl)
-sce_dbl
+seu_dbl <- readRDS(rds_seu_dbl)
+seu_dbl
 ```
 
-### scDblFinder metadata
-
-None.
-
-```{r metadata, eval=FALSE}
-scdblfinder_metadata <- metadata(sce_dbl)
-format_bold <- function(x) sprintf("**%s**", x)
-df <- matrix(
-  data = c(
-    format_bold("scDblFinder.threshold"), format(scdblfinder_metadata[["scDblFinder.threshold"]])
-  ),
-  ncol = 2, byrow = TRUE
-)
-knitr::kable(x = df)
+```{r result_names, include=FALSE}
+pANN_name <- grep("^pANN_", colnames(seu_dbl[[]]), value = TRUE)
+DF_class <- grep("^DF.classifications_", colnames(seu_dbl[[]]), value = TRUE)
 ```
 
 ## Overall statistics
@@ -75,47 +71,46 @@ knitr::kable(x = df)
 format_bold <- function(x) sprintf("**%s**", x)
 df <- matrix(
   data = c(
-    format_bold("Input barcodes"), format(sum(sce_dbl$src == "real"), big.mark = ","),
-    format_bold("Artificial doublets"), format(sum(sce_dbl$src == "artificial"), big.mark = ","),
-    format_bold("Predicted singlets"), format(sum(sce_dbl$type == "real" & sce_dbl$class == "singlet"), big.mark = ","),
-    format_bold("Predicted doublets"), format(sum(sce_dbl$type == "real" & sce_dbl$class == "doublet"), big.mark = ",")
+    format_bold("Input barcodes"), format(nrow(seu_dbl@meta.data), big.mark = ","),
+    format_bold("Predicted singlets"), format(sum(seu_dbl[[DF_class]] == "Singlet"), big.mark = ","),
+    format_bold("Predicted doublets"), format(sum(seu_dbl[[DF_class]] == "Doublet"), big.mark = ",")
   ),
   ncol = 2, byrow = TRUE
 )
 knitr::kable(x = df)
 ```
 
-## Histogram of scDblFinder scores
+## Predicted class on UMAP layout
 
-```{r plot, echo=FALSE, fig.width=7, fig.height=5}
-ggplot_data <- colData(sce_dbl) %>% 
-  as.data.frame() %>% 
+### Import preprocessed sample
+
+The sample preprocessed before scDblFinder contains a UMAP layout that can be reused in this report to cross-reference predicted doublets with information computed during that same preprocessing.
+
+```{r load_sce, echo=FALSE}
+sce <- readRDS(rds_sce)
+sce
+```
+
+## Histogram of pANN values
+
+```{r plot, echo=FALSE, fig.width=10, fig.height=5}
+ggplot_data <- FetchData(seu_dbl, c(DF_class, pANN_name)) %>% 
   as_tibble()
+colnames(ggplot_data) <- c("class", "pANN")
 ggplot_data %>% 
-  filter(type == "real") %>% 
   ggplot() +
   geom_histogram(
-    mapping = aes(x = score, fill = class),
+    mapping = aes(x = pANN, fill = class),
     breaks = seq(0, 1, 0.01),
     colour = "black", linewidth = 0.1
   ) +
   scale_x_continuous(limits = c(0, 1)) +
   theme_bw() +
   labs(
+    subtitle = sample_name,
     y = "Barcodes",
-    x = "Score (scDblFinder)"
+    x = "pANN (DoubletFinder)"
   )
-```
-
-## Predicted class on UMAP layout
-
-### Import preprocessed sample
-
-The sample preprocessed before scDblFinder contains a UMAP layout that can be reused in this report to cross-reference predicted doublets with cluster computed during that same preprocessing.
-
-```{r load_sce, echo=FALSE}
-sce <- readRDS(rds_sce)
-sce
 ```
 
 ### Coloured UMAP
@@ -129,12 +124,16 @@ Refer to the next plot further below to visualise singlets and doublets in a plo
 
 ```{r umap_class_colour, echo=FALSE, fig.width=7, fig.height=5}
 plot_data <- reducedDim(sce, "UMAP") %>% as("DataFrame")
-plot_data <- cbind(plot_data, colData(sce_dbl)[rownames(plot_data), ])
+plot_data <- cbind(
+  plot_data,
+  pANN = seu_dbl[[pANN_name]][rownames(plot_data), ],
+  class = seu_dbl[[DF_class]][rownames(plot_data), ]
+)
 ggplot() +
   rasterise(
     geom_point(
       mapping = aes(x = UMAP1, y = UMAP2),
-      data = plot_data %>% as_tibble() %>% filter(class == "singlet"),
+      data = plot_data %>% as_tibble() %>% filter(class == "Singlet"),
       size = 0.01, colour = "cyan3"
     ),
     dpi = 300
@@ -142,13 +141,13 @@ ggplot() +
   rasterise(
     geom_point(
       mapping = aes(x = UMAP1, y = UMAP2),
-      data = plot_data %>% as_tibble() %>% filter(class == "doublet"),
+      data = plot_data %>% as_tibble() %>% filter(class == "Doublet"),
       size = 0.01, colour = "brown1"
     ),
     dpi = 300
   ) +
   labs(
-    title = "scDblFinder predicted class",,
+    title = "DoubletFinder predicted class",
     subtitle = sample_name,
     x = "UMAP1",
     y = "UMAP2"
@@ -161,12 +160,12 @@ ggplot() +
 
 This next plot adds faceting to clearly show the location of both singlets and doublets, avoiding any favouring that may result of over-plotting or ordering of plot layers.
 
-```{r umap_class_facet, echo=FALSE, fig.width=12, fig.height=5}
+```{r umap_class_facet_class, echo=FALSE, fig.width=12, fig.height=5}
 ggplot() +
   rasterise(
     geom_point(
       mapping = aes(x = UMAP1, y = UMAP2, colour = class),
-      data = plot_data %>% as_tibble() %>% slice_sample(prop = 1),
+      data = plot_data %>% as_tibble(),
       size = 0.01
     ),
     dpi = 300
@@ -182,12 +181,32 @@ ggplot() +
   theme_bw()
 ```
 
+The figure below colours each droplet by the fraction of artificial doublets in its neighborhood.
+
+```{r umap_class_facet_pann, echo=FALSE, fig.width=12, fig.height=5}
+ggplot() +
+  rasterise(
+    geom_point(
+      mapping = aes(x = UMAP1, y = UMAP2, colour = pANN),
+      data = plot_data %>% as_tibble(),
+      size = 0.01
+    ),
+    dpi = 300
+  ) +
+  facet_wrap(~ class) +
+  labs(
+    x = "UMAP1",
+    y = "UMAP2"
+  ) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 5))
+  ) +
+  theme_bw()
+```
 
 ## Session info
 
 `r date()`
-
-Bioconductor version `r BiocManager::version()`
 
 ```{r session_info, echo=FALSE}
 sessionInfo()

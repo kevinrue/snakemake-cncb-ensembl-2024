@@ -4,5 +4,7 @@ channels:
 dependencies:
   - bioconductor-singlecellexperiment
   - paul.martin-2::r-doubletfinder
+  - r-ggrastr
   - r-seurat
   - r-rmarkdown
+  - r-tidyverse

@@ -11,15 +11,18 @@ if (exists("snakemake")) {
 } else {
   sce_rds <- "results/before_scdblfinder/WPPp120hrs_rep2.rds"
 }
-n_pcs <- 20
-pk <- 0.09
-expected_doublet_rate <- 0.004 * 30
+
+pn <- snakemake@params[["pn"]]
+pk <- snakemake@params[["pk"]]
+n_pcs <- snakemake@params[["npcs"]]
+doublet_rate_per_1k <- snakemake@params[["doublet_rate_per_thousand"]]
 
 message("Job configuration")
 message("- Input SCE: ", sce_rds)
-message("- n_pcs: ", n_pcs)
+message("- pn: ", pn)
 message("- pk: ", pk)
-message("- expected_doublet_rate: ", expected_doublet_rate)
+message("- n_pcs: ", n_pcs)
+message("- doublet_rate_per_1k: ", doublet_rate_per_1k)
 
 message("Loading SCE object ...")
 sce <- readRDS(sce_rds)
@@ -37,7 +40,7 @@ seu <- NormalizeData(
   object = seu
 )
 
-message("Run e() ...")
+message("Run FindVariableFeatures() ...")
 seu <- FindVariableFeatures(
   object = seu,
   nfeatures = 2000
@@ -54,12 +57,23 @@ seu <- RunPCA(
   npcs = n_pcs
 )
 
+expected_doublet_rate <- doublet_rate_per_1k * nrow(seu@meta.data) / 1E3
+message("Expected doublet rate: ", format(expected_doublet_rate * 100, digits = 3), "%")
+
 message("Determine number of expected doublets ...")
 nExp_poi <- round(expected_doublet_rate * nrow(seu@meta.data))
 message("Value: ", format(nExp_poi, big.mark = ","))
 
 message("Run doubletFinder_v3() ...")
-seu <- doubletFinder_v3(seu = seu, PCs = seq_len(n_pcs), pN = 0.25, pK = pk, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
+seu <- doubletFinder_v3(
+  seu = seu,
+  PCs = seq_len(n_pcs),
+  pN = pn,
+  pK = pk,
+  nExp = nExp_poi,
+  reuse.pANN = FALSE,
+  sct = FALSE
+)
 
 saveRDS(seu, snakemake@output[["sce"]])
 

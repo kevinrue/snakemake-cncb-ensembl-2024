@@ -39,6 +39,9 @@ filters:
   barcodes:
     mt_pct_max: 0.25
 
+doublets:
+  rate_per_thousand: 0.004
+
 scdblfinder:
   variable_genes:
     n: 1000
@@ -61,6 +64,11 @@ scdblfinder:
         - 4
         - 8
         - 16
+
+doubletfinder:
+  pN: 0.25
+  pK: 0.003
+  npcs: 20
 
 variable_genes:
   block: sample

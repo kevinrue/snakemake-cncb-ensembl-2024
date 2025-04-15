@@ -140,16 +140,17 @@ rule scdblfinder_sample_report:
 rule doubletfinder_sample_report:
     input:
         doubletfinder="results/doubletfinder/result/{sample}.rds",
+        sce="results/before_scdblfinder/{sample}.rds",
     output:
         "reports/doubletfinder/{sample}.html",
     conda:
         "../../conda/doubletfinder.yaml"
     threads: 2
     resources:
-        mem="4G",
+        mem="16G",
         runtime="10m",
     script:
-        "../../notebooks/doubletfinder_report.Rmd"
+        "../../notebooks/doubletfinder_sample_report.Rmd"
 
 
 rule enrichgo_hvgs_report:

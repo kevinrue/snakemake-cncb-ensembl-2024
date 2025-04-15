@@ -143,6 +143,8 @@ rule scdblfinder:
         sce="results/scdblfinder/result/{sample}.rds",
     params:
         clusters=lambda wildcards, input: SAMPLES['scdblfinder_clusters'][wildcards.sample],
+        npcs=lambda wildcards, input: SAMPLES['scdblfinder_npcs'][wildcards.sample],
+        doublet_rate_per_thousand=config["doublets"]["rate_per_thousand"],
     threads: 32
     resources:
         mem="64G",
@@ -158,7 +160,10 @@ rule doubletfinder:
     output:
         sce="results/doubletfinder/result/{sample}.rds",
     params:
-        clusters=lambda wildcards, input: SAMPLES['scdblfinder_clusters'][wildcards.sample],
+        pn=config["doubletfinder"]["pN"],
+        pk=config["doubletfinder"]["pK"],
+        npcs=config["doubletfinder"]["npcs"],
+        doublet_rate_per_thousand=config["doublets"]["rate_per_thousand"],
     threads: 2
     resources:
         mem="64G",
