@@ -1,0 +1,151 @@
+---
+title: "scDblFinder (sample)"
+output: html_document
+author: "Kevin Rue"
+date: "`r Sys.Date()`"
+---
+
+```{r libraries, include=FALSE}
+library(ggrastr)
+library(Seurat)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+```{r constants, include=FALSE}
+umi_breaks <- 10^(-1:10)
+umi_minor_breaks <- rep(c(1, 2, 5), 12) * (10^rep(-1:10, each = 3))
+barcode_breaks <- 10^(-1:10)
+barcode_minor_breaks <- 10^rep(-1:10)
+```
+
+```{r snakemake, include=FALSE}
+if (exists("snakemake")) {
+  rds_sce_dbl <- snakemake@input[["scdblfinder"]]
+  rds_seu_dbl <- snakemake@input[["doubletfinder"]]
+  rds_sce <- snakemake@input[["sce"]]
+} else {
+  rds_sce_dbl <- "../results/scdblfinder/result/WPPp120hrs_rep2.rds"
+  rds_seu_dbl <- "../results/doubletfinder/result/WPPp120hrs_rep2.rds"
+  rds_sce <- "../results/before_scdblfinder/WPPp120hrs_rep2.rds"
+}
+sample_name <- fs::path_ext_remove(basename(rds_sce_dbl))
+```
+
+## Run parameters
+
+```{r parameters, echo=FALSE}
+format_bold <- function(x) sprintf("**%s**", x)
+df <- matrix(
+  data = c(
+    format_bold("Sample"), sample_name,
+    format_bold("SCE (doublets)"), rds_sce_dbl,
+    format_bold("Seurat (doublets)"), rds_sce
+  ),
+  ncol = 2, byrow = TRUE
+)
+knitr::kable(x = df)
+```
+
+## scDblFinder results
+
+### SCE
+
+```{r load_scdblfinder, echo=FALSE}
+sce_dbl <- readRDS(rds_sce_dbl)
+sce_dbl
+```
+
+## DoubletFinder results
+
+### Seurat
+
+```{r}
+seu_dbl <- readRDS(rds_seu_dbl)
+seu_dbl
+```
+
+## UMAP
+
+```{r}
+sce_umap <- readRDS(rds_sce)
+sce_umap
+```
+
+## Compare doublet calls across methods
+
+```{r}
+barcodes_scdblfinder <- colData(sce_dbl) %>% 
+  as.data.frame() %>% 
+  filter(
+    type == "real"
+  ) %>% 
+  rownames()
+barcodes_doubletfinder <- colnames(seu_dbl)
+barcodes_union <- unique(c(
+  barcodes_scdblfinder,
+  barcodes_doubletfinder
+))
+```
+
+
+```{r}
+seu_class_colname <- grep("DF.classifications_", colnames(seu_dbl[[]]), value = TRUE)
+comparison_table <- tibble(
+  barcode = barcodes_union,
+  scdblfinder = colData(sce_dbl)[barcodes_union, "class"],
+  doubletfinder = seu_dbl[[]][barcodes_union, seu_class_colname]
+) %>% 
+  bind_cols(
+    reducedDim(sce_umap, "UMAP")[barcodes_union, ]
+  )
+```
+
+### Cross-tabulate
+
+```{r}
+table(
+  scdblfinder = comparison_table$scdblfinder,
+  doubletfinder = comparison_table$doubletfinder
+)
+```
+
+### UMAP
+
+```{r umap, fig.height=7, fig.width=9}
+comparison_table %>% 
+  mutate(
+    doublet = (scdblfinder == "doublet") + 2 * (doubletfinder == "Doublet"),
+    doublet = recode(
+      doublet,
+      `0` = "singlet",
+      `1` = "scdblfinder",
+      `2` = "DoubletFinder",
+      `3` = "both"
+    )
+  ) %>% 
+  ggplot() +
+  rasterise(
+    geom_point(
+      mapping = aes(
+        x = UMAP1, y = UMAP2,
+        colour = doublet
+      ),
+      size = 0.01
+    ),
+    dpi = 300
+  ) +
+  facet_wrap(~doublet) +
+  theme_bw()
+```
+
+
+## Session info
+
+`r date()`
+
+Bioconductor version `r BiocManager::version()`
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
