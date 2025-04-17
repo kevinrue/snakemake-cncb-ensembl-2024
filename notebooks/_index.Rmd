@@ -117,6 +117,23 @@ cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
 ```
 </details>
 
+## DoubletFinder
+
+The `DoubletFinder()` function of the [DoubletFinder](https://rdrr.io/github/chris-mcginnis-ucsf/DoubletFinder/) R package was used to predict doublets in each sample.
+
+This section reports on the results of this function, to guide the decision of droplets to exclude from downstream analysis.
+
+**NOTE:** At present, the results are not satisfactory, and none of the predicted doublets were excluded from downstream analysis.
+
+<details>
+  <summary>Individual sample reports</summary>
+```{r, echo=FALSE, results='asis'}
+path_samples <- grep("^doubletfinder/", report_paths, value = TRUE)
+names(path_samples) <- fs::path_ext_remove(basename(path_samples))
+cat(sprintf("- [%s](%s)", names(path_samples), path_samples), sep = "\n")
+```
+</details>
+
 ## Without integration
 
 This section reports on a standard analysis of the data merged without any integration of the samples.

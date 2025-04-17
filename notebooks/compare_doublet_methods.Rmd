@@ -91,31 +91,19 @@ barcodes_union <- unique(c(
 
 ```{r}
 seu_class_colname <- grep("DF.classifications_", colnames(seu_dbl[[]]), value = TRUE)
+seu_pann_colname <- grep("pANN_", colnames(seu_dbl[[]]), value = TRUE)
 comparison_table <- tibble(
   barcode = barcodes_union,
-  scdblfinder = colData(sce_dbl)[barcodes_union, "class"],
-  doubletfinder = seu_dbl[[]][barcodes_union, seu_class_colname]
+  scdblfinder_class = colData(sce_dbl)[barcodes_union, "class"],
+  doubletfinder_class = seu_dbl[[]][barcodes_union, seu_class_colname],
+  scdblfinder_score = colData(sce_dbl)[barcodes_union, "score"],
+  doubletfinder_pANN = seu_dbl[[]][barcodes_union, seu_pann_colname]
 ) %>% 
   bind_cols(
     reducedDim(sce_umap, "UMAP")[barcodes_union, ]
-  )
-```
-
-### Cross-tabulate
-
-```{r}
-table(
-  scdblfinder = comparison_table$scdblfinder,
-  doubletfinder = comparison_table$doubletfinder
-)
-```
-
-### UMAP
-
-```{r umap, fig.height=7, fig.width=9}
-comparison_table %>% 
+  ) %>% 
   mutate(
-    doublet = (scdblfinder == "doublet") + 2 * (doubletfinder == "Doublet"),
+    doublet = (scdblfinder_class == "doublet") + 2 * (doubletfinder_class == "Doublet"),
     doublet = recode(
       doublet,
       `0` = "singlet",
@@ -123,22 +111,63 @@ comparison_table %>%
       `2` = "DoubletFinder",
       `3` = "both"
     )
-  ) %>% 
-  ggplot() +
+  )
+```
+
+### Cross-tabulate
+
+```{r}
+table(
+  scdblfinder = comparison_table$scdblfinder_class,
+  doubletfinder = comparison_table$doubletfinder_class
+)
+```
+
+### UMAP
+
+```{r umap, fig.height=7, fig.width=9}
+ggplot() +
   rasterise(
     geom_point(
       mapping = aes(
         x = UMAP1, y = UMAP2,
         colour = doublet
       ),
+      data = comparison_table,
       size = 0.01
     ),
     dpi = 300
   ) +
   facet_wrap(~doublet) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 3))
+  ) +
   theme_bw()
 ```
 
+
+### Compare scores
+
+```{r}
+ggplot() +
+  rasterise(
+    geom_point(
+      mapping = aes(
+        x = scdblfinder_score,
+        y = doubletfinder_pANN,
+        colour = doublet
+      ),
+      data = comparison_table,
+      size = 0.01
+    ),
+    dpi = 300
+  ) +
+  guides(
+    colour = guide_legend(override.aes = list(size = 3))
+  ) +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+  theme_bw()
+```
 
 ## Session info
 

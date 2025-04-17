@@ -23,8 +23,6 @@ message("- doublet_rate_per_1k: ", doublet_rate_per_1k)
 message("- npcs: ", scdblfinder_npcs)
 message("- threads: ", threads)
 
-
-
 message("Importing SCE from RDS file ...")
 sce <- readRDS(sce_rds)
 message("Done.")
@@ -44,7 +42,7 @@ sce <- scDblFinder(
   artificialDoublets = NULL,
   dbr = dbr,
   dbr.sd = NULL,
-  nfeatures = hvgs,
+  nfeatures = 1352,
   dims = scdblfinder_npcs,
   k = NULL,
   returnType = "full",
