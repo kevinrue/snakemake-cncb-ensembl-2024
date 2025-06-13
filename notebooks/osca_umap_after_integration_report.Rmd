@@ -1,5 +1,5 @@
 ---
-title: "UMAP (merged - no integration)"
+title: "UMAP (after fastMNN integration)"
 output: html_document
 author: "Kevin Rue"
 date: "`r Sys.Date()`"
@@ -30,7 +30,7 @@ sce
 
 ## Plots
 
-```{r umap-coloured, echo=FALSE, fig.width=7, fig.height=5}
+```{r umap-coloured, echo=FALSE, fig.width=9, fig.height=7}
 for (coldata in "batch") {
   gg_data <- reducedDim(sce, "UMAP") %>%
     as_tibble() %>%
@@ -42,7 +42,10 @@ for (coldata in "batch") {
     group_by(COLOUR) %>%
     summarise(across(everything(), mean))
   gg <- ggplot() +
-    geom_point_rast(aes(UMAP1, UMAP2, colour = COLOUR), gg_data, size = 0.05) +
+  rasterise(
+    geom_point(aes(UMAP1, UMAP2, colour = COLOUR), gg_data, size = 0.001),
+    dpi = 300, scale = 0.5
+  ) +
     geom_text(aes(UMAP1, UMAP2, label = COLOUR), gg_label_data) +
     theme_bw() +
     labs(

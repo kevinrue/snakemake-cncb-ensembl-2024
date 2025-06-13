@@ -69,6 +69,30 @@ In particular, VSCode was allowed to create an `renv` library for interactive te
 The `.Rprofile` file created by `renv` interfered the creation of new Conda environments by Snakemake.
 In those instances, the code in the `.Rprofile` file had to be temporarily disabled (commented out) during the Snakemake run creating the new Conda environment.
 
+### Apptainer
+
+On the server, submit a job that launches the RStudio server in a container:
+
+```bash
+# Set working directory
+cd ../containters
+# Remove earlier password files
+rm slurm-*.out
+# Submit the job
+sbatch rserver-2023-job.sh
+# Wait for the job to launch
+# Reveal the temporary password
+cat slurm-*.out
+# Navigate back to the previous directory
+cd -
+```
+
+On the client, tunnel to the server and open the RStudio server in a browser:
+
+```bash
+connect-to-wn-rstudio-jade.sh
+```
+
 ## Experiment
 
 The 10x v4-3prime technology states a doublet rate of 0.4% per 1,000 cells (<https://www.10xgenomics.com/blog/the-next-generation-of-single-cell-rna-seq-an-introduction-to-gem-x-technology>).
