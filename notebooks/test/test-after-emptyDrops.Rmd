@@ -1,0 +1,64 @@
+---
+title: "Test report after emptyDrops"
+author: "Kevin Rue"
+date: "2025-02-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(bluster)
+library(ggrastr)
+library(scater)
+library(scran)
+library(scuttle)
+library(SingleCellExperiment)
+library(tidyverse)
+```
+
+## Load the SCE object
+
+```{r}
+sce <- readRDS("../../results/emptydrops/WPPm048hrs_rep1.rds")
+sce
+```
+
+## Log-normalise counts
+
+Necessary ahead of PCA.
+
+```{r}
+sce <- logNormCounts(sce)
+```
+
+## Highly variable genes
+
+Preferable to facilitate PCA.
+
+```{r}
+dec <- modelGeneVar(sce)
+hvg <- getTopHVGs(dec, n = 1000, var.threshold = 0)
+length(hvg)
+```
+
+
+## Dimensionality reduction
+
+```{r}
+sce <- fixedPCA(sce, rank = 50, subset.row = hvg)
+sce <- runUMAP(sce, dimred = "PCA")
+sce
+```
+```{r}
+plot_data <- cbind(
+  reducedDim(sce, "UMAP"),
+  colData(sce)
+)
+ggplot(plot_data, aes(UMAP1, UMAP2)) +
+  rasterise(geom_point(size = 0.01)) +
+  theme_bw()
+```
+
